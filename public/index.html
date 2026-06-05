@@ -499,7 +499,7 @@
             <!-- ── Step 3: Details + submit ── -->
             <div class="form-panel" data-panel="3" hidden>
               <h3 class="panel-title">Your details</h3>
-              <form id="bookingForm" novalidate>
+              <form id="bookingForm" action="form.php" method="post" enctype="multipart/form-data" novalidate>
                 <input type="hidden" name="suburb"        id="hiddenSuburb" />
                 <input type="hidden" name="package"       id="hiddenPackage"      value="Launch Offer – Full Restore" />
                 <input type="hidden" name="full_address"  id="hiddenFullAddress" />

@@ -158,7 +158,15 @@
       if (loaded) return;
       loaded = true;
       const key = document.querySelector('meta[name="gmap-key"]')?.content || "";
-      if (!key || document.getElementById("gmap-script")) return;
+      if (!key) {
+        const err = document.getElementById("addressError");
+        if (err) {
+          err.textContent = "Address autocomplete is not configured yet. Please call us or try again later.";
+          err.hidden = false;
+        }
+        return;
+      }
+      if (document.getElementById("gmap-script")) return;
       const s = document.createElement("script");
       s.id    = "gmap-script";
       s.src   = "https://maps.googleapis.com/maps/api/js?key=" +

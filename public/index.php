@@ -1,6 +1,7 @@
 <?php
-// Load Google Maps API key from central config (outside web root)
-$mapsConfig = @include dirname(__DIR__) . '/config/maps.php';
+// Load Google Maps API key from a private config file outside the public web root.
+// Copy _private/maps.example.php to _private/maps.php on the server and set the key there.
+$mapsConfig = @include dirname(__DIR__) . '/_private/maps.php';
 $mapsKey    = is_array($mapsConfig) ? ($mapsConfig['google_maps_api_key'] ?? '') : '';
 
 header('Content-Type: text/html; charset=UTF-8');

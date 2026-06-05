@@ -28,5 +28,5 @@ Options -Indexes
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# Fallback: serve index.html for unknown paths
-ErrorDocument 404 /index.html
+# Fallback: serve through index.php so runtime config can still be injected
+ErrorDocument 404 /index.php

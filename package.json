@@ -1,7 +1,15 @@
 {
-    "private": true,
-    "scripts": {
-        "dev": "echo 'No frontend build required'",
-        "build": "echo 'No frontend build required'"
-    }
+  "name": "shining-headlights-australia",
+  "version": "1.0.0",
+  "description": "Shining Headlights Australia static PHP landing page for Hostinger.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build required for Hostinger static PHP deploy'"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

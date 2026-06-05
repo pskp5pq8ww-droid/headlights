@@ -8,7 +8,7 @@ session_start();
 //   php -r "echo password_hash('YOUR_PASSWORD', PASSWORD_BCRYPT);"
 define('ADMIN_HASH', '$2y$12$placeholderHashReplaceThisNow00000000000000000000000000u');
 
-define('STORAGE_BASE', dirname(dirname($_SERVER['DOCUMENT_ROOT'])) . '/Storagehighlights');
+define('STORAGE_BASE', dirname($_SERVER['DOCUMENT_ROOT']) . '/Storagehighlights');
 define('BOOKINGS_DIR', STORAGE_BASE . '/bookings');
 
 // ── Auth ──────────────────────────────────────────────────────────────────────

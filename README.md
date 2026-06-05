@@ -1,61 +1,79 @@
-# Shining Headlights Australia Landing Page
+# Shining Headlights Australia
 
-Premium static landing page for a Brisbane mobile headlight restoration service.
+Premium mobile headlight restoration landing page for Brisbane, built as a static HTML/CSS/JS site with PHP booking/admin handlers for Hostinger.
+
+## Current Project Type
+
+This is a Hostinger-friendly static/PHP project.
+
+It is not a Laravel app in production. The old Laravel scaffold has been archived in `_archive/old-laravel-scaffold/`.
+
+## Main Structure
+
+- `public/index.php` - production entry file, injects private Maps config
+- `public/index.html` - landing page markup
+- `public/form.php` - booking form handler
+- `public/admin/` - booking admin viewer
+- `public/css/styles.css` - site styles
+- `public/js/config.js` - public business/content config
+- `public/js/main.js` - frontend behavior
+- `public/assets/` - images and SVG assets
+- `_private/maps.example.php` - template for private Maps key config
+- `_archive/` - old or duplicated files kept for safety
+- `docs/` - deploy, audit and testing notes
 
 ## Run Locally
 
-Open `index.html` directly in a browser, or run a local static server:
-
 ```bash
-python3 -m http.server 4173
+npm run dev
 ```
 
-Then visit `http://localhost:4173`.
+Then visit:
 
-## Deploy on Hostinger
+```text
+http://localhost:8123
+```
 
-Upload the project files to the `public_html` folder in Hostinger File Manager or deploy them by FTP.
+For a PHP-accurate local preview, serve the `public/` folder with PHP if available:
 
-Required files and folders:
+```bash
+php -S localhost:8123 -t public
+```
 
-- `index.html`
-- `.htaccess`
-- `form.php`
-- `assets/`
-- `css/`
-- `js/`
+## Hostinger Deploy
 
-Do not upload:
+Recommended:
 
-- `.git/`
-- `.github/`
-- local notes or screenshots
+- document root: `public`
+- build command: none
+- output directory: `public`
+- entry file: `index.php`
 
-After uploading, open your domain and test the booking form. The form posts to `form.php`, which uses PHP `mail()` on the Hostinger server.
+If using GitHub FTP deploy, `.github/workflows/deploy.yml` uploads only `public/` to `/public_html/`.
 
-Before going live, update these placeholders:
+Read [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) before going live.
 
-- `hello@shiningheadlights.com.au` in `form.php`
-- `contact.email` and `contact.phoneDisplay` in `js/config.js`
-- the canonical URL and structured data in `index.html`
+## Private Google Maps Config
 
-For best email delivery, create the sender email address inside Hostinger first, then use that same address in the `From:` header in `form.php`.
+Do not put the real key in public JS or HTML.
+
+1. Copy `_private/maps.example.php` to `_private/maps.php`.
+2. Add your restricted key to `_private/maps.php`.
+3. Keep `_private/maps.php` out of Git.
 
 ## Edit Business Details
 
-Update `js/config.js` for:
+Update `public/js/config.js` for:
 
-- Packages and inclusions
-- Service areas
+- packages and inclusions
+- service areas
 - FAQs
-- Phone number and email
-- Promotional offer copy
-- Booking endpoint
+- phone number and email
+- promotional offer copy
+- booking endpoint
 
-Replace visual assets in `assets/`:
+Replace visual assets in `public/assets/`.
 
-- `logo-clean.png` for the site logo
-- `hero-headlight-before-after.png` for the main hero visual
-- `result-before-*.svg` and `result-after-*.svg` for before/after examples
+## Testing
 
-The booking form currently shows a success state locally. Add a real form endpoint in `contact.bookingEndpoint` when the booking backend is ready.
+Use [docs/TESTING.md](docs/TESTING.md) after every deploy.

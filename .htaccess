@@ -1,5 +1,5 @@
-# Route all requests through Laravel's public/ folder.
-# Used when the hosting document root cannot be changed to /public.
+# Route all requests through the static/PHP public folder.
+# Used when Hostinger's document root cannot be changed directly to /public.
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_URI} !^/public/
