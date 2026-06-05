@@ -429,24 +429,23 @@
             <!-- ── Step 1: Address + map ── -->
             <div class="form-panel" data-panel="1">
               <h3 class="panel-title">Where is your car?</h3>
-              <p class="panel-hint">Start typing to search your address or suburb.</p>
+              <p class="panel-hint">Enter your service address. Select a suggestion to confirm the location.</p>
               <div class="address-wrap">
                 <input
                   id="addressInput"
+                  name="customer_address"
                   class="address-input"
                   type="text"
-                  placeholder="e.g. 42 Main St, Chermside — or just: Chermside"
+                  placeholder="Enter your service address"
                   autocomplete="off"
-                  aria-label="Address or suburb"
-                  aria-autocomplete="list"
-                  aria-controls="addressSuggestions"
+                  aria-label="Service address"
                 />
-                <ul class="address-suggestions" id="addressSuggestions" role="listbox" hidden></ul>
               </div>
               <div class="map-preview" id="mapPreview" hidden>
-                <iframe id="mapFrame" title="Selected location" frameborder="0" scrolling="no" loading="lazy" src=""></iframe>
+                <div id="googleMapContainer"></div>
                 <p class="map-label" id="mapLabel"></p>
               </div>
+              <p class="address-error" id="addressError" hidden>Please select a valid address from the suggestions.</p>
               <button class="button button-primary step-next-btn" type="button" data-next="2">
                 <span>Continue</span>
                 <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
@@ -501,8 +500,17 @@
             <div class="form-panel" data-panel="3" hidden>
               <h3 class="panel-title">Your details</h3>
               <form id="bookingForm" novalidate>
-                <input type="hidden" name="suburb" id="hiddenSuburb" />
-                <input type="hidden" name="package" id="hiddenPackage" value="Launch Offer – Full Restore" />
+                <input type="hidden" name="suburb"        id="hiddenSuburb" />
+                <input type="hidden" name="package"       id="hiddenPackage"      value="Launch Offer – Full Restore" />
+                <input type="hidden" name="full_address"  id="hiddenFullAddress" />
+                <input type="hidden" name="place_id"      id="hiddenPlaceId" />
+                <input type="hidden" name="latitude"      id="hiddenLat" />
+                <input type="hidden" name="longitude"     id="hiddenLng" />
+                <input type="hidden" name="street_number" id="hiddenStreetNumber" />
+                <input type="hidden" name="street_name"   id="hiddenStreetName" />
+                <input type="hidden" name="state"         id="hiddenState" />
+                <input type="hidden" name="postcode"      id="hiddenPostcode" />
+                <input type="hidden" name="country"       id="hiddenCountry" />
                 <div class="form-row">
                   <label>Full name<input name="name" autocomplete="name" required /></label>
                   <label>Phone<input name="phone" type="tel" autocomplete="tel" required /></label>

@@ -1931,3 +1931,63 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   .promo-now { font-size: 44px; }
   .step-label { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GOOGLE MAPS
+═══════════════════════════════════════════════════════════════════════════ */
+
+#googleMapContainer {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+
+/* Style Google's autocomplete dropdown to match brand */
+.pac-container {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  border: 1px solid rgba(143, 163, 178, 0.42);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: 0 10px 32px rgba(3, 7, 11, 0.12);
+  padding: 4px 0;
+  margin-top: 0;
+}
+
+.pac-item {
+  padding: 10px 16px;
+  border-top: 1px solid rgba(143, 163, 178, 0.1);
+  cursor: pointer;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.pac-item:first-child { border-top: none; }
+
+.pac-item:hover,
+.pac-item-selected { background: var(--ice) !important; }
+
+.pac-item-query {
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.pac-matched { color: #00b8d9; font-weight: 800; }
+
+.pac-icon { display: none; }
+
+/* Address validation error */
+.address-error {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: var(--radius);
+  background: rgba(248, 113, 113, 0.07);
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.address-error[hidden] { display: none; }

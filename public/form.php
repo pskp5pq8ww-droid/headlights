@@ -47,15 +47,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // ── Sanitise inputs ───────────────────────────────────────────────────────────
 $to      = 'hello@shiningheadlights.com.au';
-$name    = htmlspecialchars(trim($_POST['name']    ?? ''), ENT_QUOTES, 'UTF-8');
-$phone   = htmlspecialchars(trim($_POST['phone']   ?? ''), ENT_QUOTES, 'UTF-8');
-$email   = trim($_POST['email']   ?? '');
-$suburb  = htmlspecialchars(trim($_POST['suburb']  ?? ''), ENT_QUOTES, 'UTF-8');
-$vehicle = htmlspecialchars(trim($_POST['vehicle'] ?? ''), ENT_QUOTES, 'UTF-8');
-$date    = htmlspecialchars(trim($_POST['date']    ?? ''), ENT_QUOTES, 'UTF-8');
-$time    = htmlspecialchars(trim($_POST['time']    ?? ''), ENT_QUOTES, 'UTF-8');
-$package = htmlspecialchars(trim($_POST['package'] ?? ''), ENT_QUOTES, 'UTF-8');
-$message = htmlspecialchars(trim($_POST['message'] ?? ''), ENT_QUOTES, 'UTF-8');
+$name    = htmlspecialchars(trim($_POST['name']         ?? ''), ENT_QUOTES, 'UTF-8');
+$phone   = htmlspecialchars(trim($_POST['phone']        ?? ''), ENT_QUOTES, 'UTF-8');
+$email   = trim($_POST['email'] ?? '');
+$suburb  = htmlspecialchars(trim($_POST['suburb']       ?? ''), ENT_QUOTES, 'UTF-8');
+$vehicle = htmlspecialchars(trim($_POST['vehicle']      ?? ''), ENT_QUOTES, 'UTF-8');
+$date    = htmlspecialchars(trim($_POST['date']         ?? ''), ENT_QUOTES, 'UTF-8');
+$time    = htmlspecialchars(trim($_POST['time']         ?? ''), ENT_QUOTES, 'UTF-8');
+$package = htmlspecialchars(trim($_POST['package']      ?? ''), ENT_QUOTES, 'UTF-8');
+$message = htmlspecialchars(trim($_POST['message']      ?? ''), ENT_QUOTES, 'UTF-8');
+// Google Places address fields
+$fullAddress   = htmlspecialchars(trim($_POST['full_address']  ?? ''), ENT_QUOTES, 'UTF-8');
+$placeId       = htmlspecialchars(trim($_POST['place_id']      ?? ''), ENT_QUOTES, 'UTF-8');
+$latitude      = htmlspecialchars(trim($_POST['latitude']      ?? ''), ENT_QUOTES, 'UTF-8');
+$longitude     = htmlspecialchars(trim($_POST['longitude']     ?? ''), ENT_QUOTES, 'UTF-8');
+$streetNumber  = htmlspecialchars(trim($_POST['street_number'] ?? ''), ENT_QUOTES, 'UTF-8');
+$streetName    = htmlspecialchars(trim($_POST['street_name']   ?? ''), ENT_QUOTES, 'UTF-8');
+$state         = htmlspecialchars(trim($_POST['state']         ?? ''), ENT_QUOTES, 'UTF-8');
+$postcode      = htmlspecialchars(trim($_POST['postcode']      ?? ''), ENT_QUOTES, 'UTF-8');
+$country       = htmlspecialchars(trim($_POST['country']       ?? ''), ENT_QUOTES, 'UTF-8');
 
 $photoNames = [];
 if (!empty($_FILES['photos']['name']) && is_array($_FILES['photos']['name'])) {
@@ -85,18 +95,28 @@ $safeEmail = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
 
 // ── Save booking to /Storagehighlights/bookings/ ──────────────────────────────
 $bookingData = [
-    'received_at' => date('Y-m-d H:i:s'),
-    'name'        => $name,
-    'phone'       => $phone,
-    'email'       => $safeEmail,
-    'suburb'      => $suburb,
-    'vehicle'     => $vehicle,
-    'date'        => $date,
-    'time'        => $time,
-    'package'     => $package,
-    'message'     => $message,
-    'photos'      => $photoNames,
-    'ip'          => hash('sha256', $_SERVER['REMOTE_ADDR'] ?? ''),  // hashed, not raw
+    'received_at'   => date('Y-m-d H:i:s'),
+    'name'          => $name,
+    'phone'         => $phone,
+    'email'         => $safeEmail,
+    'package'       => $package,
+    'vehicle'       => $vehicle,
+    'date'          => $date,
+    'time'          => $time,
+    'message'       => $message,
+    'photos'        => $photoNames,
+    // Google Places address data
+    'full_address'  => $fullAddress,
+    'place_id'      => $placeId,
+    'suburb'        => $suburb,
+    'street_number' => $streetNumber,
+    'street_name'   => $streetName,
+    'state'         => $state,
+    'postcode'      => $postcode,
+    'country'       => $country,
+    'latitude'      => $latitude,
+    'longitude'     => $longitude,
+    'ip_hash'       => hash('sha256', $_SERVER['REMOTE_ADDR'] ?? ''),
 ];
 
 try {
@@ -109,8 +129,10 @@ try {
 $subject  = "New Booking - {$name} ({$vehicle})";
 $body     = "New booking from shiningheadlights.com.au\n\n";
 $body    .= "Name:     {$name}\nPhone:    {$phone}\nEmail:    {$safeEmail}\n";
-$body    .= "Location: {$suburb}\nVehicle:  {$vehicle}\n";
-$body    .= "Date:     {$date}\nTime:     {$time}\nPackage:  {$package}\n";
+$body    .= "Address:  {$fullAddress}\n";
+if ($suburb)   $body .= "Suburb:   {$suburb}, {$state} {$postcode}\n";
+if ($latitude) $body .= "Coords:   {$latitude}, {$longitude}\n";
+$body    .= "Vehicle:  {$vehicle}\nDate:     {$date}\nTime:     {$time}\nPackage:  {$package}\n";
 if ($message)    $body .= "\nMessage:\n{$message}\n";
 if ($photoNames) $body .= "\nPhotos attached by customer: " . implode(', ', $photoNames) . "\n";
 

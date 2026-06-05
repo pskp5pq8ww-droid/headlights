@@ -149,6 +149,35 @@
     });
   }
 
+  // ── Lazy-load Google Maps JS only when booking section is visible ────────
+  function loadGoogleMapsLazy() {
+    const section = document.getElementById("booking");
+    if (!section) return;
+    let loaded = false;
+    function load() {
+      if (loaded) return;
+      loaded = true;
+      const key = document.querySelector('meta[name="gmap-key"]')?.content || "";
+      if (!key || document.getElementById("gmap-script")) return;
+      const s = document.createElement("script");
+      s.id    = "gmap-script";
+      s.src   = "https://maps.googleapis.com/maps/api/js?key=" +
+                encodeURIComponent(key) +
+                "&libraries=places&callback=_initGooglePlaces&loading=async";
+      s.async = true;
+      s.defer = true;
+      document.head.appendChild(s);
+    }
+    if ("IntersectionObserver" in window) {
+      const obs = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) { load(); obs.disconnect(); }
+      }, { rootMargin: "300px" });
+      obs.observe(section);
+    } else {
+      load();
+    }
+  }
+
   // ── Render standard packages inside "other plans" ───────────────────────
   function renderOtherPackages() {
     const mount = qs("[data-other-packages]");
@@ -175,6 +204,7 @@
     let currentStep = 1;
     let selectedAddress = "";
     let selectedPackage = "Launch Offer – Full Restore";
+    let googleAddressSelected = false;
 
     // Step navigation
     function goToStep(n) {
@@ -193,16 +223,17 @@
     qsa(".step-next-btn", wizard).forEach((btn) => {
       btn.addEventListener("click", () => {
         const next = parseInt(btn.dataset.next);
-        if (next === 2 && !selectedAddress) {
+        if (next === 2 && !googleAddressSelected) {
           const input = qs("#addressInput");
+          const err   = qs("#addressError");
           if (input) { input.focus(); input.setAttribute("aria-invalid", "true"); }
+          if (err) err.hidden = false;
           return;
         }
         if (next === 3) {
-          const hs = qs("#hiddenSuburb");
           const hp = qs("#hiddenPackage");
-          if (hs) hs.value = selectedAddress;
           if (hp) hp.value = selectedPackage;
+          // suburb + address coords already filled by Google Places callback
         }
         goToStep(next);
       });
@@ -212,104 +243,17 @@
       btn.addEventListener("click", () => goToStep(parseInt(btn.dataset.prev)));
     });
 
-    // Address autocomplete (Nominatim / OpenStreetMap — free, no API key)
-    const addressInput = qs("#addressInput");
-    const suggestionsList = qs("#addressSuggestions");
-    const mapPreview = qs("#mapPreview");
-    const mapFrame = qs("#mapFrame");
-    const mapLabel = qs("#mapLabel");
-
-    if (addressInput && suggestionsList) {
-      let debounce;
-
-      addressInput.addEventListener("input", () => {
-        clearTimeout(debounce);
-        addressInput.removeAttribute("aria-invalid");
-        const q = addressInput.value.trim();
-        if (q.length < 3) { suggestionsList.hidden = true; return; }
-        debounce = window.setTimeout(() => fetchSuggestions(q), 360);
-      });
-
-      addressInput.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") suggestionsList.hidden = true;
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!addressInput.contains(e.target) && !suggestionsList.contains(e.target)) {
-          suggestionsList.hidden = true;
-        }
-      });
-    }
-
-    async function fetchSuggestions(query) {
-      const mapsConfig = config.maps || {};
-
-      // Hook: swap to Google Maps Places when API key is provided
-      if (mapsConfig.googleMapsApiKey) {
-        // TODO: loadGooglePlacesAutocomplete(mapsConfig.googleMapsApiKey, addressInput);
-        return;
-      }
-
-      // Default: Nominatim (OpenStreetMap) — completely free, no key required
-      try {
-        const city = mapsConfig.defaultCity || "Brisbane, Queensland, Australia";
-        const url =
-          "https://nominatim.openstreetmap.org/search" +
-          "?q=" + encodeURIComponent(query + ", " + city) +
-          "&format=json&addressdetails=1&limit=5&countrycodes=au";
-        const res = await fetch(url, {
-          headers: { "Accept": "application/json", "Accept-Language": "en" }
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        renderSuggestions(data);
-      } catch {
-        if (suggestionsList) suggestionsList.hidden = true;
-      }
-    }
-
-    function renderSuggestions(results) {
-      if (!results.length || !suggestionsList) { if (suggestionsList) suggestionsList.hidden = true; return; }
-      suggestionsList.innerHTML = results
-        .map(
-          (r) =>
-            `<li class="suggestion-item" role="option" tabindex="-1"
-                data-lat="${r.lat}" data-lng="${r.lon}"
-                data-label="${r.display_name.replace(/"/g, "&quot;")}">
-              ${r.display_name}
-            </li>`
-        )
-        .join("");
-      suggestionsList.hidden = false;
-      qsa(".suggestion-item", suggestionsList).forEach((item) => {
-        item.addEventListener("click", () => selectAddress(item));
-        item.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectAddress(item); }
-        });
-      });
-    }
-
-    function selectAddress(item) {
-      const lat = item.dataset.lat;
-      const lng = item.dataset.lng;
-      const label = item.dataset.label;
-      if (addressInput) { addressInput.value = label; addressInput.removeAttribute("aria-invalid"); }
-      selectedAddress = label;
-      if (suggestionsList) suggestionsList.hidden = true;
-      showMap(lat, lng, label);
-    }
-
-    function showMap(lat, lng, label) {
-      if (!mapFrame || !mapPreview) return;
-      const d = 0.013;
-      const bbox = (parseFloat(lng) - d) + "," + (parseFloat(lat) - d) + "," +
-                   (parseFloat(lng) + d) + "," + (parseFloat(lat) + d);
-      mapFrame.src =
-        "https://www.openstreetmap.org/export/embed.html" +
-        "?bbox=" + bbox + "&layer=mapnik&marker=" + lat + "," + lng;
-      if (mapLabel) mapLabel.textContent = label;
-      mapPreview.hidden = false;
-    }
+    // Address — Google Places Autocomplete
+    // Callbacks on window so the global _initGooglePlaces can update wizard-scoped state
+    window._onAddressSelected = (addr) => {
+      selectedAddress     = addr;
+      googleAddressSelected = true;
+    };
+    window._onAddressCleared = () => {
+      googleAddressSelected = false;
+    };
+    // Lazy-load Maps JS API only when the booking section scrolls into view
+    loadGoogleMapsLazy();
 
     // Package toggle
     renderOtherPackages();
@@ -364,6 +308,17 @@
         return;
       }
 
+      // Require a Google address to have been selected
+      if (!googleAddressSelected || !qs("#hiddenLat", form)?.value) {
+        status.textContent = "Please go back to Step 1 and select a valid address from the suggestions.";
+        goToStep(1);
+        const ai = qs("#addressInput");
+        if (ai) { ai.focus(); ai.setAttribute("aria-invalid", "true"); }
+        const ae = qs("#addressError");
+        if (ae) ae.hidden = false;
+        return;
+      }
+
       const button = qs('button[type="submit"]', form);
       button.disabled = true;
       button.querySelector("span").textContent = "Sending…";
@@ -386,7 +341,11 @@
               form.reset();
               goToStep(1);
               selectedAddress = "";
-              if (mapPreview) mapPreview.hidden = true;
+              googleAddressSelected = false;
+              const ai = qs("#addressInput");
+              if (ai) ai.value = "";
+              const mp = qs("#mapPreview");
+              if (mp) mp.hidden = true;
             } else {
               const firstError = result.errors ? Object.values(result.errors)[0]?.[0] : null;
               status.textContent = firstError || result.message || "Something went wrong. Please call us directly.";
@@ -457,3 +416,129 @@
   initContactDetails();
   initRevealAnimations();
 })();
+
+// ── Google Places callback (invoked by Maps JS API after loading) ────────────
+// Defined outside the IIFE so the API script can call it as a global.
+window._initGooglePlaces = function () {
+  const input = document.getElementById("addressInput");
+  if (!input) return;
+
+  const autocomplete = new google.maps.places.Autocomplete(input, {
+    componentRestrictions: { country: "au" },
+    // Request only the fields we need to minimise billing
+    fields: ["address_components", "formatted_address", "geometry", "place_id"],
+    // Bias toward Brisbane / SE Queensland — not strict, so regional AU still works
+    bounds: new google.maps.LatLngBounds(
+      { lat: -28.5, lng: 151.5 },
+      { lat: -25.5, lng: 154.0 }
+    ),
+    strictBounds: false
+  });
+
+  let gMap = null, gMarker = null;
+
+  // Prevent Enter key from submitting the page while the PAC dropdown is open
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") e.preventDefault(); });
+
+  // Clear Google selection state when the user edits the field manually
+  input.addEventListener("input", () => {
+    if (window._onAddressCleared) window._onAddressCleared();
+    _clearFields();
+    const err = document.getElementById("addressError");
+    const mp  = document.getElementById("mapPreview");
+    if (err) err.hidden = true;
+    if (mp)  mp.hidden  = true;
+    input.removeAttribute("aria-invalid");
+  });
+
+  autocomplete.addListener("place_changed", () => {
+    const place = autocomplete.getPlace();
+    if (!place.geometry?.location) {
+      if (window._onAddressCleared) window._onAddressCleared();
+      _clearFields();
+      return;
+    }
+
+    const c   = _parseComponents(place.address_components || []);
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+
+    _set("hiddenFullAddress",  place.formatted_address);
+    _set("hiddenPlaceId",      place.place_id);
+    _set("hiddenLat",          lat);
+    _set("hiddenLng",          lng);
+    _set("hiddenStreetNumber", c.street_number);
+    _set("hiddenStreetName",   c.street_name);
+    _set("hiddenSuburb",       c.suburb);
+    _set("hiddenState",        c.state);
+    _set("hiddenPostcode",     c.postcode);
+    _set("hiddenCountry",      c.country);
+
+    if (window._onAddressSelected) window._onAddressSelected(place.formatted_address);
+    input.removeAttribute("aria-invalid");
+    const err = document.getElementById("addressError");
+    if (err) err.hidden = true;
+
+    _showMap(place.geometry.location, place.formatted_address);
+  });
+
+  function _set(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val ?? "";
+  }
+
+  function _clearFields() {
+    ["hiddenFullAddress","hiddenPlaceId","hiddenLat","hiddenLng",
+     "hiddenStreetNumber","hiddenStreetName","hiddenSuburb","hiddenState",
+     "hiddenPostcode","hiddenCountry"].forEach((id) => _set(id, ""));
+  }
+
+  function _parseComponents(comps) {
+    const r = { street_number:"", street_name:"", suburb:"", state:"", postcode:"", country:"" };
+    comps.forEach((c) => {
+      if (c.types.includes("street_number"))              r.street_number = c.long_name;
+      if (c.types.includes("route"))                       r.street_name   = c.long_name;
+      if (c.types.includes("locality"))                    r.suburb        = c.long_name;
+      if (!r.suburb && c.types.includes("administrative_area_level_2")) r.suburb = c.long_name;
+      if (c.types.includes("administrative_area_level_1")) r.state         = c.short_name;
+      if (c.types.includes("postal_code"))                 r.postcode      = c.long_name;
+      if (c.types.includes("country"))                     r.country       = c.long_name;
+    });
+    return r;
+  }
+
+  function _showMap(location, label) {
+    const mp   = document.getElementById("mapPreview");
+    const cont = document.getElementById("googleMapContainer");
+    const lbl  = document.getElementById("mapLabel");
+    if (!mp || !cont) return;
+    mp.hidden = false;
+
+    if (!gMap) {
+      gMap = new google.maps.Map(cont, {
+        center: location, zoom: 16,
+        mapTypeControl:    false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        styles: [
+          { elementType: "geometry",                              stylers: [{ color: "#f0f8fc" }] },
+          { featureType: "road",  elementType: "geometry",       stylers: [{ color: "#d4edf7" }] },
+          { featureType: "road",  elementType: "labels.text.fill",stylers: [{ color: "#546e7a" }] },
+          { featureType: "water", elementType: "geometry",       stylers: [{ color: "#b8ebf8" }] },
+          { featureType: "poi",                                   stylers: [{ visibility: "off" }] },
+          { featureType: "transit",                               stylers: [{ visibility: "off" }] }
+        ]
+      });
+      gMarker = new google.maps.Marker({
+        map: gMap, position: location, title: label,
+        animation: google.maps.Animation.DROP
+      });
+    } else {
+      gMap.setCenter(location);
+      gMap.setZoom(16);
+      gMarker.setPosition(location);
+      gMarker.setAnimation(google.maps.Animation.DROP);
+    }
+    if (lbl) lbl.textContent = label;
+  }
+};

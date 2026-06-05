@@ -1,5 +1,5 @@
 # Hostinger / Apache static site entry point
-DirectoryIndex index.html
+DirectoryIndex index.php index.html
 
 # Disable directory listing
 Options -Indexes
