@@ -1,15 +1,5 @@
 <?php
-
-use Illuminate\Http\Request;
-
-define('LARAVEL_START', microtime(true));
-
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
-}
-
-require __DIR__.'/../vendor/autoload.php';
-
-$app = require_once __DIR__.'/../bootstrap/app.php';
-
-$app->handleRequest(Request::capture());
+// Static Hostinger fallback. If the server opens index.php first, serve the
+// landing page instead of trying to boot Laravel without vendor dependencies.
+header('Content-Type: text/html; charset=UTF-8');
+readfile(__DIR__ . '/index.html');
