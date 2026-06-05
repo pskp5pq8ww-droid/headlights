@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-labelledby="title desc">
+  <title id="title">Clear restored headlight after restoration</title>
+  <desc id="desc">Stylised close-up of a glossy crystal-clear car headlight after restoration.</desc>
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10283a"/>
+      <stop offset="1" stop-color="#03070b"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ecfeff"/>
+      <stop offset="0.5" stop-color="#65e7ff"/>
+      <stop offset="1" stop-color="#0d4b7d"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="900" height="560" fill="#03070b"/>
+  <path d="M0 218c142-64 326-108 530-104 160 4 280 40 370 92v354H0Z" fill="url(#body)"/>
+  <path d="M85 292c70-96 180-148 326-156 132-8 270 30 392 102-33 82-86 145-158 190-144 30-310 22-504-16-42-28-61-68-56-120Z" fill="#02070c" stroke="#19445b" stroke-width="5"/>
+  <path d="M133 302c62-70 156-106 282-110 106-3 218 22 333 76-28 58-70 101-128 130-132 26-278 18-438-22-34-20-50-45-49-74Z" fill="url(#lens)" opacity="0.9"/>
+  <path d="M153 309c93-63 194-91 306-82 88 7 164 31 228 73-45 32-99 51-162 59-125 16-249-1-372-50Z" fill="#f6ffff" opacity="0.33"/>
+  <path d="M158 325c156-24 316-25 492 1" fill="none" stroke="#a8f3ff" stroke-width="9" filter="url(#glow)"/>
+  <path d="M220 259c114-17 220-7 318 30" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.75"/>
+  <circle cx="405" cy="304" r="83" fill="#021620" opacity="0.46"/>
+  <circle cx="405" cy="304" r="59" fill="#071827" opacity="0.88"/>
+  <circle cx="405" cy="304" r="38" fill="#3ee6ff" opacity="0.28" filter="url(#glow)"/>
+  <circle cx="405" cy="304" r="18" fill="#ffffff" opacity="0.6"/>
+  <path d="M110 415c156 42 334 62 548 25" fill="none" stroke="#00d9ff" stroke-width="4" opacity="0.72"/>
+  <path d="M698 220h100M748 170v100" stroke="#a8f3ff" stroke-width="4" opacity="0.65" filter="url(#glow)"/>
+</svg>

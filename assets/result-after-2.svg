@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-labelledby="title desc">
+  <title id="title">Restored clear headlight after service</title>
+  <desc id="desc">Clean clear headlight placeholder after mobile restoration.</desc>
+  <defs>
+    <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="900" height="560" fill="#03070b"/>
+  <path d="M0 270c120-88 276-139 469-153 166-12 310 17 431 86v357H0Z" fill="#102437"/>
+  <path d="M120 312c65-89 179-136 344-142 104-4 198 16 282 60 28 15 45 45 43 77-5 73-57 123-156 150-170 12-333-12-489-70-34-25-42-50-24-75Z" fill="#04080e" stroke="#0c5269" stroke-width="5"/>
+  <path d="M168 316c56-54 143-82 262-84 103-2 204 18 303 62-32 45-79 76-141 94-132 12-255-6-370-54-30-11-48-17-54-18Z" fill="#35dfff" opacity=".78"/>
+  <path d="M194 307c109-26 214-29 315-9 67 13 117 31 150 54-130 27-281 11-465-45Z" fill="#fff" opacity=".31"/>
+  <path d="M208 344c111-32 249-35 414-9" stroke="#a8f3ff" stroke-width="9" filter="url(#glow)"/>
+  <path d="M258 281c89-17 186-10 292 23" stroke="#fff" stroke-width="4" opacity=".75"/>
+  <circle cx="345" cy="314" r="74" fill="#02131f" opacity=".7"/>
+  <circle cx="345" cy="314" r="46" fill="#061e2c"/>
+  <circle cx="345" cy="314" r="25" fill="#a8f3ff" opacity=".55" filter="url(#glow)"/>
+  <path d="M690 235h78M729 196v78" stroke="#00d9ff" stroke-width="5" filter="url(#glow)" opacity=".76"/>
+</svg>

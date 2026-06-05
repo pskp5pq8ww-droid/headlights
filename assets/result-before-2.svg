@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-labelledby="title desc">
+  <title id="title">Oxidised headlight before restoration</title>
+  <desc id="desc">Dull yellow headlight placeholder showing oxidation before service.</desc>
+  <rect width="900" height="560" fill="#0c1217"/>
+  <path d="M0 270c120-88 276-139 469-153 166-12 310 17 431 86v357H0Z" fill="#151f29"/>
+  <path d="M120 312c65-89 179-136 344-142 104-4 198 16 282 60 28 15 45 45 43 77-5 73-57 123-156 150-170 12-333-12-489-70-34-25-42-50-24-75Z" fill="#05080c" stroke="#2b3a44" stroke-width="5"/>
+  <path d="M168 316c56-54 143-82 262-84 103-2 204 18 303 62-32 45-79 76-141 94-132 12-255-6-370-54-30-11-48-17-54-18Z" fill="#9b8558"/>
+  <path d="M194 307c109-26 214-29 315-9 67 13 117 31 150 54-130 27-281 11-465-45Z" fill="#f4d68e" opacity=".18"/>
+  <g stroke="#fff1bb" stroke-width="6" opacity=".33">
+    <path d="M208 344c111-32 249-35 414-9"/>
+    <path d="M258 281c89-17 186-10 292 23"/>
+    <path d="M445 236c-31 41-45 91-42 151"/>
+  </g>
+  <circle cx="345" cy="314" r="74" fill="#2b2920" opacity=".58"/>
+  <circle cx="345" cy="314" r="42" fill="#efc672" opacity=".18"/>
+  <rect width="900" height="560" fill="#b58b3e" opacity=".14"/>
+</svg>

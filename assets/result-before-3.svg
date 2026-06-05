@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-labelledby="title desc">
+  <title id="title">Dull cloudy headlight before restoration</title>
+  <desc id="desc">Clouded headlight placeholder showing poor clarity before restoration.</desc>
+  <rect width="900" height="560" fill="#11181f"/>
+  <path d="M0 182c142 14 248 42 318 84 130-55 286-72 468-49 50 7 88 31 114 73v270H0Z" fill="#222c33"/>
+  <path d="M92 335c39-74 113-124 224-149 144-31 295-7 455 73-23 66-71 116-143 149-152 27-304 16-456-33-54-18-81-31-80-40Z" fill="#05080c" stroke="#34404a" stroke-width="5"/>
+  <path d="M144 329c56-49 128-78 217-87 126-12 246 13 359 75-31 35-73 61-127 77-132 16-264 5-397-34-30-9-47-19-52-31Z" fill="#8c7a58"/>
+  <path d="M174 318c133-38 286-28 459 30-83 42-236 32-459-30Z" fill="#f5dc9a" opacity=".16"/>
+  <g stroke="#fff0c0" stroke-width="6" opacity=".29">
+    <path d="M190 350c118-23 253-22 406 3"/>
+    <path d="M249 291c105-17 211-5 318 35"/>
+    <path d="M508 258c-28 43-40 88-36 135"/>
+  </g>
+  <circle cx="414" cy="321" r="86" fill="#2f2a22" opacity=".58"/>
+  <circle cx="414" cy="321" r="50" fill="#d7b16c" opacity=".16"/>
+  <rect width="900" height="560" fill="#d0a257" opacity=".13"/>
+</svg>
