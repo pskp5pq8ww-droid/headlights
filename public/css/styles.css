@@ -1187,9 +1187,14 @@ select[aria-invalid="true"] {
 }
 
 .reveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 520ms ease, transform 520ms ease;
+}
+
+.animations-ready .reveal {
   opacity: 0;
   transform: translateY(18px);
-  transition: opacity 520ms ease, transform 520ms ease;
 }
 
 .reveal.is-visible {
