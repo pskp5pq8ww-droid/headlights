@@ -1,8 +1,13 @@
 <?php
-header('Content-Type: application/json');
+// Suppress PHP notices/warnings so they don't corrupt JSON output
+ini_set('display_errors', 0);
+error_reporting(0);
+ob_start();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    ob_end_clean();
     http_response_code(405);
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
@@ -19,17 +24,23 @@ $package = htmlspecialchars(trim($_POST['package'] ?? ''), ENT_QUOTES, 'UTF-8');
 $message = htmlspecialchars(trim($_POST['message'] ?? ''), ENT_QUOTES, 'UTF-8');
 
 if (!$name || !$phone || !$email || !$suburb || !$vehicle || !$date || !$time || !$package) {
+    ob_end_clean();
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Please complete all required fields.']);
     exit;
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    ob_end_clean();
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Please enter a valid email address.']);
     exit;
 }
 
 $safeEmail = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
-$subject   = "New Booking Request – {$name} ({$vehicle})";
+
+// Plain ASCII subject to avoid encoding issues on shared mail servers
+$subject = "New Booking Request - {$name} ({$vehicle})";
 
 $body  = "New booking request from shiningheadlights.com.au\n\n";
 $body .= "Name:            {$name}\n";
@@ -44,12 +55,18 @@ if ($message) {
     $body .= "Message:\n{$message}\n";
 }
 
-$headers  = "From: noreply@shiningheadlights.com.au\r\n";
+// From must be a real email account configured on the Hostinger account
+$headers  = "From: hello@shiningheadlights.com.au\r\n";
 $headers .= "Reply-To: {$safeEmail}\r\n";
+$headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+$headers .= "Content-Transfer-Encoding: 8bit\r\n";
 $headers .= "X-Mailer: PHP/" . phpversion();
 
-if (mail($to, $subject, $body, $headers)) {
-    echo json_encode(['success' => true]);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Could not send your request. Please call us directly.']);
-}
+$sent = mail($to, $subject, $body, $headers);
+
+ob_end_clean();
+header('Content-Type: application/json');
+echo json_encode($sent
+    ? ['success' => true]
+    : ['success' => false, 'message' => 'Could not send your request. Please call us directly.']
+);

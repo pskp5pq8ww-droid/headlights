@@ -1,6 +1,5 @@
 # Disable directory listing
 Options -Indexes
-ServerSignature Off
 
 # GZIP compression
 <IfModule mod_deflate.c>
