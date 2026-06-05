@@ -1,59 +1,45 @@
-<!doctype html>
-<html lang="en-AU">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Mobile Headlight Restoration Brisbane | Shining Headlights Australia</title>
-    <meta
-      name="description"
-      content="Cloudy headlights? We come to you. Book mobile headlight restoration in Brisbane with crystal-clear results at your home, workplace or driveway."
-    />
-    <meta name="theme-color" content="#071827" />
-    <link rel="canonical" href="https://shiningheadlights.com.au/" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="css/styles.css" />
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "AutoRepair",
-        "name": "Shining Headlights Australia",
-        "description": "Mobile headlight restoration in Brisbane, Queensland.",
-        "image": "assets/logo-clean.png",
-        "areaServed": [
-          "Brisbane",
-          "Logan",
-          "Ipswich",
-          "Redcliffe",
-          "North Brisbane",
-          "South Brisbane",
-          "Gold Coast",
-          "Sunshine Coast"
-        ],
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Brisbane",
-          "addressRegion": "QLD",
-          "addressCountry": "AU"
-        },
-        "telephone": "+61 400 000 000",
-        "email": "hello@shiningheadlights.com.au",
-        "priceRange": "$$",
-        "serviceType": "Mobile Headlight Restoration"
-      }
-    </script>
-  </head>
-  <body>
+@extends('layouts.app')
+
+@section('head')
+  <title>Mobile Headlight Restoration Brisbane | Shining Headlights Australia</title>
+  <meta
+    name="description"
+    content="Cloudy headlights? We come to you. Book mobile headlight restoration in Brisbane with crystal-clear results at your home, workplace or driveway."
+  />
+  <meta name="theme-color" content="#071827" />
+  <link rel="canonical" href="{{ url('/') }}" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AutoRepair",
+      "name": "Shining Headlights Australia",
+      "description": "Mobile headlight restoration in Brisbane, Queensland.",
+      "image": "{{ asset('assets/logo-clean.png') }}",
+      "areaServed": [
+        "Brisbane","Logan","Ipswich","Redcliffe",
+        "North Brisbane","South Brisbane","Gold Coast","Sunshine Coast"
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Brisbane",
+        "addressRegion": "QLD",
+        "addressCountry": "AU"
+      },
+      "telephone": "+61 400 000 000",
+      "email": "hello@shiningheadlights.com.au",
+      "priceRange": "$$",
+      "serviceType": "Mobile Headlight Restoration"
+    }
+  </script>
+@endsection
+
+@section('content')
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header" data-header>
       <div class="container header-inner">
         <a class="brand" href="#home" aria-label="Shining Headlights Australia home">
-          <img src="assets/logo-clean.png" alt="Shining Headlights Australia" width="245" height="76" />
+          <img src="{{ asset('assets/logo-clean.png') }}" alt="Shining Headlights Australia" width="245" height="76" />
           <span>
             <strong>Shining Headlights Australia</strong>
             <small>Mobile Headlight Restoration</small>
@@ -99,7 +85,7 @@
         <div class="hero-bg" aria-hidden="true"></div>
         <div class="container hero-grid">
           <div class="hero-copy">
-            <img class="hero-logo reveal" src="assets/logo-clean.png" alt="Shining Headlights Australia" width="360" height="112" />
+            <img class="hero-logo reveal" src="{{ asset('assets/logo-clean.png') }}" alt="Shining Headlights Australia" width="360" height="112" />
             <p class="eyebrow reveal">Mobile headlight restoration Brisbane</p>
             <h1 class="reveal">Cloudy headlights? We come to you.</h1>
             <p class="hero-lede reveal">
@@ -121,7 +107,7 @@
 
           <figure class="hero-media reveal" aria-label="Before and after restored car headlight comparison">
             <img
-              src="assets/hero-headlight-before-after.png"
+              src="{{ asset('assets/hero-headlight-before-after.png') }}"
               alt="A car headlight split between cloudy yellow oxidation and clear restored finish"
               width="1536"
               height="1024"
@@ -160,12 +146,12 @@
         <div class="container offer-card reveal">
           <div>
             <p class="eyebrow">Daily Launch Offer</p>
-            <h2 id="offer-title">Today’s Mobile Booking Offer</h2>
+            <h2 id="offer-title">Today's Mobile Booking Offer</h2>
             <p>Book today and get our launch mobile headlight restoration offer from $99.</p>
             <small>Daily launch offer resets every 24 hours. Availability depends on location and schedule.</small>
           </div>
-          <div class="countdown-wrap" aria-label="Today’s offer countdown">
-            <p>Today’s offer resets in:</p>
+          <div class="countdown-wrap" aria-label="Today's offer countdown">
+            <p>Today's offer resets in:</p>
             <div class="countdown" data-countdown>
               <span><strong data-hours>00</strong><small>HH</small></span>
               <span><strong data-minutes>00</strong><small>MM</small></span>
@@ -173,7 +159,7 @@
             </div>
           </div>
           <a class="button button-primary" href="#booking">
-            <span>Claim Today’s Offer</span>
+            <span>Claim Today's Offer</span>
             <svg aria-hidden="true" viewBox="0 0 24 24">
               <path d="M5 12h14m-6-6 6 6-6 6" />
             </svg>
@@ -187,7 +173,7 @@
             <p class="eyebrow">The problem</p>
             <h2 id="problem-title">Yellow headlights make your car look older.</h2>
             <p>
-              Cloudy, oxidised headlights can affect your car’s appearance and reduce night visibility. Instead of paying
+              Cloudy, oxidised headlights can affect your car's appearance and reduce night visibility. Instead of paying
               for expensive replacements, restore them professionally at your location.
             </p>
             <a class="inline-link" href="#booking">Send Photos for Quick Quote</a>
@@ -225,7 +211,7 @@
         <div class="container">
           <div class="section-heading reveal">
             <p class="eyebrow">The solution</p>
-            <h2 id="solution-title">Restore, don’t replace.</h2>
+            <h2 id="solution-title">Restore, don't replace.</h2>
             <p>
               Shining Headlights Australia brings your headlights back to life with a mobile restoration service designed
               for clarity, shine and convenience.
@@ -275,9 +261,9 @@
           <div class="before-after-grid">
             <article class="comparison-card reveal">
               <div class="comparison-slider" style="--position: 52%">
-                <img src="assets/result-before-1.svg" alt="Cloudy yellow headlight before restoration" loading="lazy" />
+                <img src="{{ asset('assets/result-before-1.svg') }}" alt="Cloudy yellow headlight before restoration" loading="lazy" />
                 <div class="after-layer">
-                  <img src="assets/result-after-1.svg" alt="Clear glossy headlight after restoration" loading="lazy" />
+                  <img src="{{ asset('assets/result-after-1.svg') }}" alt="Clear glossy headlight after restoration" loading="lazy" />
                 </div>
                 <span class="label before-label">Before</span>
                 <span class="label after-label">After</span>
@@ -289,11 +275,11 @@
             <article class="result-card reveal">
               <div class="result-pair">
                 <figure>
-                  <img src="assets/result-before-2.svg" alt="Oxidised headlight before restoration" loading="lazy" />
+                  <img src="{{ asset('assets/result-before-2.svg') }}" alt="Oxidised headlight before restoration" loading="lazy" />
                   <figcaption>Before</figcaption>
                 </figure>
                 <figure>
-                  <img src="assets/result-after-2.svg" alt="Restored clear headlight after service" loading="lazy" />
+                  <img src="{{ asset('assets/result-after-2.svg') }}" alt="Restored clear headlight after service" loading="lazy" />
                   <figcaption>After</figcaption>
                 </figure>
               </div>
@@ -302,11 +288,11 @@
             <article class="result-card reveal">
               <div class="result-pair">
                 <figure>
-                  <img src="assets/result-before-3.svg" alt="Dull cloudy headlight before restoration" loading="lazy" />
+                  <img src="{{ asset('assets/result-before-3.svg') }}" alt="Dull cloudy headlight before restoration" loading="lazy" />
                   <figcaption>Before</figcaption>
                 </figure>
                 <figure>
-                  <img src="assets/result-after-3.svg" alt="Crystal clear headlight after restoration" loading="lazy" />
+                  <img src="{{ asset('assets/result-after-3.svg') }}" alt="Crystal clear headlight after restoration" loading="lazy" />
                   <figcaption>After</figcaption>
                 </figure>
               </div>
@@ -360,7 +346,7 @@
           <div class="section-heading reveal">
             <p class="eyebrow">Packages</p>
             <h2 id="packages-title">Simple mobile restoration pricing.</h2>
-            <p>Choose a package now or send photos and we’ll guide you to the best fit.</p>
+            <p>Choose a package now or send photos and we'll guide you to the best fit.</p>
           </div>
           <div class="pricing-grid" data-packages></div>
           <p class="pricing-note reveal">Final price may vary depending on headlight condition, vehicle type and location.</p>
@@ -421,7 +407,9 @@
             </div>
           </div>
 
-          <form class="booking-form reveal" id="bookingForm" action="form.php" method="post" enctype="multipart/form-data" novalidate>
+          <form class="booking-form reveal" id="bookingForm"
+                action="{{ route('booking.submit') }}" method="POST" novalidate>
+            @csrf
             <div class="form-row">
               <label>
                 Full name
@@ -474,7 +462,7 @@
             </label>
             <label>
               Upload photos of headlights
-              <input name="photos" type="file" accept="image/*" multiple />
+              <input name="photos[]" type="file" accept="image/*" multiple />
             </label>
             <label>
               Message / notes
@@ -503,7 +491,7 @@
 
       <section class="section section-dark final-cta" aria-labelledby="final-title">
         <div class="container final-panel reveal">
-          <img src="assets/logo-clean.png" alt="Shining Headlights Australia" width="300" height="93" loading="lazy" />
+          <img src="{{ asset('assets/logo-clean.png') }}" alt="Shining Headlights Australia" width="300" height="93" loading="lazy" />
           <div>
             <p class="eyebrow">Same headlights. Crystal clear again.</p>
             <h2 id="final-title">Ready to make your headlights shine again?</h2>
@@ -520,7 +508,7 @@
     <footer class="site-footer">
       <div class="container footer-grid">
         <div>
-          <img src="assets/logo-clean.png" alt="Shining Headlights Australia" width="250" height="78" loading="lazy" />
+          <img src="{{ asset('assets/logo-clean.png') }}" alt="Shining Headlights Australia" width="250" height="78" loading="lazy" />
           <p>Mobile Headlight Restoration</p>
           <p>Brisbane, Queensland</p>
         </div>
@@ -549,8 +537,4 @@
     </footer>
 
     <a class="mobile-sticky-cta" href="#booking" aria-label="Book mobile headlight restoration now">Book Now</a>
-
-    <script src="js/config.js"></script>
-    <script src="js/main.js"></script>
-  </body>
-</html>
+@endsection

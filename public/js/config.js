@@ -4,12 +4,12 @@ window.siteConfig = {
     phoneDisplay: "0400 000 000",
     phoneHref: "tel:+61400000000",
     email: "hello@shiningheadlights.com.au",
-    bookingEndpoint: "form.php",
+    bookingEndpoint: "/booking",
     instagram: "#",
     facebook: "#"
   },
   promotionalOffer: {
-    title: "Today’s Mobile Booking Offer",
+    title: "Today's Mobile Booking Offer",
     text: "Book today and get our launch mobile headlight restoration offer from $99.",
     resetNote: "Daily launch offer resets every 24 hours. Availability depends on location and schedule.",
     timezone: "Australia/Brisbane"

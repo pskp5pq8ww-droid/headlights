@@ -183,23 +183,35 @@
 
       if (config.contact.bookingEndpoint) {
         try {
+          const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? "";
+
           const response = await fetch(config.contact.bookingEndpoint, {
             method: "POST",
+            headers: { "X-CSRF-TOKEN": csrfToken },
             body: new FormData(form)
           });
-          const result = await response.json();
-          if (result.success) {
-            status.textContent = "Thanks! We’ll contact you shortly to confirm your mobile booking.";
-            form.reset();
+
+          if (response.status === 419) {
+            status.textContent = "Session expired. Please refresh the page and try again.";
           } else {
-            status.textContent = result.message || "Something went wrong. Please call us directly.";
+            const result = await response.json();
+            if (result.success) {
+              status.textContent = "Thanks! We'll contact you shortly to confirm your mobile booking.";
+              form.reset();
+            } else {
+              // Handle Laravel validation errors (422) or custom error message
+              const firstError = result.errors
+                ? Object.values(result.errors)[0]?.[0]
+                : null;
+              status.textContent = firstError || result.message || "Something went wrong. Please call us directly.";
+            }
           }
         } catch {
           status.textContent = "Something went wrong. Please call us directly.";
         }
       } else {
         await new Promise((resolve) => window.setTimeout(resolve, 650));
-        status.textContent = "Thanks! We’ll contact you shortly to confirm your mobile booking.";
+        status.textContent = "Thanks! We'll contact you shortly to confirm your mobile booking.";
         form.reset();
       }
 

@@ -1,0 +1,7 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "echo 'No frontend build required'",
+        "build": "echo 'No frontend build required'"
+    }
+}
