@@ -241,6 +241,8 @@
       return;
     }
 
+    document.body.classList.add("animations-ready");
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
