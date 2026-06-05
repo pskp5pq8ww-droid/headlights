@@ -22,6 +22,15 @@ $date    = htmlspecialchars(trim($_POST['date']    ?? ''), ENT_QUOTES, 'UTF-8');
 $time    = htmlspecialchars(trim($_POST['time']    ?? ''), ENT_QUOTES, 'UTF-8');
 $package = htmlspecialchars(trim($_POST['package'] ?? ''), ENT_QUOTES, 'UTF-8');
 $message = htmlspecialchars(trim($_POST['message'] ?? ''), ENT_QUOTES, 'UTF-8');
+$uploadedPhotoNames = [];
+
+if (!empty($_FILES['photos']['name']) && is_array($_FILES['photos']['name'])) {
+    foreach ($_FILES['photos']['name'] as $index => $fileName) {
+        if ($_FILES['photos']['error'][$index] === UPLOAD_ERR_OK && $fileName) {
+            $uploadedPhotoNames[] = htmlspecialchars(basename($fileName), ENT_QUOTES, 'UTF-8');
+        }
+    }
+}
 
 if (!$name || !$phone || !$email || !$suburb || !$vehicle || !$date || !$time || !$package) {
     ob_end_clean();
@@ -53,6 +62,11 @@ $body .= "Preferred Time:  {$time}\n";
 $body .= "Package:         {$package}\n";
 if ($message) {
     $body .= "Message:\n{$message}\n";
+}
+if ($uploadedPhotoNames) {
+    $body .= "\nUploaded photo file names:\n";
+    $body .= implode("\n", $uploadedPhotoNames) . "\n";
+    $body .= "\nNote: photos are not attached by default. Ask the customer to send photos by reply if needed.\n";
 }
 
 // From must be a real email account configured on the Hostinger account
