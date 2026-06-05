@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-labelledby="title desc">
+  <title id="title">Cloudy yellow headlight before restoration</title>
+  <desc id="desc">Stylised close-up of a dull oxidised car headlight before restoration.</desc>
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#182431"/>
+      <stop offset="1" stop-color="#05090d"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d8bf73"/>
+      <stop offset="0.55" stop-color="#8f7651"/>
+      <stop offset="1" stop-color="#4e4635"/>
+    </linearGradient>
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+  </defs>
+  <rect width="900" height="560" fill="#05090d"/>
+  <path d="M0 218c142-64 326-108 530-104 160 4 280 40 370 92v354H0Z" fill="url(#body)"/>
+  <path d="M85 292c70-96 180-148 326-156 132-8 270 30 392 102-33 82-86 145-158 190-144 30-310 22-504-16-42-28-61-68-56-120Z" fill="#02070c" stroke="#293849" stroke-width="5"/>
+  <path d="M133 302c62-70 156-106 282-110 106-3 218 22 333 76-28 58-70 101-128 130-132 26-278 18-438-22-34-20-50-45-49-74Z" fill="url(#lens)" opacity="0.95"/>
+  <path d="M160 306c84-50 177-72 279-66 85 5 166 28 244 66-36 25-84 42-144 50-129 18-252 8-379-50Z" fill="#fff4c7" opacity="0.16"/>
+  <g opacity="0.45" stroke="#fff2bd" stroke-width="7" filter="url(#blur)">
+    <path d="M174 330c132-26 270-29 421-8"/>
+    <path d="M218 265c114-20 220-10 318 30"/>
+    <path d="M330 220c-20 48-28 101-24 158"/>
+    <path d="M498 233c-32 48-48 94-49 138"/>
+  </g>
+  <circle cx="405" cy="304" r="83" fill="#332f27" opacity="0.58"/>
+  <circle cx="405" cy="304" r="56" fill="#caae73" opacity="0.22"/>
+  <circle cx="405" cy="304" r="31" fill="#fff0b8" opacity="0.2"/>
+  <path d="M110 415c156 42 334 62 548 25" fill="none" stroke="#263a4d" stroke-width="5"/>
+  <rect x="0" y="0" width="900" height="560" fill="#d8b567" opacity="0.12"/>
+</svg>
