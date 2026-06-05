@@ -92,5 +92,19 @@ window.siteConfig = {
       question: "Do you service outside Brisbane?",
       answer: "Yes, surrounding areas may be available by request. Travel fees may apply."
     }
-  ]
+  ],
+
+  // ── Maps & address autocomplete ──────────────────────────────────────
+  // By default the site uses OpenStreetMap / Nominatim (free, no key needed).
+  // To upgrade to Google Maps Places API:
+  //   1. Get a key at https://console.cloud.google.com/apis/library/places-backend.googleapis.com
+  //   2. Paste it in googleMapsApiKey below — the JS will switch automatically.
+  // To use Mapbox instead:
+  //   1. Get a token at https://account.mapbox.com/
+  //   2. Paste it in mapboxToken below.
+  maps: {
+    googleMapsApiKey: "",
+    mapboxToken: "",
+    defaultCity: "Brisbane, Queensland, Australia"
+  }
 };

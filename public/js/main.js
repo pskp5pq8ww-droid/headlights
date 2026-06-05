@@ -149,60 +149,246 @@
     });
   }
 
-  function initBookingForm() {
+  // ── Render standard packages inside "other plans" ───────────────────────
+  function renderOtherPackages() {
+    const mount = qs("[data-other-packages]");
+    if (!mount) return;
+    mount.innerHTML = config.packages
+      .map(
+        (pkg) => `
+          <label class="mini-pkg-card">
+            <input type="radio" name="selectedPackage" value="${pkg.name}" />
+            <div>
+              <div class="mini-pkg-name">${pkg.name}</div>
+              <div class="mini-pkg-price">${pkg.price}</div>
+            </div>
+          </label>`
+      )
+      .join("");
+  }
+
+  // ── Multi-step booking wizard ────────────────────────────────────────────
+  function initBookingWizard() {
+    const wizard = qs("#bookingWizard");
+    if (!wizard) return;
+
+    let currentStep = 1;
+    let selectedAddress = "";
+    let selectedPackage = "Launch Offer – Full Restore";
+
+    // Step navigation
+    function goToStep(n) {
+      qsa("[data-panel]", wizard).forEach((p) => {
+        p.hidden = parseInt(p.dataset.panel) !== n;
+      });
+      qsa("[data-step-indicator]", wizard).forEach((s) => {
+        const num = parseInt(s.dataset.stepIndicator);
+        s.classList.toggle("active", num === n);
+        s.classList.toggle("completed", num < n);
+      });
+      currentStep = n;
+      wizard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    qsa(".step-next-btn", wizard).forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const next = parseInt(btn.dataset.next);
+        if (next === 2 && !selectedAddress) {
+          const input = qs("#addressInput");
+          if (input) { input.focus(); input.setAttribute("aria-invalid", "true"); }
+          return;
+        }
+        if (next === 3) {
+          const hs = qs("#hiddenSuburb");
+          const hp = qs("#hiddenPackage");
+          if (hs) hs.value = selectedAddress;
+          if (hp) hp.value = selectedPackage;
+        }
+        goToStep(next);
+      });
+    });
+
+    qsa(".step-back-btn", wizard).forEach((btn) => {
+      btn.addEventListener("click", () => goToStep(parseInt(btn.dataset.prev)));
+    });
+
+    // Address autocomplete (Nominatim / OpenStreetMap — free, no API key)
+    const addressInput = qs("#addressInput");
+    const suggestionsList = qs("#addressSuggestions");
+    const mapPreview = qs("#mapPreview");
+    const mapFrame = qs("#mapFrame");
+    const mapLabel = qs("#mapLabel");
+
+    if (addressInput && suggestionsList) {
+      let debounce;
+
+      addressInput.addEventListener("input", () => {
+        clearTimeout(debounce);
+        addressInput.removeAttribute("aria-invalid");
+        const q = addressInput.value.trim();
+        if (q.length < 3) { suggestionsList.hidden = true; return; }
+        debounce = window.setTimeout(() => fetchSuggestions(q), 360);
+      });
+
+      addressInput.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") suggestionsList.hidden = true;
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!addressInput.contains(e.target) && !suggestionsList.contains(e.target)) {
+          suggestionsList.hidden = true;
+        }
+      });
+    }
+
+    async function fetchSuggestions(query) {
+      const mapsConfig = config.maps || {};
+
+      // Hook: swap to Google Maps Places when API key is provided
+      if (mapsConfig.googleMapsApiKey) {
+        // TODO: loadGooglePlacesAutocomplete(mapsConfig.googleMapsApiKey, addressInput);
+        return;
+      }
+
+      // Default: Nominatim (OpenStreetMap) — completely free, no key required
+      try {
+        const city = mapsConfig.defaultCity || "Brisbane, Queensland, Australia";
+        const url =
+          "https://nominatim.openstreetmap.org/search" +
+          "?q=" + encodeURIComponent(query + ", " + city) +
+          "&format=json&addressdetails=1&limit=5&countrycodes=au";
+        const res = await fetch(url, {
+          headers: { "Accept": "application/json", "Accept-Language": "en" }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        renderSuggestions(data);
+      } catch {
+        if (suggestionsList) suggestionsList.hidden = true;
+      }
+    }
+
+    function renderSuggestions(results) {
+      if (!results.length || !suggestionsList) { if (suggestionsList) suggestionsList.hidden = true; return; }
+      suggestionsList.innerHTML = results
+        .map(
+          (r) =>
+            `<li class="suggestion-item" role="option" tabindex="-1"
+                data-lat="${r.lat}" data-lng="${r.lon}"
+                data-label="${r.display_name.replace(/"/g, "&quot;")}">
+              ${r.display_name}
+            </li>`
+        )
+        .join("");
+      suggestionsList.hidden = false;
+      qsa(".suggestion-item", suggestionsList).forEach((item) => {
+        item.addEventListener("click", () => selectAddress(item));
+        item.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectAddress(item); }
+        });
+      });
+    }
+
+    function selectAddress(item) {
+      const lat = item.dataset.lat;
+      const lng = item.dataset.lng;
+      const label = item.dataset.label;
+      if (addressInput) { addressInput.value = label; addressInput.removeAttribute("aria-invalid"); }
+      selectedAddress = label;
+      if (suggestionsList) suggestionsList.hidden = true;
+      showMap(lat, lng, label);
+    }
+
+    function showMap(lat, lng, label) {
+      if (!mapFrame || !mapPreview) return;
+      const d = 0.013;
+      const bbox = (parseFloat(lng) - d) + "," + (parseFloat(lat) - d) + "," +
+                   (parseFloat(lng) + d) + "," + (parseFloat(lat) + d);
+      mapFrame.src =
+        "https://www.openstreetmap.org/export/embed.html" +
+        "?bbox=" + bbox + "&layer=mapnik&marker=" + lat + "," + lng;
+      if (mapLabel) mapLabel.textContent = label;
+      mapPreview.hidden = false;
+    }
+
+    // Package toggle
+    renderOtherPackages();
+    const otherToggle = qs("#otherPlansToggle");
+    const otherPlans = qs("#otherPlans");
+    if (otherToggle && otherPlans) {
+      otherToggle.addEventListener("click", () => {
+        const opening = otherPlans.hidden;
+        otherPlans.hidden = !opening;
+        otherToggle.setAttribute("aria-expanded", String(opening));
+      });
+    }
+
+    wizard.addEventListener("change", (e) => {
+      if (e.target.name === "selectedPackage") {
+        selectedPackage = e.target.value;
+        const hp = qs("#hiddenPackage");
+        if (hp) hp.value = selectedPackage;
+        // Update .is-selected class for :has() fallback (older browsers)
+        qsa(".promo-card", wizard).forEach((c) =>
+          c.classList.toggle("is-selected", c.querySelector("input")?.checked)
+        );
+      }
+    });
+
+    // Mark promo card selected on load
+    const promoCard = qs(".promo-card", wizard);
+    if (promoCard) promoCard.classList.add("is-selected");
+
+    // Form submission (Step 3)
     const form = qs("#bookingForm");
     const status = qs("[data-form-status]");
     if (!form || !status) return;
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      qsa("[aria-invalid]", form).forEach((field) => field.removeAttribute("aria-invalid"));
+      qsa("[aria-invalid]", form).forEach((f) => f.removeAttribute("aria-invalid"));
 
-      const requiredFields = qsa("[required]", form);
-      const invalid = requiredFields.filter((field) => !field.value.trim());
-
+      const invalid = qsa("[required]", form).filter((f) => !f.value.trim());
       if (invalid.length) {
-        invalid.forEach((field) => field.setAttribute("aria-invalid", "true"));
-        status.textContent = "Please complete the required fields so we can confirm your booking.";
+        invalid.forEach((f) => f.setAttribute("aria-invalid", "true"));
+        status.textContent = "Please complete all required fields.";
         invalid[0].focus();
         return;
       }
 
-      const email = qs('input[type="email"]', form);
-      if (email && !email.validity.valid) {
-        email.setAttribute("aria-invalid", "true");
+      const emailField = qs('input[type="email"]', form);
+      if (emailField && !emailField.validity.valid) {
+        emailField.setAttribute("aria-invalid", "true");
         status.textContent = "Please enter a valid email address.";
-        email.focus();
+        emailField.focus();
         return;
       }
 
       const button = qs('button[type="submit"]', form);
       button.disabled = true;
-      button.querySelector("span").textContent = "Sending...";
+      button.querySelector("span").textContent = "Sending…";
       status.textContent = "";
 
       if (config.contact.bookingEndpoint) {
         try {
           const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? "";
-
           const response = await fetch(config.contact.bookingEndpoint, {
             method: "POST",
             headers: { "X-CSRF-TOKEN": csrfToken },
             body: new FormData(form)
           });
-
           if (response.status === 419) {
             status.textContent = "Session expired. Please refresh the page and try again.";
           } else {
             const result = await response.json();
             if (result.success) {
-              status.textContent = "Thanks! We'll contact you shortly to confirm your mobile booking.";
+              status.textContent = "Thanks! We’ll contact you shortly to confirm your mobile booking.";
               form.reset();
+              goToStep(1);
+              selectedAddress = "";
+              if (mapPreview) mapPreview.hidden = true;
             } else {
-              // Handle Laravel validation errors (422) or custom error message
-              const firstError = result.errors
-                ? Object.values(result.errors)[0]?.[0]
-                : null;
+              const firstError = result.errors ? Object.values(result.errors)[0]?.[0] : null;
               status.textContent = firstError || result.message || "Something went wrong. Please call us directly.";
             }
           }
@@ -210,9 +396,12 @@
           status.textContent = "Something went wrong. Please call us directly.";
         }
       } else {
-        await new Promise((resolve) => window.setTimeout(resolve, 650));
-        status.textContent = "Thanks! We'll contact you shortly to confirm your mobile booking.";
+        await new Promise((r) => window.setTimeout(r, 700));
+        status.textContent = "Thanks! We’ll contact you shortly to confirm your mobile booking.";
         form.reset();
+        goToStep(1);
+        selectedAddress = "";
+        if (mapPreview) mapPreview.hidden = true;
       }
 
       button.disabled = false;
@@ -264,7 +453,7 @@
   initNavigation();
   initCountdown();
   initComparisonSliders();
-  initBookingForm();
+  initBookingWizard();
   initContactDetails();
   initRevealAnimations();
 })();

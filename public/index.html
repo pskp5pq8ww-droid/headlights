@@ -60,22 +60,6 @@
           </span>
         </a>
 
-        <nav class="desktop-nav" aria-label="Main navigation">
-          <a href="#home">Home</a>
-          <a href="#how-it-works">How It Works</a>
-          <a href="#before-after">Before &amp; After</a>
-          <a href="#packages">Packages</a>
-          <a href="#faq">FAQ</a>
-          <a href="#contact">Contact</a>
-        </nav>
-
-        <a class="button button-small button-primary header-cta" href="#booking">
-          <span>Book Mobile Service</span>
-          <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path d="M5 12h14m-6-6 6 6-6 6" />
-          </svg>
-        </a>
-
         <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" data-menu-toggle>
           <span></span>
           <span></span>
@@ -410,84 +394,154 @@
 
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
         <div class="container booking-grid">
+
           <div class="section-copy reveal">
             <p class="eyebrow">Book now</p>
             <h2 id="booking-title">Book your mobile headlight restoration</h2>
-            <p>Tell us where your car is located and send photos for a quick quote.</p>
+            <p>Book in under 2 minutes. We come to you anywhere in Brisbane.</p>
             <div class="contact-card" id="contact">
-              <span>Prefer WhatsApp or SMS?</span>
-              <strong>We can confirm your booking by phone.</strong>
+              <span>Prefer to call or WhatsApp?</span>
+              <strong>We'll confirm your booking by phone.</strong>
               <a href="tel:+61400000000" data-phone-link>Call 0400 000 000</a>
             </div>
           </div>
 
-          <form class="booking-form reveal" id="bookingForm" action="form.php" method="post" enctype="multipart/form-data" novalidate>
-            <div class="form-row">
-              <label>
-                Full name
-                <input name="name" autocomplete="name" required />
-              </label>
-              <label>
-                Phone number
-                <input name="phone" type="tel" autocomplete="tel" required />
-              </label>
+          <div class="booking-form reveal" id="bookingWizard">
+
+            <!-- Step indicators -->
+            <div class="form-steps" aria-label="Booking steps">
+              <div class="form-step active" data-step-indicator="1">
+                <span class="step-num">1</span>
+                <span class="step-label">Location</span>
+              </div>
+              <span class="step-line" aria-hidden="true"></span>
+              <div class="form-step" data-step-indicator="2">
+                <span class="step-num">2</span>
+                <span class="step-label">Package</span>
+              </div>
+              <span class="step-line" aria-hidden="true"></span>
+              <div class="form-step" data-step-indicator="3">
+                <span class="step-num">3</span>
+                <span class="step-label">Details</span>
+              </div>
             </div>
-            <div class="form-row">
-              <label>
-                Email
-                <input name="email" type="email" autocomplete="email" required />
-              </label>
-              <label>
-                Suburb / Location
-                <input name="suburb" autocomplete="address-level2" required />
-              </label>
+
+            <!-- ── Step 1: Address + map ── -->
+            <div class="form-panel" data-panel="1">
+              <h3 class="panel-title">Where is your car?</h3>
+              <p class="panel-hint">Start typing to search your address or suburb.</p>
+              <div class="address-wrap">
+                <input
+                  id="addressInput"
+                  class="address-input"
+                  type="text"
+                  placeholder="e.g. 42 Main St, Chermside — or just: Chermside"
+                  autocomplete="off"
+                  aria-label="Address or suburb"
+                  aria-autocomplete="list"
+                  aria-controls="addressSuggestions"
+                />
+                <ul class="address-suggestions" id="addressSuggestions" role="listbox" hidden></ul>
+              </div>
+              <div class="map-preview" id="mapPreview" hidden>
+                <iframe id="mapFrame" title="Selected location" frameborder="0" scrolling="no" loading="lazy" src=""></iframe>
+                <p class="map-label" id="mapLabel"></p>
+              </div>
+              <button class="button button-primary step-next-btn" type="button" data-next="2">
+                <span>Continue</span>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+              </button>
             </div>
-            <label>
-              Vehicle make and model
-              <input name="vehicle" placeholder="Toyota Corolla, Mazda 3..." required />
-            </label>
-            <div class="form-row">
-              <label>
-                Preferred date
-                <input name="date" type="date" required />
+
+            <!-- ── Step 2: Package ── -->
+            <div class="form-panel" data-panel="2" hidden>
+              <h3 class="panel-title">Choose your package</h3>
+              <p class="panel-hint">One vehicle &middot; Mobile service included &middot; No hidden fees</p>
+
+              <label class="promo-card" for="pkg-launch">
+                <input type="radio" id="pkg-launch" name="selectedPackage" value="Launch Offer – Full Restore" checked />
+                <div class="promo-inner">
+                  <span class="promo-badge">Launch Offer</span>
+                  <div class="promo-prices">
+                    <span class="promo-was">Was $200 + tax</span>
+                    <span class="promo-now">$99 <small>all-in</small></span>
+                  </div>
+                  <ul class="promo-list">
+                    <li>Full multi-stage headlight restoration</li>
+                    <li>Crystal clear glossy finish</li>
+                    <li>UV protection coating</li>
+                    <li>Mobile service at your location</li>
+                    <li>No workshop visit needed</li>
+                  </ul>
+                  <span class="promo-select-indicator">&#10003; Selected</span>
+                </div>
               </label>
-              <label>
-                Preferred time window
-                <select name="time" required>
-                  <option value="">Select a time</option>
-                  <option>Morning</option>
-                  <option>Midday</option>
-                  <option>Afternoon</option>
-                  <option>After work</option>
-                </select>
-              </label>
+
+              <button class="other-plans-toggle" type="button" id="otherPlansToggle" aria-expanded="false">
+                See standard packages
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" /></svg>
+              </button>
+              <div class="other-plans" id="otherPlans" hidden>
+                <div data-other-packages></div>
+              </div>
+
+              <div class="step-nav">
+                <button class="button button-secondary step-back-btn" type="button" data-prev="1">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg>
+                  <span>Back</span>
+                </button>
+                <button class="button button-primary step-next-btn" type="button" data-next="3">
+                  <span>Continue</span>
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+                </button>
+              </div>
             </div>
-            <label>
-              Package selection
-              <select name="package" required>
-                <option value="">Select a package</option>
-                <option>Basic Restore</option>
-                <option>Crystal Restore</option>
-                <option>Premium Protection Restore</option>
-                <option>Not sure / send me a quote</option>
-              </select>
-            </label>
-            <label>
-              Upload photos of headlights
-              <input name="photos" type="file" accept="image/*" multiple />
-            </label>
-            <label>
-              Message / notes
-              <textarea name="message" rows="4" placeholder="Tell us about access, parking, or headlight condition."></textarea>
-            </label>
-            <button class="button button-primary form-submit" type="submit">
-              <span>Request Booking</span>
-              <svg aria-hidden="true" viewBox="0 0 24 24">
-                <path d="M5 12h14m-6-6 6 6-6 6" />
-              </svg>
-            </button>
-            <p class="form-status" role="status" aria-live="polite" data-form-status></p>
-          </form>
+
+            <!-- ── Step 3: Details + submit ── -->
+            <div class="form-panel" data-panel="3" hidden>
+              <h3 class="panel-title">Your details</h3>
+              <form id="bookingForm" novalidate>
+                <input type="hidden" name="suburb" id="hiddenSuburb" />
+                <input type="hidden" name="package" id="hiddenPackage" value="Launch Offer – Full Restore" />
+                <div class="form-row">
+                  <label>Full name<input name="name" autocomplete="name" required /></label>
+                  <label>Phone<input name="phone" type="tel" autocomplete="tel" required /></label>
+                </div>
+                <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+                <label>Vehicle<input name="vehicle" placeholder="Toyota Corolla, Mazda 3&hellip;" required /></label>
+                <div class="form-row">
+                  <label>Preferred date<input name="date" type="date" required /></label>
+                  <label>Time window
+                    <select name="time" required>
+                      <option value="">Select a time</option>
+                      <option>Morning</option>
+                      <option>Midday</option>
+                      <option>Afternoon</option>
+                      <option>After work</option>
+                    </select>
+                  </label>
+                </div>
+                <label class="label-optional">Headlight photos <small>(optional)</small>
+                  <input name="photos[]" type="file" accept="image/*" multiple />
+                </label>
+                <label class="label-optional">Notes <small>(optional)</small>
+                  <textarea name="message" rows="3" placeholder="Access, parking, headlight condition&hellip;"></textarea>
+                </label>
+                <div class="step-nav">
+                  <button class="button button-secondary step-back-btn" type="button" data-prev="2">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg>
+                    <span>Back</span>
+                  </button>
+                  <button class="button button-primary form-submit" type="submit">
+                    <span>Request Booking</span>
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+                  </button>
+                </div>
+                <p class="form-status" role="status" aria-live="polite" data-form-status></p>
+              </form>
+            </div>
+
+          </div><!-- /bookingWizard -->
         </div>
       </section>
 

@@ -1502,3 +1502,432 @@ select[aria-invalid="true"] {
     min-height: 300px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HAMBURGER MENU  — shown at all viewport widths
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* Kill desktop nav and header CTA completely */
+.desktop-nav,
+.header-cta { display: none !important; }
+
+/* Show toggle for every viewport */
+.menu-toggle {
+  display: grid !important;
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  place-items: center;
+  background: transparent;
+  border: none;
+  padding: 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 180ms ease;
+}
+
+.menu-toggle:hover,
+.menu-toggle:focus-visible { background: rgba(244, 252, 255, 0.09); outline: none; }
+
+.menu-toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: rgba(244, 252, 255, 0.88);
+  border-radius: 2px;
+  transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 240ms ease,
+              width 240ms ease;
+}
+
+.menu-toggle span + span { margin-top: 5px; }
+
+/* Animate to × when menu is open */
+body.menu-open .menu-toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+body.menu-open .menu-toggle span:nth-child(2) { opacity: 0; width: 0; }
+body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Ensure mobile nav works at ALL sizes */
+.mobile-nav {
+  display: grid !important;
+  position: fixed;
+  inset: var(--header-height) 0 auto;
+  z-index: 40;
+  gap: 2px;
+  padding: 18px 20px 26px;
+  border-bottom: 1px solid rgba(168, 243, 255, 0.16);
+  background: rgba(3, 7, 11, 0.97);
+  backdrop-filter: blur(18px);
+  transform: translateY(-115%);
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.mobile-nav.is-open {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MULTI-STEP BOOKING WIZARD
+═══════════════════════════════════════════════════════════════════════════ */
+
+#bookingWizard {
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 0 12px 34px rgba(7, 24, 39, 0.06);
+}
+
+/* ── Step indicators ── */
+.form-steps {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  gap: 0;
+}
+
+.form-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.step-num {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--muted);
+  background: var(--ice);
+  border: 2px solid var(--line);
+  transition: background 220ms ease, color 220ms ease, border-color 220ms ease;
+  font-family: Sora, system-ui, sans-serif;
+}
+
+.step-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: color 220ms ease;
+}
+
+.form-step.active .step-num {
+  background: var(--cyan);
+  color: var(--black);
+  border-color: var(--cyan);
+}
+
+.form-step.active .step-label { color: var(--ink); }
+
+.form-step.completed .step-num {
+  background: rgba(0, 217, 255, 0.12);
+  color: var(--navy);
+  border-color: rgba(0, 217, 255, 0.38);
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--line);
+  margin: 0 10px;
+  border-radius: 2px;
+}
+
+/* ── Panels ── */
+.form-panel[hidden] { display: none; }
+
+.panel-title {
+  font-family: Sora, system-ui, sans-serif;
+  font-size: 19px;
+  margin: 0 0 5px;
+  color: var(--navy);
+}
+
+.panel-hint {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ── Address autocomplete ── */
+.address-wrap { position: relative; margin-bottom: 14px; }
+
+.address-input {
+  width: 100%;
+  min-height: 52px;
+  border: 1.5px solid rgba(143, 163, 178, 0.42);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.address-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
+}
+
+.address-input[aria-invalid="true"] { border-color: #d74747; }
+
+.address-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  list-style: none;
+  padding: 4px 0;
+  margin: 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 32px rgba(3, 7, 11, 0.14);
+  overflow: hidden;
+}
+
+.address-suggestions[hidden] { display: none; }
+
+.suggestion-item {
+  padding: 11px 16px;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  line-height: 1.45;
+  transition: background 100ms ease;
+}
+
+.suggestion-item:hover,
+.suggestion-item:focus { background: var(--ice); outline: none; }
+
+/* ── Map preview ── */
+.map-preview {
+  margin-bottom: 18px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.map-preview[hidden] { display: none; }
+
+.map-preview iframe { width: 100%; height: 210px; display: block; }
+
+.map-label {
+  margin: 0;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--ice);
+  border-top: 1px solid var(--line);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Step navigation row ── */
+.step-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* If only one button (first step), push it to the right */
+.step-nav .button-primary:only-child { margin-left: auto; }
+
+/* ── Optional label styling ── */
+.label-optional small {
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PROMO CARD  — $99 Launch Offer
+═══════════════════════════════════════════════════════════════════════════ */
+
+.promo-card {
+  display: block;
+  margin-bottom: 14px;
+  border: 2px solid rgba(0, 217, 255, 0.24);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+  position: relative;
+}
+
+.promo-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+/* Use JS class .is-selected as :has() fallback */
+.promo-card:has(input:checked),
+.promo-card.is-selected {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.16), var(--glow);
+}
+
+.promo-inner {
+  background: linear-gradient(155deg, var(--navy) 0%, #0d2539 100%);
+  padding: 22px 22px 18px;
+  color: #fff;
+}
+
+.promo-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  background: var(--cyan);
+  color: var(--black);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+}
+
+.promo-prices { margin-bottom: 14px; }
+
+.promo-was {
+  display: block;
+  font-size: 14px;
+  color: rgba(244, 252, 255, 0.5);
+  text-decoration: line-through;
+  margin-bottom: 2px;
+}
+
+.promo-now {
+  font-family: Sora, Montserrat, system-ui, sans-serif;
+  font-size: 52px;
+  font-weight: 800;
+  color: var(--cyan);
+  line-height: 1;
+}
+
+.promo-now small {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(244, 252, 255, 0.6);
+  margin-left: 6px;
+}
+
+.promo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.promo-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: rgba(244, 252, 255, 0.8);
+}
+
+.promo-list li::before {
+  content: "\2713";
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--success);
+  border: 1px solid rgba(52, 201, 143, 0.38);
+  background: rgba(52, 201, 143, 0.1);
+  margin-top: 1px;
+}
+
+.promo-select-indicator {
+  display: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cyan);
+}
+
+.promo-card:has(input:checked) .promo-select-indicator,
+.promo-card.is-selected .promo-select-indicator { display: block; }
+
+/* ── See other packages ── */
+.other-plans-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 0;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 160ms ease;
+  font-family: inherit;
+}
+
+.other-plans-toggle:hover { color: var(--navy); }
+
+.other-plans-toggle svg {
+  transition: transform 220ms ease;
+  flex-shrink: 0;
+}
+
+.other-plans-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+.other-plans[hidden] { display: none; }
+
+.other-plans { padding-bottom: 4px; }
+
+[data-other-packages] { display: grid; gap: 8px; }
+
+/* Mini package cards in "other plans" */
+.mini-pkg-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.mini-pkg-card:has(input:checked) {
+  border-color: var(--cyan);
+  background: rgba(0, 217, 255, 0.04);
+}
+
+.mini-pkg-card input[type="radio"] { accent-color: var(--cyan); flex-shrink: 0; }
+
+.mini-pkg-name { font-weight: 800; color: var(--navy); font-size: 14px; }
+.mini-pkg-price { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+/* ── Responsive tweaks ── */
+@media (max-width: 760px) {
+  #bookingWizard { padding: 20px 16px; }
+  .promo-now { font-size: 44px; }
+  .step-label { display: none; }
+}
