@@ -4,6 +4,14 @@
 
   const pad = (value) => String(value).padStart(2, "0");
 
+  function setPart(element, value) {
+    if (!element) return;
+    const next = pad(value);
+    if (element.textContent === next) return;
+    element.textContent = next;
+    document.dispatchEvent(new CustomEvent("countdown:tick", { detail: { element } }));
+  }
+
   countdowns.forEach((countdown) => {
     const target = new Date(countdown.dataset.target);
     const daysEl = countdown.querySelector("[data-days]");
@@ -21,10 +29,10 @@
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
 
-      if (daysEl) daysEl.textContent = pad(days);
-      if (hoursEl) hoursEl.textContent = pad(hours);
-      if (minutesEl) minutesEl.textContent = pad(minutes);
-      if (secondsEl) secondsEl.textContent = pad(seconds);
+      setPart(daysEl, days);
+      setPart(hoursEl, hours);
+      setPart(minutesEl, minutes);
+      setPart(secondsEl, seconds);
     }
 
     tick();

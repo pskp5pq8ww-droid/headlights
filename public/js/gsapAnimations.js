@@ -4,8 +4,9 @@
   const ISOTYPE_SRC = "/assets/shining-headlights-isotype.svg";
   const STAR_PATH = "M50 2 58.2 41.8 98 50 58.2 58.2 50 98 41.8 58.2 2 50 41.8 41.8 50 2Z";
   const SELECTORS = {
-    cta: ".button-primary, .button-secondary, .mobile-sticky-cta, .promo-cta",
-    reveal: ".offer-card, .promo-hero-card, .comparison-card, .booking-form, .final-panel, .final-band"
+    cta: ".button-primary, .button-secondary, .mobile-sticky-cta, .promo-cta, .eofy-main-cta",
+    reveal:
+      ".offer-card, .promo-hero-card, .comparison-card, .booking-form, .final-panel, .final-band, .landing-feature-card, .landing-review-card, .premium-comparison, .final-eofy-panel"
   };
 
   const qs = (selector, parent = document) => parent.querySelector(selector);
@@ -280,6 +281,80 @@
     qsa(SELECTORS.reveal).forEach((element) => observer.observe(element));
   }
 
+  function initLandingHero() {
+    const gsap = getGsap();
+    const hero = qs(".eofy-landing-hero");
+    if (!hero || !gsap || reduceMotion()) return;
+
+    const headlineItems = qsa(".sale-pill, .eofy-landing-hero h1, .hero-direct, .eofy-countdown-card, .eofy-price, .eofy-main-cta", hero);
+    gsap.fromTo(
+      headlineItems,
+      { autoAlpha: 0, y: 24 },
+      { autoAlpha: 1, y: 0, duration: 0.78, stagger: 0.08, ease: "power3.out", overwrite: "auto" }
+    );
+
+    const product = qs(".hero-product-light", hero);
+    if (product) {
+      gsap.fromTo(product, { autoAlpha: 0, y: 24, scale: 0.98 }, { autoAlpha: 0.72, y: 0, scale: 1, duration: 1.1, ease: "power3.out" });
+
+      const yTo = gsap.quickTo(product, "y", { duration: 0.55, ease: "power3.out" });
+      window.addEventListener(
+        "scroll",
+        () => {
+          if (window.scrollY < window.innerHeight * 1.4) yTo(window.scrollY * 0.045);
+        },
+        { passive: true }
+      );
+    }
+  }
+
+  function initLandingCountdownMotion() {
+    const gsap = getGsap();
+    if (!gsap || reduceMotion()) return;
+
+    qsa(".eofy-countdown-card").forEach((card) => {
+      gsap.to(card, {
+        scale: 1.012,
+        duration: 2.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        transformOrigin: "50% 50%"
+      });
+    });
+
+    document.addEventListener("countdown:tick", (event) => {
+      const el = event.detail?.element;
+      if (!el) return;
+      el.classList.add("is-ticking");
+      gsap.fromTo(el, { y: -8, autoAlpha: 0.55 }, { y: 0, autoAlpha: 1, duration: 0.34, ease: "power2.out", overwrite: "auto" });
+      gsap.delayedCall(0.42, () => el.classList.remove("is-ticking"));
+    });
+  }
+
+  function initMagneticButtons() {
+    const gsap = getGsap();
+    if (!gsap || reduceMotion()) return;
+
+    qsa(".eofy-main-cta").forEach((button) => {
+      if (button.dataset.magneticReady) return;
+      button.dataset.magneticReady = "true";
+      const xTo = gsap.quickTo(button, "x", { duration: 0.32, ease: "power3.out" });
+      const yTo = gsap.quickTo(button, "y", { duration: 0.32, ease: "power3.out" });
+
+      button.addEventListener("pointermove", (event) => {
+        const rect = button.getBoundingClientRect();
+        xTo((event.clientX - rect.left - rect.width / 2) * 0.14);
+        yTo((event.clientY - rect.top - rect.height / 2) * 0.18);
+      });
+
+      button.addEventListener("pointerleave", () => {
+        xTo(0);
+        yTo(0);
+      });
+    });
+  }
+
   function initCountdownPulse() {
     const gsap = getGsap();
     if (!gsap || reduceMotion()) return;
@@ -305,6 +380,9 @@
     initCTAFlash();
     initSectionReveals();
     initCountdownPulse();
+    initLandingHero();
+    initLandingCountdownMotion();
+    initMagneticButtons();
   }
 
   window.ShiningGSAP = {

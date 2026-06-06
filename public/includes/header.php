@@ -4,6 +4,7 @@ $current      = $current      ?? '';
 $page_title   = $page_title   ?? ($SITE['name'] . ' | ' . $SITE['tagline']);
 $page_desc    = $page_desc    ?? 'Mobile headlight restoration in Brisbane. We come to you — home, workplace or driveway.';
 $page_maps    = $page_maps    ?? false;
+$body_class   = trim((string)($body_class ?? ''));
 ?><!doctype html>
 <html lang="en-AU">
   <head>
@@ -21,7 +22,7 @@ $page_maps    = $page_maps    ?? false;
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="<?= asset('css/styles.css') ?>" />
   </head>
-  <body>
+  <body<?= $body_class !== '' ? ' class="' . htmlspecialchars($body_class, ENT_QUOTES) . '"' : '' ?>>
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header" data-header>
@@ -31,7 +32,7 @@ $page_maps    = $page_maps    ?? false;
             <img src="<?= asset('assets/shining-headlights-isotype.svg') ?>" alt="" width="42" height="50" />
           </span>
           <span class="brand-wordmark">
-            <strong><?= htmlspecialchars($SITE['name']) ?></strong>
+            <strong>SHINING</strong>
             <small><?= htmlspecialchars($SITE['tagline']) ?></small>
           </span>
         </a>

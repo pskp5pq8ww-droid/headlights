@@ -21,7 +21,7 @@ const TYPES = {
 http
   .createServer((req, res) => {
     let urlPath = decodeURIComponent(req.url.split("?")[0]);
-    if (urlPath === "/") urlPath = "/index.html";
+    if (urlPath === "/") urlPath = "/index.php";
 
     const filePath = path.join(ROOT, urlPath);
     if (!filePath.startsWith(ROOT)) {
@@ -32,13 +32,13 @@ http
 
     fs.readFile(filePath, (err, data) => {
       if (err) {
-        fs.readFile(path.join(ROOT, "index.html"), (fallbackErr, fallbackData) => {
+        fs.readFile(path.join(ROOT, "index.php"), (fallbackErr, fallbackData) => {
           if (fallbackErr) {
             res.writeHead(404);
             res.end("Not found");
             return;
           }
-          res.writeHead(200, { "Content-Type": TYPES[".html"] });
+          res.writeHead(200, { "Content-Type": TYPES[".php"] });
           res.end(fallbackData);
         });
         return;
