@@ -1,4 +1,0 @@
-# Block direct access to everything except index.php
-<FilesMatch "^(?!index\.php$)">
-    Deny from all
-</FilesMatch>

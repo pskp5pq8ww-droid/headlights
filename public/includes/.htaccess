@@ -1,0 +1,2 @@
+# Includes are PHP partials — never request them directly.
+Deny from all

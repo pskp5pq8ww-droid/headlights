@@ -4,7 +4,7 @@ window.siteConfig = {
     phoneDisplay: "0400 000 000",
     phoneHref: "tel:+61400000000",
     email: "hello@shiningheadlights.com.au",
-    bookingEndpoint: "form.php",
+    bookingEndpoint: "/form",
     instagram: "#",
     facebook: "#"
   },

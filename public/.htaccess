@@ -1,32 +1,42 @@
-# Hostinger / Apache static site entry point
+# Hostinger / Apache entry point
 DirectoryIndex index.php index.html
-
-# Disable directory listing
 Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # /index or /index.php → /
+  RewriteRule ^index(\.php)?$ / [L,R=301]
+
+  # Redirect external requests that include .php to the clean URL
+  RewriteCond %{THE_REQUEST} \s/+([^?\s]+)\.php[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+
+  # Serve /name with name.php when it exists (clean URLs)
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}\.php -f
+  RewriteRule ^(.+?)/?$ $1.php [L]
+</IfModule>
 
 # GZIP compression
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript image/svg+xml
+  AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript image/svg+xml
 </IfModule>
 
 # Browser caching for static assets
 <IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType text/css "access plus 1 year"
-    ExpiresByType application/javascript "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/webp "access plus 1 year"
-    ExpiresByType image/svg+xml "access plus 1 year"
-    ExpiresByType text/html "access plus 1 hour"
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/html "access plus 1 hour"
 </IfModule>
 
 # Security headers
 <IfModule mod_headers.c>
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "SAMEORIGIN"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
-
-# Fallback: serve through index.php so runtime config can still be injected
-ErrorDocument 404 /index.php

@@ -96,6 +96,8 @@ $safeEmail = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
 // ── Save booking to /Storagehighlights/bookings/ ──────────────────────────────
 $bookingData = [
     'received_at'   => date('Y-m-d H:i:s'),
+    'created_at'    => date('Y-m-d H:i:s'),
+    'status'        => 'Pending',
     'name'          => $name,
     'phone'         => $phone,
     'email'         => $safeEmail,
