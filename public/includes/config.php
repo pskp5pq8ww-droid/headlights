@@ -138,7 +138,7 @@ function asset(string $path): string {
     return '/' . ltrim($path, '/') . '?v=' . ASSET_VER;
 }
 
-// Google Maps key loader. Keep real keys in Hostinger env vars, private env files, or _private/maps.php.
+// Google Maps key loader. Keep real keys outside public_html, ideally in private/maps.php.
 function maps_api_key(): string {
     $envKey = getenv('GOOGLE_MAPS_API_KEY') ?: getenv('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY') ?: '';
     if ($envKey !== '') return trim($envKey);
@@ -161,7 +161,7 @@ function maps_api_key(): string {
 }
 
 /**
- * Search paths for _private/maps.php — ordered from most-likely to least-likely.
+ * Search paths for private/maps.php — ordered from most-likely to least-likely.
  *
  * Hostinger shared-hosting layout (typical):
  *   /home/u[id]/                         ← user home  (dirname(__DIR__, 3) from includes/)
@@ -169,17 +169,22 @@ function maps_api_key(): string {
  *       orangered-rhinoceros-*.hostingersite.com/  ← DOCUMENT_ROOT = web root
  *         includes/                      ← __DIR__
  *
- * The _private/ folder must sit at the user-home level or one above the web root.
+ * The private/ folder must sit outside public_html, normally beside it.
+ * _private/maps.php remains supported as a legacy fallback for existing installs.
  */
 function maps_php_candidates(): array {
     $docRoot  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__), '/');
     $userHome = dirname(__DIR__, 3); // includes → web-root → htdocs → user-home
 
     return array_values(array_unique([
-        $userHome          . '/_private/maps.php', // Hostinger user home (/home/u.../):      PRIMARY
-        dirname($docRoot)  . '/_private/maps.php', // one above web root (/home/u.../htdocs): FALLBACK
-        dirname(__DIR__, 2). '/_private/maps.php', // two levels above includes/:             LOCAL DEV
-        dirname(__DIR__)   . '/_private/maps.php', // one level above includes/:              LAST RESORT
+        dirname($docRoot)  . '/private/maps.php',  // same level as public_html/web root:       PRIMARY
+        $userHome          . '/private/maps.php',  // Hostinger user home fallback
+        dirname(__DIR__, 2). '/private/maps.php',  // local/project fallback
+        dirname(__DIR__)   . '/private/maps.php',  // last local fallback
+        $userHome          . '/_private/maps.php', // legacy Hostinger user home fallback
+        dirname($docRoot)  . '/_private/maps.php', // legacy one-above-web-root fallback
+        dirname(__DIR__, 2). '/_private/maps.php', // legacy local/project fallback
+        dirname(__DIR__)   . '/_private/maps.php', // legacy last local fallback
     ]));
 }
 

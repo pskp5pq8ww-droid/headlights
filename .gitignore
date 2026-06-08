@@ -3,6 +3,8 @@
 /public/storage
 /public/hot
 /storage/*.key
+/private/maps.php
+/private/admin.php
 /_private/maps.php
 /_private/admin.php
 /env

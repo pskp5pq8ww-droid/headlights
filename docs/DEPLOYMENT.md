@@ -66,14 +66,33 @@ Places API
 Geocoding API
 ```
 
-Configure one of these env vars in Hostinger:
+Preferred option: create this private PHP config file outside `public_html`, at the same level as `public_html`:
+
+```text
+private/maps.php
+```
+
+Example:
+
+```php
+<?php
+return [
+  'google_maps_api_key' => 'your-browser-key',
+];
+```
+
+Do not put this file inside `public_html` and do not commit it to GitHub.
+
+Environment variable fallback:
 
 ```text
 GOOGLE_MAPS_API_KEY=your-browser-key
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-browser-key
 ```
 
-Or create `_private/maps.php` outside `public_html`.
+`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is visible to browser JavaScript, so use it only as a fallback for frontend-style deployments. This PHP deployment should prefer `private/maps.php` or `GOOGLE_MAPS_API_KEY`.
+
+Legacy fallback: `_private/maps.php` outside `public_html` is still supported.
 
 Restrict the key by website referrer before going live.
 
@@ -115,7 +134,7 @@ GitHub secrets needed:
 - `FTP_USERNAME`
 - `FTP_PASSWORD`
 
-When using FTP deploy, manually create `Storagehighlights/` and `_private/admin.php` one level above the public document root, or use Hostinger File Manager to create them outside `public_html`.
+When using FTP deploy, manually create `Storagehighlights/`, `private/maps.php` and `_private/admin.php` one level above the public document root, or use Hostinger File Manager to create them outside `public_html`.
 
 ## Manual Upload
 
@@ -125,6 +144,7 @@ Also create these outside `public_html`:
 
 ```text
 Storagehighlights/
+private/maps.php
 _private/admin.php
 ```
 

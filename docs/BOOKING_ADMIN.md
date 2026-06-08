@@ -63,7 +63,24 @@ Admin credentials must be configured before login works.
 
 ## Google Maps
 
-Configure a restricted browser key through Hostinger env vars or `_private/maps.php`.
+Configure a restricted browser key through `private/maps.php` outside `public_html`.
+
+Recommended private file path:
+
+```text
+private/maps.php
+```
+
+Example:
+
+```php
+<?php
+return [
+  'google_maps_api_key' => 'your-browser-key',
+];
+```
+
+The app reads this file from the private server side and then prints the Google Maps script only when the booking page needs it. Do not put the real key in `public_html`.
 
 Supported env var names:
 
@@ -71,6 +88,8 @@ Supported env var names:
 GOOGLE_MAPS_API_KEY
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 ```
+
+`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is visible in the browser and should not be the only server-side source for this PHP deployment. `_private/maps.php` remains supported as a legacy fallback.
 
 Required Google APIs:
 
