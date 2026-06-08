@@ -53,6 +53,10 @@ try {
         'phone' => booking_post_value($fieldAliases['phone']),
         'email' => booking_post_value($fieldAliases['email']),
         'addressOrSuburb' => booking_post_value($fieldAliases['customer_address']),
+        'formattedAddress' => $_POST['formatted_address'] ?? '',
+        'googlePlaceId' => $_POST['google_place_id'] ?? '',
+        'addressLat' => $_POST['address_lat'] ?? '',
+        'addressLng' => $_POST['address_lng'] ?? '',
         'vehicleMakeModel' => booking_post_value($fieldAliases['vehicle']),
         'preferredDate' => booking_post_value($fieldAliases['date']),
         'preferredTimeWindow' => booking_post_value($fieldAliases['time']),
@@ -142,6 +146,8 @@ function send_booking_email(array $booking): void {
     $body .= "Phone: " . ($booking['phone'] ?? '') . "\n";
     $body .= "Email: " . ($booking['email'] ?? '') . "\n";
     $body .= "Location: " . ($booking['addressOrSuburb'] ?? '') . "\n";
+    if (!empty($booking['formattedAddress'])) $body .= "Google Address: " . $booking['formattedAddress'] . "\n";
+    if (!empty($booking['addressLat']) && !empty($booking['addressLng'])) $body .= "Map: https://www.google.com/maps?q=" . $booking['addressLat'] . "," . $booking['addressLng'] . "\n";
     $body .= "Vehicle: " . ($booking['vehicleMakeModel'] ?? '') . "\n";
     $body .= "Date: " . ($booking['preferredDate'] ?? '') . "\n";
     $body .= "Time: " . ($booking['preferredTimeWindow'] ?? '') . "\n";

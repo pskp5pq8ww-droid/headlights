@@ -47,6 +47,10 @@ $page_scripts = $page_scripts ?? [];
 <?php if (in_array('booking', $page_scripts, true)): ?>
     <script src="<?= asset('js/config.js') ?>"></script>
     <script src="<?= asset('js/booking.js') ?>"></script>
+<?php $mapsKey = !empty($page_maps) ? maps_api_key() : ''; ?>
+<?php if ($mapsKey !== ''): ?>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=<?= rawurlencode($mapsKey) ?>&libraries=places&callback=initGoogleBookingAutocomplete"></script>
+<?php endif; ?>
 <?php endif; ?>
   </body>
 </html>

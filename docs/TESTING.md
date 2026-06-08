@@ -7,8 +7,9 @@
 - Countdown ticks.
 - Package cards render.
 - FAQ accordion opens.
-- Booking wizard step 1 requires a manually typed service address or suburb.
-- No Google Maps script, Google Places autocomplete, or map marker is required for booking.
+- Booking wizard step 1 suggests addresses through Google Places when the Maps key is configured.
+- Selecting or typing an address shows the map preview when Google returns a result.
+- Booking still works with manual address entry if Google Maps fails to load.
 - Booking form validates required fields.
 - Booking form submits to `form.php`.
 - Booking JSON files are created in `Storagehighlights/bookings`.

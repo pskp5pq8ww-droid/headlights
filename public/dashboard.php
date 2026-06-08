@@ -276,6 +276,10 @@ function package_options(string $current = ''): string {
               <p><a href="tel:<?= h($b['phone']) ?>"><?= h($b['phone']) ?></a></p>
               <p><a href="mailto:<?= h($b['email']) ?>"><?= h($b['email']) ?></a></p>
               <p><?= h($b['addressOrSuburb']) ?></p>
+              <?php if (!empty($b['formattedAddress'])): ?><p><?= h($b['formattedAddress']) ?></p><?php endif; ?>
+              <?php if (!empty($b['addressLat']) && !empty($b['addressLng'])): ?>
+                <p><a href="https://www.google.com/maps?q=<?= h($b['addressLat']) ?>,<?= h($b['addressLng']) ?>" target="_blank" rel="noopener">Open in Google Maps</a></p>
+              <?php endif; ?>
             </div>
             <div class="detail-card">
               <h3>Booking</h3>

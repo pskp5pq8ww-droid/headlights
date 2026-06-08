@@ -131,5 +131,109 @@
     });
   }
 
+  function initGoogleBookingAutocomplete() {
+    const input = qs("#addressInput");
+    const mapEl = qs("#bookingMap");
+    const mapWrap = qs("#bookingMapPreview");
+    const mapLabel = qs("#bookingMapLabel");
+    const placeIdInput = qs("#googlePlaceId");
+    const formattedInput = qs("#formattedAddress");
+    const latInput = qs("#addressLat");
+    const lngInput = qs("#addressLng");
+    if (!input || !window.google?.maps?.places) return;
+
+    const brisbane = { lat: -27.4698, lng: 153.0251 };
+    let map = null;
+    let marker = null;
+    let geocodeTimer = null;
+
+    function ensureMap(position, label) {
+      if (!mapEl || !mapWrap) return;
+      mapWrap.hidden = false;
+      if (!map) {
+        map = new google.maps.Map(mapEl, {
+          center: position,
+          zoom: 15,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false
+        });
+        marker = new google.maps.Marker({ map, position });
+      } else {
+        map.setCenter(position);
+        map.setZoom(15);
+        marker?.setPosition(position);
+      }
+      if (mapLabel) mapLabel.textContent = label || input.value;
+    }
+
+    function setLocation({ placeId = "", address = "", lat = "", lng = "" }) {
+      if (address) input.value = address;
+      if (placeIdInput) placeIdInput.value = placeId;
+      if (formattedInput) formattedInput.value = address || input.value;
+      if (latInput) latInput.value = lat;
+      if (lngInput) lngInput.value = lng;
+      if (lat !== "" && lng !== "") ensureMap({ lat: Number(lat), lng: Number(lng) }, address || input.value);
+    }
+
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+      componentRestrictions: { country: "au" },
+      fields: ["place_id", "formatted_address", "geometry", "name"],
+      bounds: new google.maps.LatLngBounds(
+        new google.maps.LatLng(-28.45, 152.55),
+        new google.maps.LatLng(-26.75, 153.65)
+      ),
+      strictBounds: false
+    });
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      const location = place.geometry?.location;
+      if (!location) return;
+      setLocation({
+        placeId: place.place_id || "",
+        address: place.formatted_address || place.name || input.value,
+        lat: location.lat().toFixed(7),
+        lng: location.lng().toFixed(7)
+      });
+    });
+
+    const geocoder = new google.maps.Geocoder();
+    input.addEventListener("input", () => {
+      if (placeIdInput) placeIdInput.value = "";
+      if (formattedInput) formattedInput.value = "";
+      if (latInput) latInput.value = "";
+      if (lngInput) lngInput.value = "";
+      window.clearTimeout(geocodeTimer);
+      const query = input.value.trim();
+      if (query.length < 4) return;
+      geocodeTimer = window.setTimeout(() => {
+        geocoder.geocode({
+          address: query,
+          componentRestrictions: { country: "AU" },
+          bounds: {
+            north: -26.75,
+            south: -28.45,
+            east: 153.65,
+            west: 152.55
+          }
+        }, (results, status) => {
+          if (status !== "OK" || !results?.[0]) return;
+          const result = results[0];
+          const location = result.geometry.location;
+          setLocation({
+            placeId: result.place_id || "",
+            address: result.formatted_address || query,
+            lat: location.lat().toFixed(7),
+            lng: location.lng().toFixed(7)
+          });
+        });
+      }, 900);
+    });
+
+    ensureMap(brisbane, "Brisbane, Queensland");
+  }
+
+  window.initGoogleBookingAutocomplete = initGoogleBookingAutocomplete;
   initBookingWizard();
 })();

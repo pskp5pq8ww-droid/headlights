@@ -2,7 +2,7 @@
 
 ## Scope
 
-The booking flow uses manual address entry. Google address autocomplete and map selection are intentionally disabled.
+The booking flow supports Google address autocomplete and map preview when a Maps key is configured. Manual address entry still works as a fallback.
 
 The system stores bookings in JSON files instead of a database, so it is compatible with a simple Hostinger PHP/static deployment.
 
@@ -13,6 +13,7 @@ The system stores bookings in JSON files instead of a database, so it is compati
 - Public API endpoint: `/api/bookings`
 - Required fields: name, phone, email, service address or suburb, vehicle, preferred date, preferred time window and package.
 - Optional fields: headlight condition, vehicle location type, number of headlights, preferred contact method, message and photos.
+- Google fields stored when available: place ID, formatted address, latitude and longitude.
 
 Successful submissions create one file per booking:
 
@@ -59,6 +60,27 @@ Keep this folder outside `public_html`.
 - Metrics API: `/api/admin/metrics`
 
 Admin credentials must be configured before login works.
+
+## Google Maps
+
+Configure a restricted browser key through Hostinger env vars or `_private/maps.php`.
+
+Supported env var names:
+
+```text
+GOOGLE_MAPS_API_KEY
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+```
+
+Required Google APIs:
+
+```text
+Maps JavaScript API
+Places API
+Geocoding API
+```
+
+Restrict the key to your production domain in Google Cloud Console.
 
 Environment variable option:
 

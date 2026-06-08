@@ -4,6 +4,7 @@ $current      = 'book';
 $page_title   = 'Book Now | ' . $SITE['name'];
 $page_desc    = 'Book your mobile headlight restoration in Brisbane. Tell us where your car is located and we will confirm your booking.';
 $page_scripts = ['booking', 'countdown'];
+$page_maps    = true;
 include __DIR__ . '/includes/header.php';
 ?>
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
@@ -40,11 +41,19 @@ include __DIR__ . '/includes/header.php';
             <form id="bookingForm" action="/form" method="post" enctype="multipart/form-data" novalidate>
               <div class="form-panel" data-panel="1">
                 <h3 class="panel-title">Where is your car?</h3>
-                <p class="panel-hint">Enter the suburb or service address where the car will be available.</p>
+                <p class="panel-hint">Start typing your suburb or address and choose the closest Google suggestion.</p>
                 <label>Service address or suburb
                   <input id="addressInput" name="customer_address" class="address-input" type="text"
                          placeholder="Example: Newstead, Brisbane or full address if ready" autocomplete="street-address" required />
                 </label>
+                <input type="hidden" name="google_place_id" id="googlePlaceId" />
+                <input type="hidden" name="formatted_address" id="formattedAddress" />
+                <input type="hidden" name="address_lat" id="addressLat" />
+                <input type="hidden" name="address_lng" id="addressLng" />
+                <div class="map-preview" id="bookingMapPreview" hidden>
+                  <div id="bookingMap" class="booking-map" aria-label="Selected service location map"></div>
+                  <p class="map-label" id="bookingMapLabel"></p>
+                </div>
                 <label>Vehicle location type
                   <select name="vehicle_location_type">
                     <option>Home</option>

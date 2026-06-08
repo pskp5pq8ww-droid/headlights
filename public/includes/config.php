@@ -5,7 +5,7 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '8';
+const ASSET_VER = '9';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [
@@ -92,4 +92,18 @@ $NAV = [
 // Helper: versioned asset URL
 function asset(string $path): string {
     return '/' . ltrim($path, '/') . '?v=' . ASSET_VER;
+}
+
+// Google Maps key loader. Keep real keys in Hostinger env vars or _private/maps.php.
+function maps_api_key(): string {
+    $envKey = getenv('GOOGLE_MAPS_API_KEY') ?: getenv('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY') ?: '';
+    if ($envKey !== '') return trim($envKey);
+
+    $file = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/_private/maps.php';
+    if (is_file($file)) {
+        $config = include $file;
+        if (is_array($config)) return trim((string)($config['google_maps_api_key'] ?? ''));
+    }
+
+    return '';
 }

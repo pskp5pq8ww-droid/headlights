@@ -54,6 +54,29 @@ BOOKING_STORAGE_PATH=/home/YOUR_USER/Storagehighlights
 
 Keep this folder outside `public_html`.
 
+## Google Maps Autocomplete
+
+The booking page can load Google Maps autocomplete and a map preview.
+
+Required Google Cloud APIs:
+
+```text
+Maps JavaScript API
+Places API
+Geocoding API
+```
+
+Configure one of these env vars in Hostinger:
+
+```text
+GOOGLE_MAPS_API_KEY=your-browser-key
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-browser-key
+```
+
+Or create `_private/maps.php` outside `public_html`.
+
+Restrict the key by website referrer before going live.
+
 ## Admin Credentials
 
 Preferred option: configure environment variables in Hostinger:

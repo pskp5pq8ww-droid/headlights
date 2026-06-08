@@ -42,7 +42,7 @@ Old Laravel/scaffold and duplicate root static files were moved into `_archive/`
 
 ## Current Booking/Admin Notes
 
-- Google address autocomplete is no longer part of the booking flow.
+- Google address autocomplete and map preview are part of the booking flow when a Maps key is configured.
 - Bookings are stored as individual JSON files in `Storagehighlights/bookings`.
 - Admin credentials are required through environment variables or `_private/admin.php`.
 - See `docs/BOOKING_ADMIN.md` for deployment, backup and testing details.
