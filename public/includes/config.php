@@ -5,7 +5,7 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '10';
+const ASSET_VER = '11';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [
@@ -63,6 +63,22 @@ $REVIEWS = [
         ['text' => 'Came to my driveway and had both headlights crystal clear in under an hour. Looks like a new car.', 'name' => 'James R., Chermside'],
         ['text' => 'So easy — booked online, they came to my work. Night driving is so much better now.', 'name' => 'Priya M., Sunnybank'],
         ['text' => 'Professional, on time and a fraction of the cost of new headlights. Highly recommend.', 'name' => 'Daniel K., Redcliffe'],
+    ],
+];
+
+// ── Before / After real results ──────────────────────────────────────────────
+$BEFORE_AFTER_RESULTS = [
+    [
+        'id' => 1,
+        'before' => 'assets/before-after/before-1.jpg',
+        'after' => 'assets/before-after/after-1.jpg',
+        'title' => 'Headlight restoration result 1',
+    ],
+    [
+        'id' => 2,
+        'before' => 'assets/before-after/before-2.jpg',
+        'after' => 'assets/before-after/after-2.jpg',
+        'title' => 'Headlight restoration result 2',
     ],
 ];
 

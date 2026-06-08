@@ -4,6 +4,7 @@ $current      = $current      ?? '';
 $page_title   = $page_title   ?? ($SITE['name'] . ' | ' . $SITE['tagline']);
 $page_desc    = $page_desc    ?? 'Mobile headlight restoration in Brisbane. We come to you — home, workplace or driveway.';
 $body_class   = trim((string)($body_class ?? ''));
+$minimal_header = str_contains(' ' . $body_class . ' ', ' booking-page ');
 ?><!doctype html>
 <html lang="en-AU">
   <head>
@@ -21,7 +22,7 @@ $body_class   = trim((string)($body_class ?? ''));
   <body<?= $body_class !== '' ? ' class="' . htmlspecialchars($body_class, ENT_QUOTES) . '"' : '' ?>>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="site-header" data-header>
+    <header class="site-header<?= $minimal_header ? ' is-minimal' : '' ?>" data-header>
       <div class="container header-inner">
         <a class="brand" href="/" aria-label="<?= htmlspecialchars($SITE['name']) ?> home">
           <span class="brand-mark" aria-hidden="true">
@@ -33,6 +34,7 @@ $body_class   = trim((string)($body_class ?? ''));
           </span>
         </a>
 
+<?php if (!$minimal_header): ?>
         <nav class="desktop-nav" aria-label="Main navigation">
 <?php foreach ($NAV as $key => $item): ?>
           <a href="<?= $item[0] ?>"<?= $current === $key ? ' class="is-active"' : '' ?>><?= $item[1] ?></a>
@@ -47,8 +49,10 @@ $body_class   = trim((string)($body_class ?? ''));
         <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" data-menu-toggle>
           <span></span><span></span><span></span>
         </button>
+<?php endif; ?>
       </div>
 
+<?php if (!$minimal_header): ?>
       <nav class="mobile-nav" aria-label="Mobile navigation" data-mobile-nav>
 <?php foreach ($NAV as $key => $item): ?>
         <a href="<?= $item[0] ?>"<?= $current === $key ? ' class="is-active"' : '' ?>><?= $item[1] ?></a>
@@ -56,6 +60,7 @@ $body_class   = trim((string)($body_class ?? ''));
         <a class="button button-primary" href="/book">Claim EOFY Offer</a>
         <a class="mobile-admin" href="/admin">Admin login</a>
       </nav>
+<?php endif; ?>
     </header>
 
     <main id="main">

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/auth.php';
-require_admin();
+require_admin_api();
 require_once __DIR__ . '/../../includes/bookings.php';
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';

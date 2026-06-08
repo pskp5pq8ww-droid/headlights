@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/config.php';
+admin_no_cache();
 
 if (admin_logged_in()) {
     header('Location: /dashboard');

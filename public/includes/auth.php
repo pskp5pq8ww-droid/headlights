@@ -7,12 +7,22 @@
  * or:
  *   /home/uXXX/_private/admin.php   (NOT inside public_html, NOT in git)
  * which returns: ['username' => '...', 'password_hash' => '<bcrypt hash>']
- * or, for quick private setup only: ['username' => '...', 'password' => '...']
  */
 
 if (session_status() === PHP_SESSION_NONE) {
-    session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
+    $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+    session_set_cookie_params([
+        'httponly' => true,
+        'secure' => $secure,
+        'samesite' => 'Lax',
+    ]);
     session_start();
+}
+
+function admin_no_cache(): void {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
 }
 
 function admin_credentials(): array {
@@ -28,7 +38,7 @@ function admin_credentials(): array {
     $file = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/_private/admin.php';
     if (is_file($file)) {
         $c = include $file;
-        if (is_array($c) && !empty($c['username']) && (!empty($c['password_hash']) || !empty($c['password']))) {
+        if (is_array($c) && !empty($c['username']) && !empty($c['password_hash'])) {
             return $c;
         }
     }
@@ -38,11 +48,9 @@ function admin_credentials(): array {
 
 function admin_attempt(string $username, string $password): bool {
     $c = admin_credentials();
-    if (($c['username'] ?? '') === '' || (($c['password_hash'] ?? '') === '' && ($c['password'] ?? '') === '')) return false;
+    if (($c['username'] ?? '') === '' || ($c['password_hash'] ?? '') === '') return false;
     $userOk = hash_equals($c['username'], $username);
-    $passOk = !empty($c['password_hash'])
-        ? password_verify($password, $c['password_hash'])
-        : hash_equals((string)$c['password'], $password);
+    $passOk = password_verify($password, $c['password_hash']);
     if ($userOk && $passOk) {
         session_regenerate_id(true);
         $_SESSION['admin_ok']    = true;
@@ -67,8 +75,19 @@ function admin_logout(): void {
 }
 
 function require_admin(): void {
+    admin_no_cache();
     if (!admin_logged_in()) {
         header('Location: /admin');
+        exit;
+    }
+}
+
+function require_admin_api(): void {
+    admin_no_cache();
+    if (!admin_logged_in()) {
+        http_response_code(401);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
         exit;
     }
 }

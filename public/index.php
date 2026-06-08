@@ -76,15 +76,15 @@ include __DIR__ . '/includes/header.php';
             <h2 id="before-after-title">Cloudy To Clear In One Visit</h2>
           </div>
           <article class="premium-comparison reveal">
-            <div class="comparison-slider" style="--position: 52%">
-              <img src="<?= asset('assets/result-before-1.svg') ?>" alt="Cloudy yellow headlight before restoration" loading="lazy" />
-              <div class="after-layer">
-                <img src="<?= asset('assets/result-after-1.svg') ?>" alt="Clear glossy headlight after restoration" loading="lazy" />
-              </div>
-              <span class="label before-label">Before</span>
-              <span class="label after-label">After</span>
-              <span class="slider-line" aria-hidden="true"></span>
-              <input type="range" min="5" max="95" value="52" aria-label="Before after comparison slider" />
+            <div class="real-result-pair landing-real-pair">
+              <figure>
+                <img src="<?= asset($BEFORE_AFTER_RESULTS[0]['before']) ?>" alt="Cloudy oxidised headlight before restoration" loading="lazy" />
+                <figcaption>Before</figcaption>
+              </figure>
+              <figure>
+                <img src="<?= asset($BEFORE_AFTER_RESULTS[0]['after']) ?>" alt="Clear restored headlight after restoration" loading="lazy" />
+                <figcaption>After</figcaption>
+              </figure>
             </div>
           </article>
         </div>

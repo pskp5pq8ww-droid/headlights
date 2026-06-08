@@ -115,6 +115,14 @@ svg {
   gap: 20px;
 }
 
+.site-header.is-minimal .header-inner {
+  justify-content: center;
+}
+
+.site-header.is-minimal .brand {
+  margin: 0 auto;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -1005,6 +1013,81 @@ p {
   top: 10px;
 }
 
+.real-results-grid {
+  display: grid;
+  gap: 22px;
+}
+
+.real-result-card {
+  padding: clamp(14px, 3vw, 22px);
+  border: 1px solid rgba(168, 243, 255, 0.16);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(0, 217, 255, 0.12), transparent 34%),
+    rgba(7, 24, 39, 0.72);
+  box-shadow: 0 28px 80px rgba(3, 7, 11, 0.28);
+}
+
+.real-result-card h2 {
+  margin: 0 0 14px;
+  color: #fff;
+  font-size: clamp(20px, 3vw, 28px);
+}
+
+.real-result-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.real-result-pair figure {
+  position: relative;
+  min-height: 360px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(168, 243, 255, 0.14);
+  border-radius: var(--radius);
+  background: var(--black);
+}
+
+.real-result-pair img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  display: block;
+  object-fit: cover;
+}
+
+.real-result-pair figcaption {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid rgba(244, 252, 255, 0.18);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(3, 7, 11, 0.72);
+  backdrop-filter: blur(10px);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.landing-real-pair figure,
+.landing-real-pair img {
+  min-height: clamp(340px, 42vw, 560px);
+}
+
+.cta-support {
+  margin: 0 0 14px;
+  color: rgba(244, 252, 255, 0.76);
+  font-weight: 800;
+}
+
 .section-cta {
   margin-top: 34px;
   text-align: center;
@@ -1814,6 +1897,15 @@ select[aria-invalid="true"] {
   .result-pair figure,
   .result-pair img {
     min-height: 230px;
+  }
+
+  .real-result-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .real-result-pair figure,
+  .real-result-pair img {
+    min-height: 360px;
   }
 
   .area-map {
@@ -3047,6 +3139,15 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
   .landing-review-card figcaption {
     margin-top: auto;
+  }
+
+  .real-results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .real-result-pair figure,
+  .real-result-pair img {
+    min-height: 520px;
   }
 }
 

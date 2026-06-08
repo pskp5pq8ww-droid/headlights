@@ -21,32 +21,29 @@ include __DIR__ . '/includes/header.php';
             <p>From cloudy and yellow to clean, clear and glossy.</p>
           </div>
 
-          <div class="before-after-grid">
-            <article class="comparison-card reveal">
-              <div class="comparison-slider" style="--position: 52%">
-                <img src="<?= asset('assets/result-before-1.svg') ?>" alt="Cloudy yellow headlight before restoration" loading="lazy" />
-                <div class="after-layer"><img src="<?= asset('assets/result-after-1.svg') ?>" alt="Clear glossy headlight after restoration" loading="lazy" /></div>
-                <span class="label before-label">Before</span><span class="label after-label">After</span>
-                <span class="slider-line" aria-hidden="true"></span>
-                <input type="range" min="5" max="95" value="52" aria-label="Before after comparison slider" />
+          <div class="real-results-grid">
+<?php foreach ($BEFORE_AFTER_RESULTS as $result): ?>
+            <article class="real-result-card reveal">
+              <h2><?= htmlspecialchars($result['title']) ?></h2>
+              <div class="real-result-pair">
+                <figure>
+                  <img src="<?= asset($result['before']) ?>" alt="Cloudy oxidised headlight before restoration" loading="lazy" />
+                  <figcaption>Before</figcaption>
+                </figure>
+                <figure>
+                  <img src="<?= asset($result['after']) ?>" alt="Clear restored headlight after restoration" loading="lazy" />
+                  <figcaption>After</figcaption>
+                </figure>
               </div>
             </article>
-            <article class="result-card reveal">
-              <div class="result-pair">
-                <figure><img src="<?= asset('assets/result-before-2.svg') ?>" alt="Oxidised headlight before restoration" loading="lazy" /><figcaption>Before</figcaption></figure>
-                <figure><img src="<?= asset('assets/result-after-2.svg') ?>" alt="Restored clear headlight after service" loading="lazy" /><figcaption>After</figcaption></figure>
-              </div>
-            </article>
-            <article class="result-card reveal">
-              <div class="result-pair">
-                <figure><img src="<?= asset('assets/result-before-3.svg') ?>" alt="Dull cloudy headlight before restoration" loading="lazy" /><figcaption>Before</figcaption></figure>
-                <figure><img src="<?= asset('assets/result-after-3.svg') ?>" alt="Crystal clear headlight after restoration" loading="lazy" /><figcaption>After</figcaption></figure>
-              </div>
-            </article>
+<?php endforeach; ?>
           </div>
 
-          <div class="section-cta reveal"><a class="button button-primary" href="/book"><span>Book Your Transformation</span>
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></a></div>
+          <div class="section-cta reveal">
+            <p class="cta-support">Ready to restore your headlights at home?</p>
+            <a class="button button-primary" href="/book"><span>Book Mobile Service</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></a>
+          </div>
         </div>
       </section>
 <?php include __DIR__ . '/includes/footer.php'; ?>
