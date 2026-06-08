@@ -5,7 +5,7 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '11';
+const ASSET_VER = '13';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [
@@ -82,6 +82,34 @@ $BEFORE_AFTER_RESULTS = [
     ],
 ];
 
+$SERVICE_PROOFS = [
+    [
+        'image' => 'assets/before-after/after-1.jpg',
+        'label' => 'Restored finish',
+        'title' => 'Clear lens after mobile restoration',
+    ],
+    [
+        'image' => 'assets/before-after/before-1.jpg',
+        'label' => 'Before condition',
+        'title' => 'Cloudy lens before restoration',
+    ],
+    [
+        'image' => 'assets/before-after/after-2.jpg',
+        'label' => 'Finished result',
+        'title' => 'Glossy clarity restored on-site',
+    ],
+    [
+        'image' => 'assets/before-after/before-2.jpg',
+        'label' => 'Before condition',
+        'title' => 'Yellow oxidised headlight before service',
+    ],
+    [
+        'image' => 'assets/before-after/condition-before-3.jpg',
+        'label' => 'Oxidation example',
+        'title' => 'Heavy clouding we can assess on arrival',
+    ],
+];
+
 // ── FAQs ─────────────────────────────────────────────────────────────────────
 $FAQS = [
     ['q' => 'How long does it take?',              'a' => 'Most restorations take around 45–90 minutes depending on the condition of the headlights.'],
@@ -120,23 +148,53 @@ function maps_api_key(): string {
         if ($fileKey !== '') return $fileKey;
     }
 
-    $file = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/_private/maps.php';
-    if (is_file($file)) {
-        $config = include $file;
-        if (is_array($config)) return trim((string)($config['google_maps_api_key'] ?? ''));
+    foreach (maps_php_candidates() as $candidate) {
+        if (is_file($candidate)) {
+            $config = include $candidate;
+            if (is_array($config) && !empty($config['google_maps_api_key'])) {
+                return trim((string)$config['google_maps_api_key']);
+            }
+        }
     }
 
     return '';
 }
 
+/**
+ * Search paths for _private/maps.php — ordered from most-likely to least-likely.
+ *
+ * Hostinger shared-hosting layout (typical):
+ *   /home/u[id]/                         ← user home  (dirname(__DIR__, 3) from includes/)
+ *     htdocs/                            ← dirname(DOCUMENT_ROOT)
+ *       orangered-rhinoceros-*.hostingersite.com/  ← DOCUMENT_ROOT = web root
+ *         includes/                      ← __DIR__
+ *
+ * The _private/ folder must sit at the user-home level or one above the web root.
+ */
+function maps_php_candidates(): array {
+    $docRoot  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__), '/');
+    $userHome = dirname(__DIR__, 3); // includes → web-root → htdocs → user-home
+
+    return array_values(array_unique([
+        $userHome          . '/_private/maps.php', // Hostinger user home (/home/u.../):      PRIMARY
+        dirname($docRoot)  . '/_private/maps.php', // one above web root (/home/u.../htdocs): FALLBACK
+        dirname(__DIR__, 2). '/_private/maps.php', // two levels above includes/:             LOCAL DEV
+        dirname(__DIR__)   . '/_private/maps.php', // one level above includes/:              LAST RESORT
+    ]));
+}
+
 function maps_env_file_candidates(): array {
-    $docParent = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__);
+    $docRoot     = rtrim($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__), '/');
+    $docParent   = dirname($docRoot);
+    $userHome    = dirname(__DIR__, 3);
     $projectRoot = dirname(__DIR__, 2);
     return array_values(array_unique([
-        $docParent . '/.env',
-        $docParent . '/env',
-        $docParent . '/_private/.env',
-        $docParent . '/_private/env',
+        $userHome    . '/.env',
+        $userHome    . '/_private/.env',
+        $userHome    . '/_private/env',
+        $docParent   . '/.env',
+        $docParent   . '/_private/.env',
+        $docParent   . '/_private/env',
         $projectRoot . '/.env',
         $projectRoot . '/env',
         $projectRoot . '/_private/.env',

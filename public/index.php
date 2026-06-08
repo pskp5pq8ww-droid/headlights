@@ -90,6 +90,27 @@ include __DIR__ . '/includes/header.php';
         </div>
       </section>
 
+      <section class="landing-section service-proof-section" aria-labelledby="proof-title">
+        <div class="container">
+          <div class="landing-section-heading reveal">
+            <p class="eyebrow">Proofs of service</p>
+            <h2 id="proof-title">Real Mobile Results Around Brisbane</h2>
+            <p>Actual customer vehicle photos showing cloudy headlights, restored clarity and service conditions.</p>
+          </div>
+          <div class="service-proof-grid">
+<?php foreach ($SERVICE_PROOFS as $proof): ?>
+            <figure class="service-proof-card reveal">
+              <img src="<?= asset($proof['image']) ?>" alt="<?= htmlspecialchars($proof['title']) ?>" loading="lazy" />
+              <figcaption>
+                <span><?= htmlspecialchars($proof['label']) ?></span>
+                <strong><?= htmlspecialchars($proof['title']) ?></strong>
+              </figcaption>
+            </figure>
+<?php endforeach; ?>
+          </div>
+        </div>
+      </section>
+
       <section class="landing-section landing-reviews" aria-labelledby="reviews-title">
         <div class="container">
           <div class="landing-section-heading reveal">

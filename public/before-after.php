@@ -39,6 +39,15 @@ include __DIR__ . '/includes/header.php';
 <?php endforeach; ?>
           </div>
 
+          <div class="proof-strip reveal" aria-label="Additional service proof photos">
+<?php foreach ($SERVICE_PROOFS as $proof): ?>
+            <figure>
+              <img src="<?= asset($proof['image']) ?>" alt="<?= htmlspecialchars($proof['title']) ?>" loading="lazy" />
+              <figcaption><?= htmlspecialchars($proof['label']) ?></figcaption>
+            </figure>
+<?php endforeach; ?>
+          </div>
+
           <div class="section-cta reveal">
             <p class="cta-support">Ready to restore your headlights at home?</p>
             <a class="button button-primary" href="/book"><span>Book Mobile Service</span>
