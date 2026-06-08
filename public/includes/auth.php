@@ -7,6 +7,7 @@
  * or:
  *   /home/uXXX/_private/admin.php   (NOT inside public_html, NOT in git)
  * which returns: ['username' => '...', 'password_hash' => '<bcrypt hash>']
+ * or, for quick private setup only: ['username' => '...', 'password' => '...']
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -27,7 +28,7 @@ function admin_credentials(): array {
     $file = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/_private/admin.php';
     if (is_file($file)) {
         $c = include $file;
-        if (is_array($c) && !empty($c['username']) && !empty($c['password_hash'])) {
+        if (is_array($c) && !empty($c['username']) && (!empty($c['password_hash']) || !empty($c['password']))) {
             return $c;
         }
     }
@@ -37,9 +38,11 @@ function admin_credentials(): array {
 
 function admin_attempt(string $username, string $password): bool {
     $c = admin_credentials();
-    if (($c['username'] ?? '') === '' || ($c['password_hash'] ?? '') === '') return false;
+    if (($c['username'] ?? '') === '' || (($c['password_hash'] ?? '') === '' && ($c['password'] ?? '') === '')) return false;
     $userOk = hash_equals($c['username'], $username);
-    $passOk = password_verify($password, $c['password_hash']);
+    $passOk = !empty($c['password_hash'])
+        ? password_verify($password, $c['password_hash'])
+        : hash_equals((string)$c['password'], $password);
     if ($userOk && $passOk) {
         session_regenerate_id(true);
         $_SESSION['admin_ok']    = true;

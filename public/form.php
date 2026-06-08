@@ -10,6 +10,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     booking_json_response(['success' => false, 'message' => 'Method not allowed'], 405);
 }
 
+$fieldAliases = [
+    'name' => ['name', 'fullName', 'full_name'],
+    'phone' => ['phone', 'mobile'],
+    'email' => ['email'],
+    'customer_address' => ['customer_address', 'addressOrSuburb', 'address_or_suburb', 'address', 'suburb'],
+    'vehicle' => ['vehicle', 'vehicleMakeModel', 'vehicle_make_model'],
+    'date' => ['date', 'preferredDate', 'preferred_date'],
+    'time' => ['time', 'preferredTimeWindow', 'preferred_time_window'],
+    'package' => ['package', 'packageSelected', 'package_selected'],
+];
+
 $required = [
     'name' => 'Full name is required.',
     'phone' => 'Phone is required.',
@@ -23,9 +34,9 @@ $required = [
 
 $errors = [];
 foreach ($required as $field => $message) {
-    if (clean_text($_POST[$field] ?? '') === '') $errors[$field] = $message;
+    if (booking_post_value($fieldAliases[$field] ?? [$field]) === '') $errors[$field] = $message;
 }
-if (!filter_var(clean_text($_POST['email'] ?? ''), FILTER_VALIDATE_EMAIL)) {
+if (!filter_var(booking_post_value($fieldAliases['email']), FILTER_VALIDATE_EMAIL)) {
     $errors['email'] = 'A valid email is required.';
 }
 if ($errors) {
@@ -38,14 +49,14 @@ if ($errors) {
 
 try {
     $booking = createBooking([
-        'fullName' => $_POST['name'] ?? '',
-        'phone' => $_POST['phone'] ?? '',
-        'email' => $_POST['email'] ?? '',
-        'addressOrSuburb' => $_POST['customer_address'] ?? '',
-        'vehicleMakeModel' => $_POST['vehicle'] ?? '',
-        'preferredDate' => $_POST['date'] ?? '',
-        'preferredTimeWindow' => $_POST['time'] ?? '',
-        'packageSelected' => $_POST['package'] ?? '',
+        'fullName' => booking_post_value($fieldAliases['name']),
+        'phone' => booking_post_value($fieldAliases['phone']),
+        'email' => booking_post_value($fieldAliases['email']),
+        'addressOrSuburb' => booking_post_value($fieldAliases['customer_address']),
+        'vehicleMakeModel' => booking_post_value($fieldAliases['vehicle']),
+        'preferredDate' => booking_post_value($fieldAliases['date']),
+        'preferredTimeWindow' => booking_post_value($fieldAliases['time']),
+        'packageSelected' => booking_post_value($fieldAliases['package']),
         'headlightCondition' => $_POST['headlight_condition'] ?? '',
         'vehicleLocationType' => $_POST['vehicle_location_type'] ?? '',
         'numberOfHeadlights' => $_POST['number_of_headlights'] ?? '2',
@@ -112,6 +123,15 @@ function handle_booking_uploads(string $bookingId): array {
         }
     }
     return $saved;
+}
+
+function booking_post_value(array $names): string {
+    foreach ($names as $name) {
+        if (isset($_POST[$name]) && clean_text($_POST[$name]) !== '') {
+            return clean_text($_POST[$name]);
+        }
+    }
+    return '';
 }
 
 function send_booking_email(array $booking): void {

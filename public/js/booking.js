@@ -10,6 +10,18 @@
     const status = qs("[data-form-status]", wizard || document);
     if (!wizard || !form || !status) return;
 
+    const fieldLabels = {
+      customer_address: "service address or suburb",
+      package: "service/package",
+      headlight_condition: "headlight condition",
+      name: "full name",
+      phone: "phone",
+      email: "email",
+      vehicle: "vehicle make and model",
+      date: "preferred date",
+      time: "preferred time window"
+    };
+
     function goToStep(step) {
       qsa("[data-panel]", wizard).forEach((panel) => {
         panel.hidden = Number(panel.dataset.panel) !== step;
@@ -22,16 +34,39 @@
       wizard.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
+    function fieldName(field) {
+      return fieldLabels[field.name] || field.closest("label")?.childNodes[0]?.textContent?.trim().toLowerCase() || "required field";
+    }
+
+    function invalidRequiredFields(parent) {
+      return qsa("[required]", parent).filter((field) => {
+        const value = field.value || "";
+        return !value.trim() || !field.validity.valid;
+      });
+    }
+
+    function showInvalidField(field) {
+      const panel = field.closest("[data-panel]");
+      if (panel) goToStep(Number(panel.dataset.panel));
+      qsa("[aria-invalid]", form).forEach((item) => item.removeAttribute("aria-invalid"));
+      field.setAttribute("aria-invalid", "true");
+      status.textContent = field.type === "email" && field.value.trim()
+        ? "Please enter a valid email address."
+        : `Please complete: ${fieldName(field)}.`;
+      window.ShiningGSAP?.playFormErrorAnimation(form);
+      window.setTimeout(() => field.focus(), 80);
+    }
+
+    function findFieldByName(name) {
+      return qsa("[name]", form).find((field) => field.name === name) || null;
+    }
+
     function panelIsValid(step) {
       const panel = qs(`[data-panel="${step}"]`, wizard);
       if (!panel) return true;
-      const invalid = qsa("[required]", panel).filter((field) => !field.value.trim() || !field.validity.valid);
-      qsa("[aria-invalid]", panel).forEach((field) => field.removeAttribute("aria-invalid"));
+      const invalid = invalidRequiredFields(panel);
       if (!invalid.length) return true;
-      invalid.forEach((field) => field.setAttribute("aria-invalid", "true"));
-      invalid[0].focus();
-      status.textContent = invalid[0].type === "email" ? "Please enter a valid email address." : "Please complete all required fields.";
-      window.ShiningGSAP?.playFormErrorAnimation(form);
+      showInvalidField(invalid[0]);
       return false;
     }
 
@@ -56,12 +91,9 @@
       event.preventDefault();
       qsa("[aria-invalid]", form).forEach((field) => field.removeAttribute("aria-invalid"));
 
-      const invalid = qsa("[required]", form).filter((field) => !field.value.trim() || !field.validity.valid);
+      const invalid = invalidRequiredFields(form);
       if (invalid.length) {
-        invalid.forEach((field) => field.setAttribute("aria-invalid", "true"));
-        status.textContent = invalid[0].type === "email" ? "Please enter a valid email address." : "Please complete all required fields.";
-        window.ShiningGSAP?.playFormErrorAnimation(form);
-        invalid[0].focus();
+        showInvalidField(invalid[0]);
         return;
       }
 
@@ -78,7 +110,10 @@
         });
         const result = await response.json();
         if (!response.ok || !result.success) {
-          status.textContent = result.message || "Something went wrong. Please try again or contact us directly.";
+          const firstError = result.errors ? Object.values(result.errors)[0] : "";
+          status.textContent = firstError || result.message || "Something went wrong. Please try again or contact us directly.";
+          const firstErrorField = result.errors ? findFieldByName(Object.keys(result.errors)[0]) : null;
+          if (firstErrorField) showInvalidField(firstErrorField);
           window.ShiningGSAP?.playFormErrorAnimation(form);
           return;
         }
