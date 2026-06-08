@@ -5,6 +5,7 @@ $page_title   = 'Book Now | ' . $SITE['name'];
 $page_desc    = 'Book your mobile headlight restoration in Brisbane. Tell us where your car is located and we will confirm your booking.';
 $page_scripts = ['booking', 'countdown'];
 $page_maps    = true;
+$body_class   = 'booking-page';
 include __DIR__ . '/includes/header.php';
 ?>
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
@@ -20,7 +21,7 @@ include __DIR__ . '/includes/header.php';
                 <span class="promo-now">$<?= $EOFY['now'] ?></span>
                 <span class="promo-save">Save $<?= $EOFY['save'] ?></span>
               </div>
-              <div class="countdown" data-countdown data-target="<?= htmlspecialchars($EOFY['target']) ?>" aria-label="EOFY offer countdown">
+              <div class="countdown" data-countdown data-mode="daily-brisbane" aria-label="Daily offer countdown">
                 <span><strong data-days>00</strong><small>Days</small></span>
                 <span><strong data-hours>00</strong><small>Hrs</small></span>
                 <span><strong data-minutes>00</strong><small>Min</small></span>
@@ -46,8 +47,13 @@ include __DIR__ . '/includes/header.php';
                   <input id="addressInput" name="customer_address" class="address-input" type="text"
                          placeholder="Example: Newstead, Brisbane or full address if ready" autocomplete="street-address" required />
                 </label>
+                <p class="address-fallback" id="addressFallback" hidden>Address suggestions are not available right now. Please type the full service address manually.</p>
                 <input type="hidden" name="google_place_id" id="googlePlaceId" />
                 <input type="hidden" name="formatted_address" id="formattedAddress" />
+                <input type="hidden" name="address_suburb" id="addressSuburb" />
+                <input type="hidden" name="address_postcode" id="addressPostcode" />
+                <input type="hidden" name="address_state" id="addressState" />
+                <input type="hidden" name="address_country" id="addressCountry" />
                 <input type="hidden" name="address_lat" id="addressLat" />
                 <input type="hidden" name="address_lng" id="addressLng" />
                 <div class="map-preview" id="bookingMapPreview" hidden>

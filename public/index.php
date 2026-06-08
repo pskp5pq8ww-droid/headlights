@@ -21,7 +21,7 @@ include __DIR__ . '/includes/header.php';
 
             <div class="eofy-countdown-card reveal" aria-label="EOFY offer countdown">
               <p>Offer ends in</p>
-              <div class="countdown landing-countdown" data-countdown data-target="<?= htmlspecialchars($EOFY['target']) ?>">
+              <div class="countdown landing-countdown" data-countdown data-mode="daily-brisbane">
                 <span><strong data-days>00</strong><small>Days</small></span>
                 <span><strong data-hours>00</strong><small>Hours</small></span>
                 <span><strong data-minutes>00</strong><small>Minutes</small></span>

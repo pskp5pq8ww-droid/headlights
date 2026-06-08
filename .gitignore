@@ -5,6 +5,7 @@
 /storage/*.key
 /_private/maps.php
 /_private/admin.php
+/env
 /_archive/generated-zips/*.zip
 *.zip
 /.env

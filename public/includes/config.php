@@ -5,7 +5,7 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '9';
+const ASSET_VER = '10';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [
@@ -94,15 +94,51 @@ function asset(string $path): string {
     return '/' . ltrim($path, '/') . '?v=' . ASSET_VER;
 }
 
-// Google Maps key loader. Keep real keys in Hostinger env vars or _private/maps.php.
+// Google Maps key loader. Keep real keys in Hostinger env vars, private env files, or _private/maps.php.
 function maps_api_key(): string {
     $envKey = getenv('GOOGLE_MAPS_API_KEY') ?: getenv('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY') ?: '';
     if ($envKey !== '') return trim($envKey);
+
+    foreach (maps_env_file_candidates() as $envFile) {
+        $fileKey = maps_key_from_env_file($envFile);
+        if ($fileKey !== '') return $fileKey;
+    }
 
     $file = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/_private/maps.php';
     if (is_file($file)) {
         $config = include $file;
         if (is_array($config)) return trim((string)($config['google_maps_api_key'] ?? ''));
+    }
+
+    return '';
+}
+
+function maps_env_file_candidates(): array {
+    $docParent = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__);
+    $projectRoot = dirname(__DIR__, 2);
+    return array_values(array_unique([
+        $docParent . '/.env',
+        $docParent . '/env',
+        $docParent . '/_private/.env',
+        $docParent . '/_private/env',
+        $projectRoot . '/.env',
+        $projectRoot . '/env',
+        $projectRoot . '/_private/.env',
+        $projectRoot . '/_private/env',
+    ]));
+}
+
+function maps_key_from_env_file(string $file): string {
+    if (!is_file($file) || !is_readable($file)) return '';
+    $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (!is_array($lines)) return '';
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
+        [$name, $value] = array_map('trim', explode('=', $line, 2));
+        if (!in_array($name, ['GOOGLE_MAPS_API_KEY', 'NEXT_PUBLIC_GOOGLE_MAPS_API_KEY'], true)) continue;
+        return trim($value, " \t\n\r\0\x0B\"'");
     }
 
     return '';

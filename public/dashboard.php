@@ -277,6 +277,9 @@ function package_options(string $current = ''): string {
               <p><a href="mailto:<?= h($b['email']) ?>"><?= h($b['email']) ?></a></p>
               <p><?= h($b['addressOrSuburb']) ?></p>
               <?php if (!empty($b['formattedAddress'])): ?><p><?= h($b['formattedAddress']) ?></p><?php endif; ?>
+              <?php if (!empty($b['addressSuburb']) || !empty($b['addressPostcode']) || !empty($b['addressState']) || !empty($b['addressCountry'])): ?>
+                <p><?= h(trim(($b['addressSuburb'] ?? '') . ' ' . ($b['addressPostcode'] ?? '') . ' ' . ($b['addressState'] ?? '') . ' ' . ($b['addressCountry'] ?? ''))) ?></p>
+              <?php endif; ?>
               <?php if (!empty($b['addressLat']) && !empty($b['addressLng'])): ?>
                 <p><a href="https://www.google.com/maps?q=<?= h($b['addressLat']) ?>,<?= h($b['addressLng']) ?>" target="_blank" rel="noopener">Open in Google Maps</a></p>
               <?php endif; ?>

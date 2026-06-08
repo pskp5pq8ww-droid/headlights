@@ -131,16 +131,31 @@
     });
   }
 
+  function addressComponent(components, type, useShort = false) {
+    const component = components?.find((item) => item.types?.includes(type));
+    return component ? (useShort ? component.short_name : component.long_name) : "";
+  }
+
   function initGoogleBookingAutocomplete() {
     const input = qs("#addressInput");
     const mapEl = qs("#bookingMap");
     const mapWrap = qs("#bookingMapPreview");
     const mapLabel = qs("#bookingMapLabel");
+    const fallback = qs("#addressFallback");
     const placeIdInput = qs("#googlePlaceId");
     const formattedInput = qs("#formattedAddress");
+    const suburbInput = qs("#addressSuburb");
+    const postcodeInput = qs("#addressPostcode");
+    const stateInput = qs("#addressState");
+    const countryInput = qs("#addressCountry");
     const latInput = qs("#addressLat");
     const lngInput = qs("#addressLng");
-    if (!input || !window.google?.maps?.places) return;
+    if (!input) return;
+    if (!window.google?.maps?.places) {
+      if (fallback) fallback.hidden = false;
+      return;
+    }
+    if (fallback) fallback.hidden = true;
 
     const brisbane = { lat: -27.4698, lng: 153.0251 };
     let map = null;
@@ -167,10 +182,21 @@
       if (mapLabel) mapLabel.textContent = label || input.value;
     }
 
-    function setLocation({ placeId = "", address = "", lat = "", lng = "" }) {
+    function setLocation({ placeId = "", address = "", lat = "", lng = "", components = [] }) {
+      const suburb = addressComponent(components, "locality")
+        || addressComponent(components, "postal_town")
+        || addressComponent(components, "sublocality")
+        || addressComponent(components, "administrative_area_level_2");
+      const postcode = addressComponent(components, "postal_code");
+      const state = addressComponent(components, "administrative_area_level_1", true);
+      const country = addressComponent(components, "country", true);
       if (address) input.value = address;
       if (placeIdInput) placeIdInput.value = placeId;
       if (formattedInput) formattedInput.value = address || input.value;
+      if (suburbInput) suburbInput.value = suburb;
+      if (postcodeInput) postcodeInput.value = postcode;
+      if (stateInput) stateInput.value = state;
+      if (countryInput) countryInput.value = country;
       if (latInput) latInput.value = lat;
       if (lngInput) lngInput.value = lng;
       if (lat !== "" && lng !== "") ensureMap({ lat: Number(lat), lng: Number(lng) }, address || input.value);
@@ -178,7 +204,7 @@
 
     const autocomplete = new google.maps.places.Autocomplete(input, {
       componentRestrictions: { country: "au" },
-      fields: ["place_id", "formatted_address", "geometry", "name"],
+      fields: ["place_id", "formatted_address", "geometry", "name", "address_components"],
       bounds: new google.maps.LatLngBounds(
         new google.maps.LatLng(-28.45, 152.55),
         new google.maps.LatLng(-26.75, 153.65)
@@ -194,7 +220,8 @@
         placeId: place.place_id || "",
         address: place.formatted_address || place.name || input.value,
         lat: location.lat().toFixed(7),
-        lng: location.lng().toFixed(7)
+        lng: location.lng().toFixed(7),
+        components: place.address_components || []
       });
     });
 
@@ -202,6 +229,10 @@
     input.addEventListener("input", () => {
       if (placeIdInput) placeIdInput.value = "";
       if (formattedInput) formattedInput.value = "";
+      if (suburbInput) suburbInput.value = "";
+      if (postcodeInput) postcodeInput.value = "";
+      if (stateInput) stateInput.value = "";
+      if (countryInput) countryInput.value = "";
       if (latInput) latInput.value = "";
       if (lngInput) lngInput.value = "";
       window.clearTimeout(geocodeTimer);
@@ -225,7 +256,8 @@
             placeId: result.place_id || "",
             address: result.formatted_address || query,
             lat: location.lat().toFixed(7),
-            lng: location.lng().toFixed(7)
+            lng: location.lng().toFixed(7),
+            components: result.address_components || []
           });
         });
       }, 900);
@@ -236,4 +268,9 @@
 
   window.initGoogleBookingAutocomplete = initGoogleBookingAutocomplete;
   initBookingWizard();
+  window.setTimeout(() => {
+    const input = qs("#addressInput");
+    const fallback = qs("#addressFallback");
+    if (input && fallback && !window.google?.maps?.places) fallback.hidden = false;
+  }, 3500);
 })();

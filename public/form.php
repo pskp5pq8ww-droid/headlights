@@ -54,6 +54,10 @@ try {
         'email' => booking_post_value($fieldAliases['email']),
         'addressOrSuburb' => booking_post_value($fieldAliases['customer_address']),
         'formattedAddress' => $_POST['formatted_address'] ?? '',
+        'addressSuburb' => $_POST['address_suburb'] ?? '',
+        'addressPostcode' => $_POST['address_postcode'] ?? '',
+        'addressState' => $_POST['address_state'] ?? '',
+        'addressCountry' => $_POST['address_country'] ?? '',
         'googlePlaceId' => $_POST['google_place_id'] ?? '',
         'addressLat' => $_POST['address_lat'] ?? '',
         'addressLng' => $_POST['address_lng'] ?? '',
@@ -147,6 +151,10 @@ function send_booking_email(array $booking): void {
     $body .= "Email: " . ($booking['email'] ?? '') . "\n";
     $body .= "Location: " . ($booking['addressOrSuburb'] ?? '') . "\n";
     if (!empty($booking['formattedAddress'])) $body .= "Google Address: " . $booking['formattedAddress'] . "\n";
+    if (!empty($booking['addressSuburb'])) $body .= "Suburb: " . $booking['addressSuburb'] . "\n";
+    if (!empty($booking['addressPostcode'])) $body .= "Postcode: " . $booking['addressPostcode'] . "\n";
+    if (!empty($booking['addressState'])) $body .= "State: " . $booking['addressState'] . "\n";
+    if (!empty($booking['addressCountry'])) $body .= "Country: " . $booking['addressCountry'] . "\n";
     if (!empty($booking['addressLat']) && !empty($booking['addressLng'])) $body .= "Map: https://www.google.com/maps?q=" . $booking['addressLat'] . "," . $booking['addressLng'] . "\n";
     $body .= "Vehicle: " . ($booking['vehicleMakeModel'] ?? '') . "\n";
     $body .= "Date: " . ($booking['preferredDate'] ?? '') . "\n";

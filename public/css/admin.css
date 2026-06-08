@@ -190,3 +190,23 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
   .calendar-day{min-height:44px;padding:7px}
   .bne-clock{min-width:0;align-items:flex-start}
 }
+
+@media (min-width:1180px){
+  .admin-layout{grid-template-columns:260px minmax(0,1fr)}
+  .admin-sidebar{padding:26px 18px}
+  .admin-main{width:min(100%,1500px);padding:32px 38px 70px}
+  .admin-topbar{align-items:center;margin-bottom:30px}
+  .admin-topbar h1{font-size:30px}
+  .stat-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+  .stat-card{min-height:118px;justify-content:space-between}
+  .stat-card.wide{grid-column:span 2}
+  .dashboard-grid{grid-template-columns:minmax(520px,1.08fr) minmax(430px,.92fr);gap:24px}
+  .panel{padding:24px}
+  .calendar-day{min-height:64px}
+  .daily-list li{grid-template-columns:minmax(160px,.8fr) minmax(260px,1fr) 140px 112px}
+  .admin-filters{grid-template-columns:minmax(280px,1.7fr) repeat(4,minmax(150px,1fr)) 104px;gap:12px}
+  .bookings-table{min-width:1080px;font-size:13px}
+  .bookings-table th,.bookings-table td{padding:13px 14px}
+  .detail-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .detail-card{min-height:210px}
+}
