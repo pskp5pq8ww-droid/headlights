@@ -25,7 +25,7 @@ function ensureStorageDirs(): void {
 
 function saveBooking(array $data): void {
     ensureStorageDirs();
-    $filename = BOOKINGS_DIR . '/booking_' . date('Y-m-d_His') . '_' . bin2hex(random_bytes(4)) . '.json';
+    $filename = BOOKINGS_DIR . '/booking_' . $data['id'] . '.json';
     file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
     chmod($filename, 0600);
 }
@@ -94,10 +94,16 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 $safeEmail = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
 
 // ── Save booking to /Storagehighlights/bookings/ ──────────────────────────────
+$bookingId = date('Ymd_His') . '_' . bin2hex(random_bytes(4));
+$amount    = 99; // EOFY launch price (kept in sync with config EOFY['now'])
+
 $bookingData = [
-    'received_at'   => date('Y-m-d H:i:s'),
-    'created_at'    => date('Y-m-d H:i:s'),
-    'status'        => 'Pending',
+    'id'             => $bookingId,
+    'received_at'    => date('Y-m-d H:i:s'),
+    'created_at'     => date('Y-m-d H:i:s'),
+    'status'         => 'Pending',
+    'payment_status' => 'unpaid',
+    'amount'         => $amount,
     'name'          => $name,
     'phone'         => $phone,
     'email'         => $safeEmail,
@@ -121,8 +127,10 @@ $bookingData = [
     'ip_hash'       => hash('sha256', $_SERVER['REMOTE_ADDR'] ?? ''),
 ];
 
+$saved = false;
 try {
     saveBooking($bookingData);
+    $saved = true;
 } catch (Throwable $e) {
     logError('saveBooking failed: ' . $e->getMessage());
 }
@@ -144,13 +152,12 @@ $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 $headers .= "Content-Transfer-Encoding: 8bit\r\n";
 $headers .= "X-Mailer: PHP/" . phpversion();
 
-$sent = mail($to, $subject, $body, $headers);
-
+$sent = @mail($to, $subject, $body, $headers); // best-effort; booking is already saved
 if (!$sent) logError("mail() failed for booking: {$name} <{$safeEmail}>");
 
 ob_end_clean();
 header('Content-Type: application/json');
-echo json_encode($sent
-    ? ['success' => true]
-    : ['success' => false, 'message' => 'Could not send your request. Please call us directly.']
+echo json_encode($saved
+    ? ['success' => true, 'booking_id' => $bookingId, 'amount' => $amount]
+    : ['success' => false, 'message' => 'Could not save your booking. Please call us directly.']
 );

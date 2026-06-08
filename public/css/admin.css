@@ -67,7 +67,9 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .bne-label{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin-top:6px}
 
 /* ── Stat cards ────────────────────────────────────────────────────────────── */
-.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:26px}
+.stat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:26px}
+.stat-label small{display:block;font-weight:700;color:var(--cyan);text-transform:none;letter-spacing:0;margin-top:2px}
+@media (max-width:1200px){.stat-grid{grid-template-columns:repeat(3,1fr)}}
 .stat-card{padding:20px;border-radius:var(--radius);background:var(--card);border:1px solid var(--line);
   display:flex;flex-direction:column;gap:6px}
 .stat-card.highlight{background:linear-gradient(160deg,#0b2538,#103248);border-color:rgba(0,217,255,.3);box-shadow:0 0 26px rgba(0,217,255,.16)}
@@ -103,6 +105,8 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .badge-confirmed{background:rgba(79,157,255,.14);color:var(--blue);border:1px solid rgba(79,157,255,.3)}
 .badge-completed{background:rgba(52,201,143,.14);color:var(--ok);border:1px solid rgba(52,201,143,.3)}
 .badge-cancelled{background:rgba(248,113,113,.12);color:var(--bad);border:1px solid rgba(248,113,113,.3)}
+.badge-paid{background:rgba(52,201,143,.16);color:var(--ok);border:1px solid rgba(52,201,143,.34)}
+.badge-unpaid{background:rgba(143,163,178,.14);color:var(--steel);border:1px solid rgba(143,163,178,.3)}
 .status-form{margin-top:7px}
 .status-form select{width:100%;max-width:130px;padding:5px 8px;font-size:12px;color:var(--ice);
   background:rgba(3,7,11,.5);border:1px solid rgba(143,163,178,.3);border-radius:7px;cursor:pointer}

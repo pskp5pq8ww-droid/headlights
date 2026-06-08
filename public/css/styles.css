@@ -2974,3 +2974,18 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
     border-radius: 14px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIMULATED PAYMENT STEP  (booking wizard)
+═══════════════════════════════════════════════════════════════════════════ */
+.pay-summary{display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:14px 16px;margin-bottom:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--ice)}
+.pay-summary span{color:var(--muted);font-weight:700;font-size:14px}
+.pay-summary strong{font-family:Sora,system-ui,sans-serif;font-size:24px;color:var(--navy)}
+.pay-note{margin:10px 0 0;font-size:12px;color:var(--muted);line-height:1.5}
+.pay-submit{min-width:170px}
+.booking-done{text-align:center;padding:14px 0}
+.done-check{width:64px;height:64px;margin:0 auto 14px;display:grid;place-items:center;border-radius:50%;
+  color:var(--success);background:rgba(52,201,143,.14);border:1px solid rgba(52,201,143,.4);font-size:30px;font-weight:900}
+.pay-ref{margin:6px 0 18px;font-size:13px;font-weight:700;color:var(--muted)}
+.pay-ref[hidden]{display:none}

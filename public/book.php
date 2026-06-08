@@ -42,6 +42,8 @@ include __DIR__ . '/includes/header.php';
               <div class="form-step" data-step-indicator="2"><span class="step-num">2</span><span class="step-label">Package</span></div>
               <span class="step-line" aria-hidden="true"></span>
               <div class="form-step" data-step-indicator="3"><span class="step-num">3</span><span class="step-label">Details</span></div>
+              <span class="step-line" aria-hidden="true"></span>
+              <div class="form-step" data-step-indicator="4"><span class="step-num">4</span><span class="step-label">Payment</span></div>
             </div>
 
             <!-- Step 1: address + map -->
@@ -122,10 +124,44 @@ include __DIR__ . '/includes/header.php';
                 <label class="label-optional">Notes <small>(optional)</small><textarea name="message" rows="3" placeholder="Access, parking, headlight condition&hellip;"></textarea></label>
                 <div class="step-nav">
                   <button class="button button-secondary step-back-btn" type="button" data-prev="2"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg><span>Back</span></button>
-                  <button class="button button-primary form-submit" type="submit"><span>Request Booking</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></button>
+                  <button class="button button-primary form-submit" type="submit"><span>Continue to Payment</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></button>
                 </div>
                 <p class="form-status" role="status" aria-live="polite" data-form-status></p>
               </form>
+            </div>
+
+            <!-- Step 4: payment (SIMULATED — no real charge) -->
+            <div class="form-panel" data-panel="4" hidden>
+              <h3 class="panel-title">Payment</h3>
+              <p class="panel-hint">Secure your EOFY price. <strong>Demo mode</strong> — no real charge is made.</p>
+              <div class="pay-summary">
+                <span>EOFY Mobile Headlight Restoration</span>
+                <strong>$<span data-pay-amount><?= $EOFY['now'] ?></span></strong>
+              </div>
+              <form id="paymentForm" novalidate>
+                <input type="hidden" name="booking_id" id="payBookingId" />
+                <label>Name on card<input name="card_name" autocomplete="off" placeholder="As shown on card" required /></label>
+                <label>Card number<input name="card_number" inputmode="numeric" autocomplete="off" placeholder="4242 4242 4242 4242" required /></label>
+                <div class="form-row">
+                  <label>Expiry<input name="card_expiry" autocomplete="off" placeholder="MM/YY" required /></label>
+                  <label>CVC<input name="card_cvc" inputmode="numeric" autocomplete="off" placeholder="123" required /></label>
+                </div>
+                <p class="pay-note">🔒 Simulated gateway for testing — use any details. A card number ending in <strong>0002</strong> simulates a decline.</p>
+                <div class="step-nav">
+                  <button class="button button-secondary step-back-btn" type="button" data-prev="3"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg><span>Back</span></button>
+                  <button class="button button-primary pay-submit" type="submit"><span>Pay $<?= $EOFY['now'] ?> (Demo)</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></button>
+                </div>
+                <p class="form-status" role="status" aria-live="polite" data-pay-status></p>
+              </form>
+            </div>
+
+            <!-- Confirmation -->
+            <div class="form-panel booking-done" data-panel="5" hidden>
+              <div class="done-check" aria-hidden="true">&#10003;</div>
+              <h3 class="panel-title">Booking confirmed</h3>
+              <p class="panel-hint" data-done-msg>Thanks! We'll contact you shortly to confirm your mobile booking.</p>
+              <p class="pay-ref" data-pay-ref hidden></p>
+              <a class="button button-primary" href="/"><span>Back to home</span></a>
             </div>
           </div>
         </div>

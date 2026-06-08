@@ -152,12 +152,12 @@
         });
         const result = await response.json();
         if (result.success) {
-          status.textContent = "Thanks! We'll contact you shortly to confirm your mobile booking.";
-          form.reset();
-          goToStep(1);
-          googleAddressSelected = false;
-          const ai = qs("#addressInput"); if (ai) ai.value = "";
-          const mp = qs("#mapPreview"); if (mp) mp.hidden = true;
+          // Booking saved — move on to the (simulated) payment step
+          const payId = qs("#payBookingId");
+          if (payId) payId.value = result.booking_id || "";
+          qsa("[data-pay-amount]").forEach((e) => { e.textContent = result.amount || 99; });
+          status.textContent = "";
+          goToStep(4);
         } else {
           const firstError = result.errors ? Object.values(result.errors)[0]?.[0] : null;
           status.textContent = firstError || result.message || "Something went wrong. Please call us directly.";
@@ -167,8 +167,47 @@
       }
 
       button.disabled = false;
-      button.querySelector("span").textContent = "Request Booking";
+      button.querySelector("span").textContent = "Continue to Payment";
     });
+
+    // ── Simulated payment step ───────────────────────────────────────────────
+    const payForm = qs("#paymentForm");
+    const payStatus = qs("[data-pay-status]");
+    if (payForm && payStatus) {
+      payForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const invalid = qsa("[required]", payForm).filter((f) => !f.value.trim());
+        if (invalid.length) {
+          invalid.forEach((f) => f.setAttribute("aria-invalid", "true"));
+          payStatus.textContent = "Please complete all card fields.";
+          invalid[0].focus();
+          return;
+        }
+        const payBtn = qs('button[type="submit"]', payForm);
+        payBtn.disabled = true;
+        payBtn.querySelector("span").textContent = "Processing…";
+        payStatus.textContent = "";
+
+        try {
+          const res = await fetch("/pay", { method: "POST", body: new FormData(payForm) });
+          const result = await res.json();
+          if (result.success) {
+            const ref = qs("[data-pay-ref]");
+            if (ref) { ref.textContent = "Payment reference: " + result.reference; ref.hidden = false; }
+            const msg = qs("[data-done-msg]");
+            if (msg) msg.textContent = "Payment received (demo). We'll contact you shortly to confirm your mobile booking.";
+            goToStep(5);
+          } else {
+            payStatus.textContent = result.message || "Payment was declined. Please try another card.";
+          }
+        } catch {
+          payStatus.textContent = "Payment could not be processed. Please try again.";
+        }
+
+        payBtn.disabled = false;
+        payBtn.querySelector("span").textContent = "Pay (Demo)";
+      });
+    }
   }
 
   initBookingWizard();

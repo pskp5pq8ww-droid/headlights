@@ -31,8 +31,9 @@ if (is_dir($bookingsDir)) {
     foreach (glob($bookingsDir . '/booking_*.json') as $f) {
         $d = json_decode(file_get_contents($f), true);
         if (!is_array($d)) continue;
-        $d['_file']  = basename($f);
-        $d['status'] = $d['status'] ?? 'Pending';
+        $d['_file']          = basename($f);
+        $d['status']         = $d['status'] ?? 'Pending';
+        $d['payment_status'] = $d['payment_status'] ?? 'unpaid';
         $bookings[] = $d;
     }
 }
@@ -44,13 +45,15 @@ $todayStr  = $now->format('Y-m-d');
 $weekStart = (clone $now)->modify('monday this week')->format('Y-m-d');
 $weekEnd   = (clone $now)->modify('sunday this week')->format('Y-m-d');
 
-$stats = ['today' => 0, 'week' => 0, 'pending' => 0, 'completed' => 0, 'total' => count($bookings)];
+$stats = ['today' => 0, 'week' => 0, 'pending' => 0, 'paid' => 0, 'completed' => 0, 'total' => count($bookings)];
+$paidRevenue = 0;
 foreach ($bookings as $b) {
     $d = $b['date'] ?? '';
     if ($d === $todayStr) $stats['today']++;
     if ($d >= $weekStart && $d <= $weekEnd && $d !== '') $stats['week']++;
     if (($b['status'] ?? '') === 'Pending')   $stats['pending']++;
     if (($b['status'] ?? '') === 'Completed') $stats['completed']++;
+    if (($b['payment_status'] ?? '') === 'paid') { $stats['paid']++; $paidRevenue += (int)($b['amount'] ?? 0); }
 }
 
 // Upcoming (appointment date >= today), soonest first
@@ -129,6 +132,7 @@ function statusSelect(array $b): string {
         <div class="stat-card"><span class="stat-num"><?= $stats['today'] ?></span><span class="stat-label">Today's bookings</span></div>
         <div class="stat-card"><span class="stat-num"><?= $stats['week'] ?></span><span class="stat-label">This week</span></div>
         <div class="stat-card"><span class="stat-num"><?= $stats['pending'] ?></span><span class="stat-label">Pending</span></div>
+        <div class="stat-card"><span class="stat-num"><?= $stats['paid'] ?></span><span class="stat-label">Paid <small>($<?= $paidRevenue ?>)</small></span></div>
         <div class="stat-card"><span class="stat-num"><?= $stats['completed'] ?></span><span class="stat-label">Completed</span></div>
         <div class="stat-card highlight"><span class="stat-num"><?= $stats['total'] ?></span><span class="stat-label">Total bookings</span></div>
       </section>
@@ -162,16 +166,17 @@ function statusSelect(array $b): string {
           <div class="table-wrap">
           <table class="bookings-table">
             <thead><tr>
-              <th>Customer</th><th>Contact</th><th>Address / Suburb</th><th>Date</th><th>Time</th><th>Status</th><th>Notes</th>
+              <th>Customer</th><th>Contact</th><th>Address / Suburb</th><th>Date</th><th>Time</th><th>Payment</th><th>Status</th><th>Notes</th>
             </tr></thead>
             <tbody>
-            <?php foreach ($recent as $b): ?>
+            <?php foreach ($recent as $b): $paid = ($b['payment_status'] ?? '') === 'paid'; ?>
               <tr>
                 <td><?= htmlspecialchars($b['name'] ?? '') ?><small><?= htmlspecialchars($b['vehicle'] ?? '') ?></small></td>
                 <td><a href="tel:<?= htmlspecialchars($b['phone'] ?? '') ?>"><?= htmlspecialchars($b['phone'] ?? '') ?></a><small><?= htmlspecialchars($b['email'] ?? '') ?></small></td>
                 <td><?= htmlspecialchars($b['full_address'] ?: ($b['suburb'] ?? '')) ?></td>
                 <td><?= htmlspecialchars($b['date'] ?? '') ?></td>
                 <td><?= htmlspecialchars($b['time'] ?? '') ?></td>
+                <td><span class="badge <?= $paid ? 'badge-paid' : 'badge-unpaid' ?>"><?= $paid ? 'Paid' : 'Unpaid' ?></span><?php if ($paid && !empty($b['payment_ref'])): ?><small><?= htmlspecialchars($b['payment_ref']) ?></small><?php endif; ?></td>
                 <td><span class="badge <?= badge_class($b['status']) ?>"><?= htmlspecialchars($b['status']) ?></span><?= statusSelect($b) ?></td>
                 <td class="notes-cell"><?= htmlspecialchars($b['message'] ?? '') ?></td>
               </tr>
