@@ -29,13 +29,20 @@ This project now follows the same stability principle while keeping Shining Head
 - countdown
 - before/after visuals
 - booking wizard
-- Google Places autocomplete hooks
-- hidden Google address fields
+- manual service address or suburb field
 - PHP booking endpoint
 - JSON booking storage outside the public web root
 - email notification
-- admin booking viewer
+- secured admin booking dashboard
+- admin JSON APIs
 
 ## Archived Files
 
 Old Laravel/scaffold and duplicate root static files were moved into `_archive/` instead of being deleted.
+
+## Current Booking/Admin Notes
+
+- Google address autocomplete is no longer part of the booking flow.
+- Bookings are stored as individual JSON files in `Storagehighlights/bookings`.
+- Admin credentials are required through environment variables or `_private/admin.php`.
+- See `docs/BOOKING_ADMIN.md` for deployment, backup and testing details.

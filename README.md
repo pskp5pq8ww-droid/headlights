@@ -10,15 +10,20 @@ It is not a Laravel app in production. The old Laravel scaffold has been archive
 
 ## Main Structure
 
-- `public/index.php` - production entry file, injects private Maps config
-- `public/index.html` - landing page markup
+- `public/index.php` - production entry file
 - `public/form.php` - booking form handler
-- `public/admin/` - booking admin viewer
+- `public/book.php` - public booking wizard
+- `public/dashboard.php` - secured booking admin dashboard
+- `public/api/` - public/admin JSON endpoints
+- `public/includes/bookings.php` - file-based booking storage helpers
 - `public/css/styles.css` - site styles
+- `public/css/admin.css` - admin styles
 - `public/js/config.js` - public business/content config
-- `public/js/main.js` - frontend behavior
+- `public/js/site.js` - frontend behavior
+- `public/js/booking.js` - booking wizard behavior
 - `public/assets/` - images and SVG assets
-- `_private/maps.example.php` - template for private Maps key config
+- `_private/admin.php` - optional private admin credentials file, not committed
+- `Storagehighlights/` - private booking JSON storage on Hostinger, outside `public_html`
 - `_archive/` - old or duplicated files kept for safety
 - `docs/` - deploy, audit and testing notes
 
@@ -53,13 +58,13 @@ If using GitHub FTP deploy, `.github/workflows/deploy.yml` uploads only `public/
 
 Read [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) before going live.
 
-## Private Google Maps Config
+## Booking and Admin
 
-Do not put the real key in public JS or HTML.
+The booking flow uses manual service address or suburb entry. It does not require Google Maps or a database.
 
-1. Copy `_private/maps.example.php` to `_private/maps.php`.
-2. Add your restricted key to `_private/maps.php`.
-3. Keep `_private/maps.php` out of Git.
+Before using `/admin`, configure admin credentials with `ADMIN_USERNAME` and `ADMIN_PASSWORD`, or create `_private/admin.php` outside `public_html`.
+
+Read [docs/BOOKING_ADMIN.md](docs/BOOKING_ADMIN.md) for storage, backup, API and dashboard details.
 
 ## Edit Business Details
 

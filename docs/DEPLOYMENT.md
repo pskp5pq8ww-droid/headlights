@@ -14,20 +14,73 @@ It is not a Laravel deployment.
 - Output directory: `public`
 - Entry file: `public/index.php`
 - Booking endpoint: `public/form.php`
-- Admin panel: `public/admin/`
+- Public booking API: `/api/bookings`
+- Admin login: `/admin`
+- Admin dashboard: `/dashboard`
 
 If Hostinger cannot point the domain directly to `/public`, upload the whole repository and keep the root `.htaccess`; it rewrites traffic into `/public`.
 
-## Google Maps Key
+## Private Storage
 
-Keep the real Google Maps key outside the public web root.
+Bookings are stored as JSON files. No database migration is needed.
 
-1. Copy `_private/maps.example.php` to `_private/maps.php`.
-2. Paste the restricted Google Maps key into `_private/maps.php`.
-3. In Google Cloud Console, restrict the key by domain and APIs.
-4. Required APIs: Maps JavaScript API and Places API.
+Default Hostinger path:
 
-Do not commit `_private/maps.php` to a public repository.
+```text
+/home/YOUR_USER/Storagehighlights/
+```
+
+The app creates:
+
+```text
+Storagehighlights/bookings/
+Storagehighlights/booking-uploads/
+Storagehighlights/logs/
+```
+
+Recommended permissions:
+
+```text
+Storagehighlights directories: 700
+booking JSON files: 600
+uploaded photos: 600
+```
+
+If Hostinger uses a different private location, set:
+
+```text
+BOOKING_STORAGE_PATH=/home/YOUR_USER/Storagehighlights
+```
+
+Keep this folder outside `public_html`.
+
+## Admin Credentials
+
+Preferred option: configure environment variables in Hostinger:
+
+```text
+ADMIN_USERNAME=your-admin-user
+ADMIN_PASSWORD=your-strong-password
+ADMIN_EMAIL=bookings@yourdomain.com
+```
+
+Alternative option: create this private file outside `public_html`:
+
+```text
+_private/admin.php
+```
+
+Example:
+
+```php
+<?php
+return [
+  'username' => 'your-admin-user',
+  'password_hash' => password_hash('your-strong-password', PASSWORD_BCRYPT),
+];
+```
+
+Do not commit `_private/admin.php`.
 
 ## GitHub FTP Deploy
 
@@ -39,25 +92,25 @@ GitHub secrets needed:
 - `FTP_USERNAME`
 - `FTP_PASSWORD`
 
-When using FTP deploy, manually create `_private/maps.php` on Hostinger one level above the public document root, or use Hostinger File Manager to upload it outside `public_html`.
+When using FTP deploy, manually create `Storagehighlights/` and `_private/admin.php` one level above the public document root, or use Hostinger File Manager to create them outside `public_html`.
 
 ## Manual Upload
 
 Upload the contents of `public/` into `public_html`.
 
-Also create this private file outside `public_html`:
+Also create these outside `public_html`:
 
 ```text
-_private/maps.php
+Storagehighlights/
+_private/admin.php
 ```
-
-Use `_private/maps.example.php` as the template.
 
 ## Live Update Checklist
 
 - Clear Hostinger cache if enabled.
 - Open the site in a private browser window.
-- Confirm page source contains `<meta name="gmap-key"`.
-- Confirm `css/styles.css` and `js/main.js` are loading from the latest upload.
+- Confirm `css/styles.css`, `css/admin.css`, `js/site.js` and `js/booking.js` are loading from the latest upload.
 - Test booking form submission.
-- Test `/admin/`.
+- Confirm a JSON file appears in `Storagehighlights/bookings`.
+- Test `/admin` login.
+- Test `/dashboard` booking status and notes updates.

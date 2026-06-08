@@ -3,7 +3,6 @@ require_once __DIR__ . '/config.php';
 $current      = $current      ?? '';
 $page_title   = $page_title   ?? ($SITE['name'] . ' | ' . $SITE['tagline']);
 $page_desc    = $page_desc    ?? 'Mobile headlight restoration in Brisbane. We come to you — home, workplace or driveway.';
-$page_maps    = $page_maps    ?? false;
 $body_class   = trim((string)($body_class ?? ''));
 ?><!doctype html>
 <html lang="en-AU">
@@ -14,9 +13,6 @@ $body_class   = trim((string)($body_class ?? ''));
     <meta name="description" content="<?= htmlspecialchars($page_desc) ?>" />
     <meta name="theme-color" content="#071827" />
     <link rel="canonical" href="<?= htmlspecialchars($SITE['canonical']) ?>/" />
-<?php if ($page_maps): ?>
-    <meta name="gmap-key" content="<?= htmlspecialchars(maps_api_key(), ENT_QUOTES) ?>" />
-<?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />

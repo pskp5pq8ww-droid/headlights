@@ -89,16 +89,6 @@ $NAV = [
     'contact'      => ['/contact',      'Contact'],
 ];
 
-// ── Google Maps key loader (private, outside web root) ───────────────────────
-function maps_api_key(): string {
-    $file = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/_private/maps.php';
-    if (is_file($file)) {
-        $c = include $file;
-        if (is_array($c)) return (string)($c['google_maps_api_key'] ?? '');
-    }
-    return '';
-}
-
 // Helper: versioned asset URL
 function asset(string $path): string {
     return '/' . ltrim($path, '/') . '?v=' . ASSET_VER;

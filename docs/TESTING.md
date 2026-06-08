@@ -7,14 +7,18 @@
 - Countdown ticks.
 - Package cards render.
 - FAQ accordion opens.
-- Booking wizard step 1 requires a Google-selected address.
-- Google suggestions appear after the Maps key is configured.
-- Hidden address fields populate after selecting a suggestion.
-- Map marker appears for the selected address.
+- Booking wizard step 1 requires a manually typed service address or suburb.
+- No Google Maps script, Google Places autocomplete, or map marker is required for booking.
 - Booking form validates required fields.
 - Booking form submits to `form.php`.
 - Booking JSON files are created in `Storagehighlights/bookings`.
+- Optional photos are accepted only as image files up to 5 MB each and stored in `Storagehighlights/booking-uploads`.
 - Email notification sends from Hostinger.
-- `/admin/` opens and shows saved bookings after login.
+- `/admin` opens after private admin credentials are configured.
+- `/dashboard` shows saved bookings after login.
+- Dashboard filters by search, status, package and preferred date.
+- Dashboard calendar shows daily booking counts.
+- Dashboard booking detail saves status, admin notes and follow-up fields.
+- `/api/admin/bookings` returns JSON only after admin login.
 - Browser console has no production errors.
 - Hostinger deploy updates after pushing to the correct branch.

@@ -2,13 +2,11 @@
 /**
  * Minimal session-based admin authentication.
  *
- * Credentials are read from a private file outside the web root:
+ * Credentials are read from environment variables or a private file outside the web root:
+ *   ADMIN_USERNAME + ADMIN_PASSWORD
+ * or:
  *   /home/uXXX/_private/admin.php   (NOT inside public_html, NOT in git)
  * which returns: ['username' => '...', 'password_hash' => '<bcrypt hash>']
- *
- * If that file is missing, a default account is used so the dashboard is
- * testable immediately:  username "admin"  /  password "eofy2026".
- * CHANGE THIS for production — see docs/DEPLOYMENT.md.
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -17,6 +15,15 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 function admin_credentials(): array {
+    $envUser = getenv('ADMIN_USERNAME') ?: '';
+    $envPass = getenv('ADMIN_PASSWORD') ?: '';
+    if ($envUser !== '' && $envPass !== '') {
+        return [
+            'username' => $envUser,
+            'password_hash' => password_hash($envPass, PASSWORD_BCRYPT),
+        ];
+    }
+
     $file = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/_private/admin.php';
     if (is_file($file)) {
         $c = include $file;
@@ -24,15 +31,13 @@ function admin_credentials(): array {
             return $c;
         }
     }
-    // Fallback default (hashed at runtime — still bcrypt, never plain-text compared)
-    return [
-        'username'      => 'admin',
-        'password_hash' => password_hash('eofy2026', PASSWORD_BCRYPT),
-    ];
+
+    return ['username' => '', 'password_hash' => ''];
 }
 
 function admin_attempt(string $username, string $password): bool {
     $c = admin_credentials();
+    if (($c['username'] ?? '') === '' || ($c['password_hash'] ?? '') === '') return false;
     $userOk = hash_equals($c['username'], $username);
     $passOk = password_verify($password, $c['password_hash']);
     if ($userOk && $passOk) {

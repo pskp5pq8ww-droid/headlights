@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </a>
 
     <h1>Sign in</h1>
-    <p class="auth-secure">🔒 Secure access only. Authorised staff.</p>
+    <p class="auth-secure">Secure access only. Authorised staff.</p>
 
     <?php if ($error): ?><p class="auth-error" role="alert"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 

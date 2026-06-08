@@ -5,6 +5,11 @@ Options -Indexes
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # API route helpers
+  RewriteRule ^api/admin/bookings/([^/]+)/?$ api/admin/bookings.php?id=$1 [L,QSA]
+  RewriteRule ^admin/login/?$ admin.php [L,QSA]
+  RewriteRule ^admin/dashboard/?$ dashboard.php [L,QSA]
+
   # /index or /index.php → /
   RewriteRule ^index(\.php)?$ / [L,R=301]
 
