@@ -140,7 +140,7 @@ function asset(string $path): string {
 
 // Google Maps key loader. Keep real keys outside public_html, ideally in private/maps.php.
 function maps_api_key(): string {
-    $envKey = getenv('GOOGLE_MAPS_API_KEY') ?: getenv('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY') ?: '';
+    $envKey = maps_env_value('GOOGLE_MAPS_API_KEY') ?: maps_env_value('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY');
     if ($envKey !== '') return trim($envKey);
 
     foreach (maps_env_file_candidates() as $envFile) {
@@ -160,51 +160,78 @@ function maps_api_key(): string {
     return '';
 }
 
-/**
- * Search paths for private/maps.php — ordered from most-likely to least-likely.
- *
- * Hostinger shared-hosting layout (typical):
- *   /home/u[id]/                         ← user home  (dirname(__DIR__, 3) from includes/)
- *     htdocs/                            ← dirname(DOCUMENT_ROOT)
- *       orangered-rhinoceros-*.hostingersite.com/  ← DOCUMENT_ROOT = web root
- *         includes/                      ← __DIR__
- *
- * The private/ folder must sit outside public_html, normally beside it.
- * _private/maps.php remains supported as a legacy fallback for existing installs.
- */
-function maps_php_candidates(): array {
-    $docRoot  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__), '/');
-    $userHome = dirname(__DIR__, 3); // includes → web-root → htdocs → user-home
+function maps_env_value(string $name): string {
+    $value = getenv($name);
+    if (is_string($value) && trim($value) !== '') return trim($value);
+    if (isset($_ENV[$name]) && trim((string)$_ENV[$name]) !== '') return trim((string)$_ENV[$name]);
+    if (isset($_SERVER[$name]) && trim((string)$_SERVER[$name]) !== '') return trim((string)$_SERVER[$name]);
+    return '';
+}
 
-    return array_values(array_unique([
-        dirname($docRoot)  . '/private/maps.php',  // same level as public_html/web root:       PRIMARY
-        $userHome          . '/private/maps.php',  // Hostinger user home fallback
-        dirname(__DIR__, 2). '/private/maps.php',  // local/project fallback
-        dirname(__DIR__)   . '/private/maps.php',  // last local fallback
-        $userHome          . '/_private/maps.php', // legacy Hostinger user home fallback
-        dirname($docRoot)  . '/_private/maps.php', // legacy one-above-web-root fallback
-        dirname(__DIR__, 2). '/_private/maps.php', // legacy local/project fallback
-        dirname(__DIR__)   . '/_private/maps.php', // legacy last local fallback
-    ]));
+function maps_php_candidates(): array {
+    $roots = maps_private_roots();
+    $paths = [];
+
+    foreach ($roots as $root) {
+        $paths[] = $root . '/private/maps.php';
+    }
+    foreach ($roots as $root) {
+        $paths[] = $root . '/_private/maps.php';
+    }
+
+    return array_values(array_unique($paths));
 }
 
 function maps_env_file_candidates(): array {
-    $docRoot     = rtrim($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__), '/');
-    $docParent   = dirname($docRoot);
-    $userHome    = dirname(__DIR__, 3);
-    $projectRoot = dirname(__DIR__, 2);
-    return array_values(array_unique([
-        $userHome    . '/.env',
-        $userHome    . '/_private/.env',
-        $userHome    . '/_private/env',
-        $docParent   . '/.env',
-        $docParent   . '/_private/.env',
-        $docParent   . '/_private/env',
-        $projectRoot . '/.env',
-        $projectRoot . '/env',
-        $projectRoot . '/_private/.env',
-        $projectRoot . '/_private/env',
-    ]));
+    $paths = [];
+    foreach (maps_private_roots() as $root) {
+        $paths[] = $root . '/.env';
+        $paths[] = $root . '/env';
+        $paths[] = $root . '/private/.env';
+        $paths[] = $root . '/private/env';
+        $paths[] = $root . '/_private/.env';
+        $paths[] = $root . '/_private/env';
+    }
+
+    return array_values(array_unique($paths));
+}
+
+/**
+ * Candidate private roots, from closest to the public web root up to the account home.
+ * This covers Hostinger layouts like /home/{user}/domains/site/public_html
+ * with the config file at /home/{user}/private/maps.php.
+ */
+function maps_private_roots(): array {
+    $roots = [];
+    $docRoot = maps_normalize_path($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__));
+    $includeRoot = maps_normalize_path(dirname(__DIR__));
+
+    foreach ([dirname($docRoot), dirname($includeRoot), getenv('HOME') ?: ''] as $start) {
+        foreach (maps_path_ancestors($start, 8) as $ancestor) {
+            $roots[] = $ancestor;
+        }
+    }
+
+    return array_values(array_unique(array_filter($roots)));
+}
+
+function maps_path_ancestors(string $path, int $limit): array {
+    $path = maps_normalize_path($path);
+    if ($path === '') return [];
+
+    $ancestors = [$path];
+    for ($i = 0; $i < $limit; $i++) {
+        $parent = dirname($path);
+        if ($parent === $path || $parent === '.' || $parent === '') break;
+        $ancestors[] = $parent;
+        $path = $parent;
+    }
+
+    return $ancestors;
+}
+
+function maps_normalize_path(string $path): string {
+    return rtrim($path, "/\\");
 }
 
 function maps_key_from_env_file(string $file): string {
