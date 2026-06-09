@@ -170,7 +170,7 @@ function maps_env_value(string $name): string {
 
 function maps_php_candidates(): array {
     $roots = maps_private_roots();
-    $paths = [];
+    $paths = ['/home/u613502604/private/maps.php'];
 
     foreach ($roots as $root) {
         $paths[] = $root . '/private/maps.php';
