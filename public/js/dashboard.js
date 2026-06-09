@@ -21,4 +21,21 @@
   }
   tick();
   setInterval(tick, 1000);
+
+  document.querySelectorAll("[data-copy]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const value = button.getAttribute("data-copy") || "";
+      if (!value.trim()) return;
+      try {
+        await navigator.clipboard.writeText(value);
+        const original = button.textContent;
+        button.textContent = "Copied";
+        window.setTimeout(() => {
+          button.textContent = original;
+        }, 1200);
+      } catch {
+        button.textContent = "Select text";
+      }
+    });
+  });
 })();

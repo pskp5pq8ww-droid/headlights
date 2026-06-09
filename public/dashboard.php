@@ -20,6 +20,10 @@ try {
                 ]);
             } elseif ($action === 'quick_status') {
                 updateBooking($id, ['status' => $_POST['status'] ?? '']);
+            } elseif ($action === 'delete_booking') {
+                if (($_POST['confirm_delete'] ?? '') === 'yes') {
+                    deleteBooking($id);
+                }
             }
         }
         $redirect = '/dashboard';
@@ -47,16 +51,32 @@ $search = strtolower(clean_text($_GET['search'] ?? '', 120));
 $statusFilter = clean_text($_GET['status'] ?? '', 40);
 $packageFilter = clean_text($_GET['package'] ?? '', 120);
 $dateFilter = clean_text($_GET['filter_date'] ?? '', 40);
+$dateRange = clean_text($_GET['date_range'] ?? '', 40);
+$dateFrom = clean_text($_GET['date_from'] ?? '', 40);
+$dateTo = clean_text($_GET['date_to'] ?? '', 40);
 $sort = clean_text($_GET['sort'] ?? 'newest', 40);
 
-$filtered = array_values(array_filter($bookings, function ($b) use ($search, $statusFilter, $packageFilter, $dateFilter) {
+$filtered = array_values(array_filter($bookings, function ($b) use ($search, $statusFilter, $packageFilter, $dateFilter, $dateRange, $dateFrom, $dateTo, $now) {
     if ($statusFilter !== '' && ($b['status'] ?? '') !== $statusFilter) return false;
     if ($packageFilter !== '' && ($b['packageSelected'] ?? '') !== $packageFilter) return false;
-    if ($dateFilter !== '' && ($b['preferredDate'] ?? '') !== $dateFilter) return false;
+    $preferred = (string)($b['preferredDate'] ?? '');
+    if ($dateFilter !== '' && $preferred !== $dateFilter) return false;
+    if ($dateRange === 'today' && $preferred !== $now->format('Y-m-d')) return false;
+    if ($dateRange === 'week') {
+        $from = $now->modify('monday this week')->format('Y-m-d');
+        $to = $now->modify('sunday this week')->format('Y-m-d');
+        if ($preferred === '' || $preferred < $from || $preferred > $to) return false;
+    }
+    if ($dateRange === 'month' && !str_starts_with($preferred, $now->format('Y-m'))) return false;
+    if ($dateRange === 'custom') {
+        if ($dateFrom !== '' && ($preferred === '' || $preferred < $dateFrom)) return false;
+        if ($dateTo !== '' && ($preferred === '' || $preferred > $dateTo)) return false;
+    }
     if ($search !== '') {
         $haystack = strtolower(implode(' ', [
             $b['fullName'] ?? '', $b['phone'] ?? '', $b['email'] ?? '',
             $b['vehicleMakeModel'] ?? '', $b['addressOrSuburb'] ?? '',
+            $b['formattedAddress'] ?? '', $b['addressSuburb'] ?? '', $b['addressPostcode'] ?? '',
         ]));
         if (!str_contains($haystack, $search)) return false;
     }
@@ -83,9 +103,17 @@ foreach ($bookings as $b) {
 function h(mixed $value): string { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
 function status_label(string $status): string { return ucwords(str_replace('_', ' ', $status)); }
 function badge_class_admin(string $status): string { return 'badge-' . str_replace('_', '-', strtolower($status)); }
+function maps_link(array $b): string {
+    if (!empty($b['addressLat']) && !empty($b['addressLng'])) return 'https://www.google.com/maps?q=' . rawurlencode($b['addressLat'] . ',' . $b['addressLng']);
+    $address = $b['formattedAddress'] ?: $b['addressOrSuburb'] ?? '';
+    return $address !== '' ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($address) : '';
+}
+function booking_price(array $b): int { return package_price((string)($b['packageSelected'] ?? '')); }
 function status_options(string $current): string {
     $html = '';
-    foreach (BOOKING_STATUSES as $status) {
+    $statuses = ['new', 'contacted', 'confirmed', 'completed', 'cancelled'];
+    if ($current !== '' && !in_array($current, $statuses, true)) $statuses[] = $current;
+    foreach ($statuses as $status) {
         $selected = $status === $current ? ' selected' : '';
         $html .= '<option value="' . h($status) . '"' . $selected . '>' . h(status_label($status)) . '</option>';
     }
@@ -140,15 +168,15 @@ function package_options(string $current = ''): string {
       <?php if ($error): ?><p class="admin-error" role="alert"><?= h($error) ?></p><?php endif; ?>
 
       <section class="stat-grid" id="metrics" aria-label="Dashboard metrics">
+        <div class="stat-card"><span class="stat-num"><?= $stats['total'] ?></span><span class="stat-label">Total Bookings</span></div>
+        <div class="stat-card"><span class="stat-num"><?= $stats['new'] ?></span><span class="stat-label">New Bookings</span></div>
+        <div class="stat-card"><span class="stat-num"><?= $stats['confirmed'] ?></span><span class="stat-label">Confirmed Bookings</span></div>
+        <div class="stat-card"><span class="stat-num"><?= $stats['completed'] ?></span><span class="stat-label">Completed Bookings</span></div>
+        <div class="stat-card"><span class="stat-num"><?= $stats['cancelled'] ?></span><span class="stat-label">Cancelled Bookings</span></div>
         <div class="stat-card"><span class="stat-num"><?= $stats['today'] ?></span><span class="stat-label">Today's Bookings</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['new'] ?></span><span class="stat-label">New Leads</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['confirmed'] ?></span><span class="stat-label">Confirmed Jobs</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['completed'] ?></span><span class="stat-label">Completed Jobs</span></div>
+        <div class="stat-card"><span class="stat-num"><?= $stats['contacted'] ?></span><span class="stat-label">Contacted</span></div>
         <div class="stat-card highlight"><span class="stat-num">$<?= $stats['estimatedRevenue'] ?></span><span class="stat-label">Estimated Revenue</span></div>
         <div class="stat-card"><span class="stat-num"><?= $stats['pendingFollowUps'] ?></span><span class="stat-label">Pending Follow-ups</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['week'] ?></span><span class="stat-label">This Week's Bookings</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['month'] ?></span><span class="stat-label">This Month's Bookings</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['cancelled'] ?></span><span class="stat-label">Cancelled Bookings</span></div>
         <div class="stat-card wide"><span class="stat-num small"><?= h($stats['mostSelectedPackage']) ?></span><span class="stat-label">Most Selected Package</span></div>
       </section>
 
@@ -210,7 +238,16 @@ function package_options(string $current = ''): string {
           <input type="search" name="search" value="<?= h($_GET['search'] ?? '') ?>" placeholder="Search name, phone, email, vehicle, suburb" />
           <select name="status"><option value="">All statuses</option><?= status_options($statusFilter) ?></select>
           <select name="package"><?= package_options($packageFilter) ?></select>
+          <select name="date_range">
+            <option value="">Any date</option>
+            <option value="today"<?= $dateRange === 'today' ? ' selected' : '' ?>>Today</option>
+            <option value="week"<?= $dateRange === 'week' ? ' selected' : '' ?>>This week</option>
+            <option value="month"<?= $dateRange === 'month' ? ' selected' : '' ?>>This month</option>
+            <option value="custom"<?= $dateRange === 'custom' ? ' selected' : '' ?>>Custom range</option>
+          </select>
           <input type="date" name="filter_date" value="<?= h($dateFilter) ?>" />
+          <input type="date" name="date_from" value="<?= h($dateFrom) ?>" aria-label="Date from" />
+          <input type="date" name="date_to" value="<?= h($dateTo) ?>" aria-label="Date to" />
           <select name="sort">
             <option value="newest"<?= $sort === 'newest' ? ' selected' : '' ?>>Sort by newest</option>
             <option value="preferred_date"<?= $sort === 'preferred_date' ? ' selected' : '' ?>>Sort by preferred date</option>
@@ -221,26 +258,57 @@ function package_options(string $current = ''): string {
         <?php if (!$filtered): ?>
           <p class="empty">No bookings found.</p>
         <?php else: ?>
-          <div class="table-wrap">
-            <table class="bookings-table">
-              <thead><tr><th>Date</th><th>Time window</th><th>Customer</th><th>Phone</th><th>Location</th><th>Vehicle</th><th>Package</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
-              <tbody>
-              <?php foreach ($filtered as $b): ?>
-                <tr>
-                  <td><?= h($b['preferredDate']) ?></td>
-                  <td><?= h($b['preferredTimeWindow']) ?></td>
-                  <td><?= h($b['fullName']) ?><small><?= h($b['email']) ?></small></td>
-                  <td><a href="tel:<?= h($b['phone']) ?>"><?= h($b['phone']) ?></a></td>
-                  <td><?= h($b['addressOrSuburb']) ?></td>
-                  <td><?= h($b['vehicleMakeModel']) ?></td>
-                  <td><?= h($b['packageSelected']) ?></td>
-                  <td><span class="badge <?= badge_class_admin($b['status']) ?>"><?= h(status_label($b['status'])) ?></span></td>
-                  <td><?= h(substr($b['createdAt'], 0, 10)) ?></td>
-                  <td><a class="up-action" href="/dashboard?date=<?= h($b['preferredDate'] ?: $selectedDate) ?>&id=<?= h($b['id']) ?>#detail">View details</a></td>
-                </tr>
-              <?php endforeach; ?>
-              </tbody>
-            </table>
+          <div class="booking-card-list">
+            <?php foreach ($filtered as $b): $mapUrl = maps_link($b); $price = booking_price($b); ?>
+              <article class="admin-booking-card" id="booking-<?= h($b['id']) ?>">
+                <div class="booking-card-main">
+                  <div class="booking-card-title">
+                    <h3><?= h($b['fullName'] ?: 'Unnamed customer') ?></h3>
+                    <span class="badge <?= badge_class_admin($b['status']) ?>"><?= h(status_label($b['status'])) ?></span>
+                  </div>
+                  <div class="booking-quick-grid">
+                    <div>
+                      <span class="field-label">Email</span>
+                      <a class="field-value" href="mailto:<?= h($b['email']) ?>"><?= h($b['email'] ?: 'No email') ?></a>
+                    </div>
+                    <div>
+                      <span class="field-label">Phone</span>
+                      <a class="field-value" href="tel:<?= h($b['phone']) ?>"><?= h($b['phone'] ?: 'No phone') ?></a>
+                    </div>
+                    <div>
+                      <span class="field-label">Location</span>
+                      <span class="field-value"><?= h($b['addressSuburb'] ?: $b['addressOrSuburb']) ?></span>
+                    </div>
+                    <div>
+                      <span class="field-label">Vehicle</span>
+                      <span class="field-value"><?= h($b['vehicleMakeModel'] ?: 'Vehicle not supplied') ?></span>
+                    </div>
+                    <div>
+                      <span class="field-label">Preferred</span>
+                      <span class="field-value"><?= h(trim(($b['preferredDate'] ?? '') . ' ' . ($b['preferredTimeWindow'] ?? ''))) ?></span>
+                    </div>
+                    <div>
+                      <span class="field-label">Price</span>
+                      <span class="field-value"><?= $price > 0 ? '$' . h((string)$price) : 'Quote' ?></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="booking-card-actions">
+                  <button type="button" class="mini-action" data-copy="<?= h($b['email']) ?>">Copy Email</button>
+                  <button type="button" class="mini-action" data-copy="<?= h($b['phone']) ?>">Copy Phone</button>
+                  <?php if (!empty($b['email'])): ?><a class="mini-action" href="mailto:<?= h($b['email']) ?>">Open Mail</a><?php endif; ?>
+                  <?php if (!empty($b['phone'])): ?><a class="mini-action call-action" href="tel:<?= h($b['phone']) ?>">Call</a><?php endif; ?>
+                  <?php if ($mapUrl !== ''): ?><a class="mini-action" href="<?= h($mapUrl) ?>" target="_blank" rel="noopener">Open Maps</a><?php endif; ?>
+                  <a class="mini-action is-primary" href="/dashboard?date=<?= h($b['preferredDate'] ?: $selectedDate) ?>&id=<?= h($b['id']) ?>#detail">View Details</a>
+                  <form method="post" class="quick-status-form">
+                    <input type="hidden" name="action" value="quick_status" />
+                    <input type="hidden" name="id" value="<?= h($b['id']) ?>" />
+                    <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
+                    <select name="status" onchange="this.form.submit()"><?= status_options($b['status']) ?></select>
+                  </form>
+                </div>
+              </article>
+            <?php endforeach; ?>
           </div>
         <?php endif; ?>
       </section>
@@ -264,50 +332,73 @@ function package_options(string $current = ''): string {
         <h2>Booking details</h2>
         <?php if (!$selectedBooking): ?>
           <p class="empty">Select a booking to view details.</p>
-        <?php else: $b = $selectedBooking; ?>
+        <?php else: $b = $selectedBooking; $mapUrl = maps_link($b); $price = booking_price($b); ?>
           <form method="post" class="detail-grid">
             <input type="hidden" name="action" value="update_booking" />
             <input type="hidden" name="id" value="<?= h($b['id']) ?>" />
             <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
             <input type="hidden" name="detail" value="<?= h($b['id']) ?>" />
             <div class="detail-card">
-              <h3>Customer</h3>
+              <h3>Customer Details</h3>
               <p><strong><?= h($b['fullName']) ?></strong></p>
-              <p><a href="tel:<?= h($b['phone']) ?>"><?= h($b['phone']) ?></a></p>
               <p><a href="mailto:<?= h($b['email']) ?>"><?= h($b['email']) ?></a></p>
+              <p><a href="tel:<?= h($b['phone']) ?>"><?= h($b['phone']) ?></a></p>
+              <p>Preferred contact: <?= h($b['preferredContactMethod']) ?></p>
+              <div class="detail-actions-row">
+                <button type="button" class="mini-action" data-copy="<?= h($b['email']) ?>">Copy Email</button>
+                <button type="button" class="mini-action" data-copy="<?= h($b['phone']) ?>">Copy Phone</button>
+                <?php if (!empty($b['email'])): ?><a class="mini-action" href="mailto:<?= h($b['email']) ?>">Open Mail</a><?php endif; ?>
+                <?php if (!empty($b['phone'])): ?><a class="mini-action call-action" href="tel:<?= h($b['phone']) ?>">Call</a><?php endif; ?>
+              </div>
               <p><?= h($b['addressOrSuburb']) ?></p>
               <?php if (!empty($b['formattedAddress'])): ?><p><?= h($b['formattedAddress']) ?></p><?php endif; ?>
               <?php if (!empty($b['addressSuburb']) || !empty($b['addressPostcode']) || !empty($b['addressState']) || !empty($b['addressCountry'])): ?>
                 <p><?= h(trim(($b['addressSuburb'] ?? '') . ' ' . ($b['addressPostcode'] ?? '') . ' ' . ($b['addressState'] ?? '') . ' ' . ($b['addressCountry'] ?? ''))) ?></p>
               <?php endif; ?>
-              <?php if (!empty($b['addressLat']) && !empty($b['addressLng'])): ?>
-                <p><a href="https://www.google.com/maps?q=<?= h($b['addressLat']) ?>,<?= h($b['addressLng']) ?>" target="_blank" rel="noopener">Open in Google Maps</a></p>
-              <?php endif; ?>
+              <?php if ($mapUrl !== ''): ?><p><a href="<?= h($mapUrl) ?>" target="_blank" rel="noopener">Open in Google Maps</a></p><?php endif; ?>
             </div>
             <div class="detail-card">
-              <h3>Booking</h3>
+              <h3>Vehicle Details</h3>
+              <p>Vehicle: <?= h($b['vehicleMakeModel'] ?: 'Not supplied') ?></p>
+              <p>Number of headlights: <?= h($b['numberOfHeadlights']) ?></p>
+              <p>Condition notes: <?= h($b['headlightCondition'] ?: 'Not supplied') ?></p>
+              <p>Vehicle location type: <?= h($b['vehicleLocationType'] ?: 'Not supplied') ?></p>
+              <p>Customer message: <?= h($b['message'] ?: 'No message') ?></p>
+            </div>
+            <div class="detail-card">
+              <h3>Booking Details</h3>
               <label>Status<select name="status"><?= status_options($b['status']) ?></select></label>
-              <label>Date<input type="date" name="preferredDate" value="<?= h($b['preferredDate']) ?>" /></label>
-              <label>Time window<input name="preferredTimeWindow" value="<?= h($b['preferredTimeWindow']) ?>" /></label>
-              <p><?= h($b['vehicleMakeModel']) ?> · <?= h($b['packageSelected']) ?></p>
+              <label>Preferred date<input type="date" name="preferredDate" value="<?= h($b['preferredDate']) ?>" /></label>
+              <label>Preferred time<input name="preferredTimeWindow" value="<?= h($b['preferredTimeWindow']) ?>" /></label>
+              <p>Service selected: <?= h($b['packageSelected']) ?></p>
+              <p>Promo selected: <?= str_contains($b['packageSelected'], 'EOFY') ? 'EOFY Sale' : 'None' ?></p>
+              <p>Price: <?= $price > 0 ? '$' . h((string)$price) : 'Quote' ?></p>
+              <p>Created: <?= h($b['createdAt']) ?></p>
+              <p>Last updated: <?= h($b['updatedAt']) ?></p>
             </div>
             <div class="detail-card">
-              <h3>Internal notes</h3>
+              <h3>Admin Notes</h3>
               <label>Admin notes<textarea name="adminNotes" rows="5"><?= h($b['adminNotes']) ?></textarea></label>
               <label class="check-row"><input type="checkbox" name="followUpRequired" <?= !empty($b['followUpRequired']) ? 'checked' : '' ?> /> Follow-up required</label>
               <label>Follow-up date<input type="date" name="followUpDate" value="<?= h($b['followUpDate']) ?>" /></label>
             </div>
-            <div class="detail-card">
-              <h3>Full information</h3>
-              <p>Condition: <?= h($b['headlightCondition']) ?></p>
-              <p>Location type: <?= h($b['vehicleLocationType']) ?></p>
-              <p>Headlights: <?= h($b['numberOfHeadlights']) ?></p>
-              <p>Preferred contact: <?= h($b['preferredContactMethod']) ?></p>
-              <p>Message: <?= h($b['message']) ?></p>
-              <p>Created: <?= h($b['createdAt']) ?></p>
-              <p>Updated: <?= h($b['updatedAt']) ?></p>
+            <div class="detail-card detail-card-wide">
+              <h3>Booking Actions</h3>
+              <div class="status-actions">
+                <?php foreach (['new', 'contacted', 'confirmed', 'completed', 'cancelled'] as $status): ?>
+                  <button class="mini-action" type="submit" name="status" value="<?= h($status) ?>">Mark as <?= h(status_label($status)) ?></button>
+                <?php endforeach; ?>
+              </div>
+              <p class="detail-muted">Save keeps status, date, time, follow-up and internal notes persistent in the private JSON booking file.</p>
             </div>
             <button class="auth-submit detail-save" type="submit">Save booking</button>
+          </form>
+          <form method="post" class="delete-booking-form" onsubmit="return confirm('Delete this booking from the dashboard? The JSON file will be kept but hidden.');">
+            <input type="hidden" name="action" value="delete_booking" />
+            <input type="hidden" name="id" value="<?= h($b['id']) ?>" />
+            <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
+            <input type="hidden" name="confirm_delete" value="yes" />
+            <button type="submit">Delete booking</button>
           </form>
         <?php endif; ?>
       </section>

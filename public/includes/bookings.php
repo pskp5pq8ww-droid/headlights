@@ -261,6 +261,20 @@ function updateBooking(string $id, array $updates): ?array {
     return writeBooking($booking);
 }
 
+function deleteBooking(string $id): ?array {
+    $booking = getBookingById($id);
+    if (!$booking) return null;
+    $booking['deleted'] = true;
+    $booking['status'] = 'cancelled';
+    $booking['updatedAt'] = booking_now();
+    $booking['history'][] = [
+        'at' => $booking['updatedAt'],
+        'type' => 'deleted',
+        'message' => 'Booking hidden from dashboard.',
+    ];
+    return writeBooking($booking);
+}
+
 function getBookingsByDate(string $date): array {
     return array_values(array_filter(readBookings(), fn($b) => ($b['preferredDate'] ?? '') === $date));
 }
@@ -280,6 +294,7 @@ function getBookingStats(array $bookings = null): array {
     $stats = [
         'total' => count($bookings),
         'new' => 0,
+        'contacted' => 0,
         'confirmed' => 0,
         'completed' => 0,
         'cancelled' => 0,

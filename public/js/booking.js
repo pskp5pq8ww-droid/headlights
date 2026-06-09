@@ -119,14 +119,18 @@
         }
         status.textContent = "Thanks! Your booking request has been received. We'll contact you shortly to confirm your mobile service.";
         window.ShiningGSAP?.playFormSuccessAnimation(form);
-        form.reset();
-        goToStep(1);
+        const redirect = result.redirect_url || `/thank-you?booking=${encodeURIComponent(result.booking_id || "")}`;
+        window.setTimeout(() => {
+          window.location.href = redirect;
+        }, 650);
       } catch {
         status.textContent = "Something went wrong. Please try again or contact us directly.";
         window.ShiningGSAP?.playFormErrorAnimation(form);
       } finally {
-        button.disabled = false;
-        button.querySelector("span").textContent = "Request Booking";
+        if (!status.textContent.startsWith("Thanks!")) {
+          button.disabled = false;
+          button.querySelector("span").textContent = "Request Booking";
+        }
       }
     });
   }

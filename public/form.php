@@ -83,6 +83,7 @@ try {
     booking_json_response([
         'success' => true,
         'booking_id' => $booking['id'],
+        'redirect_url' => '/thank-you?booking=' . rawurlencode($booking['id']),
         'message' => "Thanks! Your booking request has been received. We'll contact you shortly to confirm your mobile service.",
     ]);
 } catch (Throwable $e) {
