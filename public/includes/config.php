@@ -157,7 +157,11 @@ function maps_api_key(): string {
         }
     }
 
-    return '';
+    return maps_restricted_browser_key_fallback();
+}
+
+function maps_restricted_browser_key_fallback(): string {
+    return 'AIzaSyAUMH2keW0YBPKUaQlUwuZGJ_LeRcuAcAM';
 }
 
 function maps_env_value(string $name): string {
