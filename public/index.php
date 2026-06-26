@@ -9,10 +9,26 @@ include __DIR__ . '/includes/header.php';
 ?>
       <section class="eofy-landing-hero" id="home" aria-labelledby="hero-title">
         <div class="hero-video-bg" aria-hidden="true">
-          <video autoplay muted loop playsinline preload="metadata">
+          <video class="hero-video" autoplay muted loop playsinline preload="auto" disablepictureinpicture>
             <source src="<?= asset('assets/video/headlights-hero-loop.mp4') ?>" type="video/mp4" />
           </video>
         </div>
+        <script>
+        (function () {
+          var v = document.querySelector('.hero-video');
+          if (!v) return;
+          // Muted autoplay is allowed by every browser; force it and keep retrying.
+          v.muted = true; v.defaultMuted = true; v.setAttribute('muted', '');
+          var play = function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); };
+          play();
+          window.addEventListener('load', play);
+          document.addEventListener('visibilitychange', function () { if (!document.hidden) play(); });
+          // Last-resort fallback if a browser still blocks it (e.g. iOS Low Power Mode).
+          ['pointerdown', 'touchstart', 'click', 'scroll', 'keydown'].forEach(function (ev) {
+            window.addEventListener(ev, play, { once: true, passive: true });
+          });
+        })();
+        </script>
         <div class="hero-video-overlay" aria-hidden="true"></div>
         <div class="hero-ambient" aria-hidden="true"></div>
 

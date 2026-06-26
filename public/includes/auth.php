@@ -38,8 +38,15 @@ function admin_credentials(): array {
     $file = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/_private/admin.php';
     if (is_file($file)) {
         $c = include $file;
-        if (is_array($c) && !empty($c['username']) && !empty($c['password_hash'])) {
-            return $c;
+        if (is_array($c) && !empty($c['username'])) {
+            // Accept either a precomputed bcrypt hash or a plaintext password
+            // (the private file lives outside public_html and is gitignored).
+            if (!empty($c['password_hash'])) {
+                return ['username' => $c['username'], 'password_hash' => $c['password_hash']];
+            }
+            if (!empty($c['password'])) {
+                return ['username' => $c['username'], 'password_hash' => password_hash((string)$c['password'], PASSWORD_BCRYPT)];
+            }
         }
     }
 
