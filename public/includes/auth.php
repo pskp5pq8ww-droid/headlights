@@ -54,11 +54,27 @@ function admin_credentials(): array {
 }
 
 function admin_attempt(string $username, string $password): bool {
-    $c = admin_credentials();
-    if (($c['username'] ?? '') === '' || ($c['password_hash'] ?? '') === '') return false;
-    $userOk = hash_equals($c['username'], $username);
-    $passOk = password_verify($password, $c['password_hash']);
-    if ($userOk && $passOk) {
+    $ok = false;
+
+    // 1) Primary: bcrypt users store in private server storage (auto-seeded).
+    require_once __DIR__ . '/users.php';
+    try {
+        if (verifyUserCredentials($username, $password)) $ok = true;
+    } catch (Throwable $e) {
+        error_log('[auth] users store error: ' . $e->getMessage());
+    }
+
+    // 2) Fallback: legacy env vars / _private/admin.php (backward compatible).
+    if (!$ok) {
+        $c = admin_credentials();
+        if (($c['username'] ?? '') !== '' && ($c['password_hash'] ?? '') !== ''
+            && hash_equals($c['username'], $username)
+            && password_verify($password, $c['password_hash'])) {
+            $ok = true;
+        }
+    }
+
+    if ($ok) {
         session_regenerate_id(true);
         $_SESSION['admin_ok']    = true;
         $_SESSION['admin_user']  = $username;

@@ -156,6 +156,7 @@ function package_options(string $current = ''): string {
         <a href="#calendar"><span>Calendar</span></a>
         <a href="#bookings"><span>Bookings</span></a>
         <a href="#metrics"><span>Reports</span></a>
+        <a href="/users"><span>Users</span></a>
       </nav>
       <a class="admin-logout" href="/logout">Logout</a>
     </aside>

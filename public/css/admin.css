@@ -87,6 +87,8 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .empty{color:var(--steel);padding:18px 0;text-align:center;font-size:14px}
 .admin-error{margin-bottom:18px;padding:12px 14px;border-radius:var(--radius);border:1px solid rgba(248,113,113,.34);
   background:rgba(248,113,113,.12);color:#fecaca;font-weight:700;font-size:14px}
+.admin-notice{margin-bottom:18px;padding:12px 14px;border-radius:var(--radius);border:1px solid rgba(52,201,143,.4);
+  background:rgba(52,201,143,.14);color:#7ef0c0;font-weight:700;font-size:14px}
 .dashboard-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:22px;align-items:start}
 
 /* ── Calendar + daily list ────────────────────────────────────────────────── */
