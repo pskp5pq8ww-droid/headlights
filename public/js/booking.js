@@ -105,8 +105,12 @@
       };
       setSummary("package", pkg);
       setSummary("datetime", [fieldValue("date"), fieldValue("time")].filter(Boolean).join(" · "));
+      setSummary("date", fieldValue("date"));
+      setSummary("time", fieldValue("time"));
       setSummary("location", fieldValue("formatted_address") || fieldValue("customer_address"));
+      setSummary("vehicle", fieldValue("vehicle"));
       setSummary("name", fieldValue("name"));
+      setSummary("price", price > 0 ? money(price) : "Quote");
       setSummary("total", price > 0 ? money(price) : "Quote on request");
       return price;
     }
@@ -129,7 +133,7 @@
       const isQuote = price <= 0;
       if (cardBlock) cardBlock.hidden = isQuote;
       if (quoteBlock) quoteBlock.hidden = !isQuote;
-      if (payLabel) payLabel.textContent = isQuote ? "Request Booking" : `Pay ${money(price)} & Confirm`;
+      if (payLabel) payLabel.textContent = isQuote ? "Request Booking" : `Pay ${money(price)} & Confirm Booking`;
 
       if (isQuote) {
         squareReady = false;
@@ -263,7 +267,7 @@
         }
       } finally {
         if (!window.location.href.includes("/thank-you")) {
-          setSubmitting(false, useRequest ? "Request Booking" : `Pay ${money(price)} & Confirm`);
+          setSubmitting(false, useRequest ? "Request Booking" : `Pay ${money(price)} & Confirm Booking`);
         }
       }
     });

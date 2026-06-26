@@ -12,21 +12,22 @@ include __DIR__ . '/includes/header.php';
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
         <div class="container booking-grid">
           <div class="section-copy reveal">
-            <span class="eofy-badge"><?= htmlspecialchars($EOFY['badge']) ?></span>
+            <span class="eofy-badge">EOFY LIMITED TIME ONLY</span>
             <h1 id="booking-title">Book your mobile headlight restoration</h1>
-            <p>Tell us where your car is located and we'll contact you to confirm your booking.</p>
+            <p>Tell us where your vehicle is located and we'll contact you to confirm your booking.</p>
 
             <div class="promo-hero-card compact reveal">
+              <p class="promo-kicker">Limited EOFY Offer</p>
               <div class="promo-price-row">
-                <span class="promo-was">Was $<?= $EOFY['was'] ?></span>
                 <span class="promo-now">$<?= $EOFY['now'] ?></span>
+                <span class="promo-was">Was $<?= $EOFY['was'] ?></span>
                 <span class="promo-save">Save $<?= $EOFY['save'] ?></span>
               </div>
               <div class="countdown" data-countdown data-mode="daily-brisbane" aria-label="Daily offer countdown">
                 <span><strong data-days>00</strong><small>Days</small></span>
-                <span><strong data-hours>00</strong><small>Hrs</small></span>
-                <span><strong data-minutes>00</strong><small>Min</small></span>
-                <span><strong data-seconds>00</strong><small>Sec</small></span>
+                <span><strong data-hours>00</strong><small>Hours</small></span>
+                <span><strong data-minutes>00</strong><small>Minutes</small></span>
+                <span><strong data-seconds>00</strong><small>Seconds</small></span>
               </div>
             </div>
           </div>
@@ -39,7 +40,7 @@ include __DIR__ . '/includes/header.php';
               <span class="step-line" aria-hidden="true"></span>
               <div class="form-step" data-step-indicator="3"><span class="step-num">3</span><span class="step-label">Details</span></div>
               <span class="step-line" aria-hidden="true"></span>
-              <div class="form-step" data-step-indicator="4"><span class="step-num">4</span><span class="step-label">Pay</span></div>
+              <div class="form-step" data-step-indicator="4"><span class="step-num">4</span><span class="step-label">Payment</span></div>
             </div>
 
             <form id="bookingForm" action="/form" method="post" enctype="multipart/form-data" novalidate>
@@ -159,22 +160,57 @@ include __DIR__ . '/includes/header.php';
                 </div>
               </div>
 
-              <div class="form-panel" data-panel="4" hidden>
+              <div class="form-panel checkout-panel" data-panel="4" hidden>
                 <h3 class="panel-title">Review &amp; confirm</h3>
                 <div class="pay-summary" id="paySummary" aria-live="polite">
-                  <div class="pay-summary-row"><span>Service</span><strong data-summary="package">—</strong></div>
-                  <div class="pay-summary-row"><span>Date &amp; time</span><strong data-summary="datetime">—</strong></div>
-                  <div class="pay-summary-row"><span>Location</span><strong data-summary="location">—</strong></div>
-                  <div class="pay-summary-row"><span>Name</span><strong data-summary="name">—</strong></div>
-                  <div class="pay-summary-total"><span>Total</span><strong data-summary="total">—</strong></div>
+                  <div class="summary-topline">
+                    <div>
+                      <span>Service</span>
+                      <strong data-summary="package">—</strong>
+                    </div>
+                    <div>
+                      <span>Date</span>
+                      <strong data-summary="date">—</strong>
+                    </div>
+                    <div>
+                      <span>Time</span>
+                      <strong data-summary="time">—</strong>
+                    </div>
+                  </div>
+                  <div class="summary-location-row">
+                    <span class="summary-location-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><path d="M12 10.5h.01"/></svg>
+                    </span>
+                    <div>
+                      <span>Location</span>
+                      <strong data-summary="location">—</strong>
+                    </div>
+                    <button class="summary-edit step-back-btn" type="button" data-prev="1">Edit</button>
+                  </div>
+                  <div class="summary-meta-row">
+                    <div>
+                      <span>Vehicle</span>
+                      <strong data-summary="vehicle">—</strong>
+                    </div>
+                    <div>
+                      <span>Name</span>
+                      <strong data-summary="name">—</strong>
+                    </div>
+                    <div>
+                      <span>Price</span>
+                      <strong data-summary="price">—</strong>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="pay-card-block" id="payCardBlock">
-                  <p class="panel-hint">Enter your card details to confirm your booking. Payments are securely processed by Square.</p>
-                  <div id="squareCard" class="square-card-field"></div>
+                  <label class="square-card-label" for="squareCard">Card details</label>
+                  <div class="square-card-shell">
+                    <div id="squareCard" class="square-card-field"></div>
+                  </div>
                   <p class="pay-secure-note">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-4Z"/></svg>
-                    Secure payment · We never store your card details.
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M6 11h12v10H6z"/></svg>
+                    <span><strong>Secure payment.</strong> Your card details are encrypted and processed securely by Square. We never store your card information.</span>
                   </p>
                 </div>
 
@@ -188,8 +224,12 @@ include __DIR__ . '/includes/header.php';
                   </button>
                   <button class="button button-primary form-submit" id="payButton" type="submit">
                     <span data-pay-label>Pay &amp; Confirm Booking</span>
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M6 11h12v10H6z"/></svg>
                   </button>
+                </div>
+                <div class="checkout-total">
+                  <span>Total</span>
+                  <strong data-summary="total">—</strong>
                 </div>
               </div>
               <p class="form-status" role="status" aria-live="polite" data-form-status></p>
