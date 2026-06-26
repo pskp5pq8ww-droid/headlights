@@ -8,10 +8,13 @@ $body_class   = 'landing-home';
 include __DIR__ . '/includes/header.php';
 ?>
       <section class="eofy-landing-hero" id="home" aria-labelledby="hero-title">
+        <div class="hero-video-bg" aria-hidden="true">
+          <video autoplay muted loop playsinline preload="metadata">
+            <source src="<?= asset('assets/video/headlights-hero-loop.mp4') ?>" type="video/mp4" />
+          </video>
+        </div>
+        <div class="hero-video-overlay" aria-hidden="true"></div>
         <div class="hero-ambient" aria-hidden="true"></div>
-        <figure class="hero-product-light reveal" aria-hidden="true">
-          <img src="<?= asset('assets/hero-headlight-before-after.png') ?>" alt="" width="1536" height="1024" fetchpriority="high" />
-        </figure>
 
         <div class="container eofy-landing-inner">
           <div class="eofy-hero-copy">

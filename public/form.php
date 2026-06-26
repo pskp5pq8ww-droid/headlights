@@ -142,34 +142,3 @@ function booking_post_value(array $names): string {
     }
     return '';
 }
-
-function send_booking_email(array $booking): void {
-    $adminEmail = getenv('ADMIN_EMAIL') ?: ($GLOBALS['SITE']['email'] ?? 'hello@shiningheadlights.com.au');
-    $subject = 'New booking request - ' . ($booking['fullName'] ?? 'Customer');
-    $body = "New booking request from shiningheadlights.com.au\n\n";
-    $body .= "Name: " . ($booking['fullName'] ?? '') . "\n";
-    $body .= "Phone: " . ($booking['phone'] ?? '') . "\n";
-    $body .= "Email: " . ($booking['email'] ?? '') . "\n";
-    $body .= "Location: " . ($booking['addressOrSuburb'] ?? '') . "\n";
-    if (!empty($booking['formattedAddress'])) $body .= "Google Address: " . $booking['formattedAddress'] . "\n";
-    if (!empty($booking['addressSuburb'])) $body .= "Suburb: " . $booking['addressSuburb'] . "\n";
-    if (!empty($booking['addressPostcode'])) $body .= "Postcode: " . $booking['addressPostcode'] . "\n";
-    if (!empty($booking['addressState'])) $body .= "State: " . $booking['addressState'] . "\n";
-    if (!empty($booking['addressCountry'])) $body .= "Country: " . $booking['addressCountry'] . "\n";
-    if (!empty($booking['addressLat']) && !empty($booking['addressLng'])) $body .= "Map: https://www.google.com/maps?q=" . $booking['addressLat'] . "," . $booking['addressLng'] . "\n";
-    $body .= "Vehicle: " . ($booking['vehicleMakeModel'] ?? '') . "\n";
-    $body .= "Date: " . ($booking['preferredDate'] ?? '') . "\n";
-    $body .= "Time: " . ($booking['preferredTimeWindow'] ?? '') . "\n";
-    $body .= "Package: " . ($booking['packageSelected'] ?? '') . "\n";
-    $body .= "Condition: " . ($booking['headlightCondition'] ?? '') . "\n";
-    $body .= "Preferred contact: " . ($booking['preferredContactMethod'] ?? '') . "\n";
-    $body .= "Message: " . ($booking['message'] ?? '') . "\n";
-
-    $headers = "From: " . ($GLOBALS['SITE']['email'] ?? 'hello@shiningheadlights.com.au') . "\r\n";
-    $headers .= "Reply-To: " . ($booking['email'] ?? '') . "\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-
-    if (!@mail($adminEmail, $subject, $body, $headers)) {
-        booking_log_error('mail() failed for booking ' . ($booking['id'] ?? 'unknown'));
-    }
-}

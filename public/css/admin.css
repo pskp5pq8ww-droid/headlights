@@ -242,3 +242,22 @@ a.field-value{color:var(--cyan-soft)}
   .detail-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
   .detail-card{min-height:210px}
 }
+
+/* ── Payment badges (dashboard) ──────────────────────────────────────────── */
+.pay-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.pay-paid     { color: #0f7a52; background: rgba(52, 201, 143, .16); border: 1px solid rgba(52, 201, 143, .45); }
+.pay-pending  { color: #946200; background: rgba(244, 182, 63, .16); border: 1px solid rgba(244, 182, 63, .45); }
+.pay-failed   { color: #a3262b; background: rgba(214, 69, 69, .14);  border: 1px solid rgba(214, 69, 69, .4); }
+.pay-refunded { color: #5a6b78; background: rgba(143, 163, 178, .16); border: 1px solid rgba(143, 163, 178, .4); }
+.pay-unpaid   { color: #5a6b78; background: rgba(143, 163, 178, .12); border: 1px solid rgba(143, 163, 178, .32); }
+.detail-card .mono,
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }

@@ -109,6 +109,14 @@ function maps_link(array $b): string {
     return $address !== '' ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($address) : '';
 }
 function booking_price(array $b): int { return package_price((string)($b['packageSelected'] ?? '')); }
+function payment_label(array $b): string {
+    $status = $b['paymentStatus'] ?? 'unpaid';
+    return ucfirst($status);
+}
+function payment_badge_class(array $b): string {
+    $status = strtolower((string)($b['paymentStatus'] ?? 'unpaid'));
+    return 'pay-badge pay-' . preg_replace('/[^a-z]/', '', $status);
+}
 function status_options(string $current): string {
     $html = '';
     $statuses = ['new', 'contacted', 'confirmed', 'completed', 'cancelled'];
@@ -175,7 +183,9 @@ function package_options(string $current = ''): string {
         <div class="stat-card"><span class="stat-num"><?= $stats['cancelled'] ?></span><span class="stat-label">Cancelled Bookings</span></div>
         <div class="stat-card"><span class="stat-num"><?= $stats['today'] ?></span><span class="stat-label">Today's Bookings</span></div>
         <div class="stat-card"><span class="stat-num"><?= $stats['contacted'] ?></span><span class="stat-label">Contacted</span></div>
-        <div class="stat-card highlight"><span class="stat-num">$<?= $stats['estimatedRevenue'] ?></span><span class="stat-label">Estimated Revenue</span></div>
+        <div class="stat-card highlight"><span class="stat-num">$<?= number_format((float)$stats['paidRevenue'], 2) ?></span><span class="stat-label">Paid Revenue (Square)</span></div>
+        <div class="stat-card"><span class="stat-num"><?= $stats['paid'] ?></span><span class="stat-label">Paid Bookings</span></div>
+        <div class="stat-card"><span class="stat-num">$<?= $stats['estimatedRevenue'] ?></span><span class="stat-label">Estimated Revenue</span></div>
         <div class="stat-card"><span class="stat-num"><?= $stats['pendingFollowUps'] ?></span><span class="stat-label">Pending Follow-ups</span></div>
         <div class="stat-card wide"><span class="stat-num small"><?= h($stats['mostSelectedPackage']) ?></span><span class="stat-label">Most Selected Package</span></div>
       </section>
@@ -265,6 +275,7 @@ function package_options(string $current = ''): string {
                   <div class="booking-card-title">
                     <h3><?= h($b['fullName'] ?: 'Unnamed customer') ?></h3>
                     <span class="badge <?= badge_class_admin($b['status']) ?>"><?= h(status_label($b['status'])) ?></span>
+                    <span class="<?= payment_badge_class($b) ?>"><?= h(payment_label($b)) ?></span>
                   </div>
                   <div class="booking-quick-grid">
                     <div>
@@ -290,6 +301,10 @@ function package_options(string $current = ''): string {
                     <div>
                       <span class="field-label">Price</span>
                       <span class="field-value"><?= $price > 0 ? '$' . h((string)$price) : 'Quote' ?></span>
+                    </div>
+                    <div>
+                      <span class="field-label">Paid</span>
+                      <span class="field-value"><?= ($b['paymentStatus'] ?? '') === 'paid' ? h(($b['currency'] ?: 'AUD') . ' $' . number_format((float)$b['amount'], 2)) : h(payment_label($b)) ?></span>
                     </div>
                   </div>
                 </div>
@@ -375,6 +390,16 @@ function package_options(string $current = ''): string {
               <p>Price: <?= $price > 0 ? '$' . h((string)$price) : 'Quote' ?></p>
               <p>Created: <?= h($b['createdAt']) ?></p>
               <p>Last updated: <?= h($b['updatedAt']) ?></p>
+            </div>
+            <div class="detail-card">
+              <h3>Payment</h3>
+              <p>Status: <span class="<?= payment_badge_class($b) ?>"><?= h(payment_label($b)) ?></span></p>
+              <p>Amount: <?= ($b['paymentStatus'] ?? '') === 'paid' ? h(($b['currency'] ?: 'AUD') . ' $' . number_format((float)$b['amount'], 2)) : '—' ?></p>
+              <p>Square Payment ID: <?= !empty($b['squarePaymentId']) ? '<span class="mono">' . h($b['squarePaymentId']) . '</span>' : '—' ?></p>
+              <?php if (!empty($b['squareOrderId'])): ?><p>Square Order ID: <span class="mono"><?= h($b['squareOrderId']) ?></span></p><?php endif; ?>
+              <?php if (!empty($b['cardBrand'])): ?><p>Card: <?= h($b['cardBrand'] . ' ****' . ($b['cardLast4'] ?? '')) ?></p><?php endif; ?>
+              <?php if (!empty($b['paidAt'])): ?><p>Paid at: <?= h($b['paidAt']) ?></p><?php endif; ?>
+              <?php if (!empty($b['squareReceiptUrl'])): ?><p><a href="<?= h($b['squareReceiptUrl']) ?>" target="_blank" rel="noopener">View Square receipt</a></p><?php endif; ?>
             </div>
             <div class="detail-card">
               <h3>Admin Notes</h3>

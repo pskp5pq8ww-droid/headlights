@@ -46,6 +46,9 @@ $page_scripts = $page_scripts ?? [];
 <?php endif; ?>
 <?php if (in_array('booking', $page_scripts, true)): ?>
     <script src="<?= asset('js/config.js') ?>"></script>
+<?php if (in_array('square', $page_scripts, true)): ?>
+    <script src="<?= asset('js/square-payment.js') ?>"></script>
+<?php endif; ?>
     <script src="<?= asset('js/booking.js') ?>"></script>
 <?php $mapsKey = !empty($page_maps) ? maps_api_key() : ''; ?>
 <?php if ($mapsKey !== ''): ?>

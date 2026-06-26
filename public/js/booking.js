@@ -1,14 +1,26 @@
-/* booking.js — manual address booking wizard. No maps/autocomplete. */
+/* booking.js — booking wizard with Square payment step. */
 (function () {
   const config = window.siteConfig || {};
+  const pricing = window.bookingPricing || {};
+  const currency = window.bookingCurrency || "AUD";
   const qs = (selector, parent = document) => parent.querySelector(selector);
   const qsa = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
+
+  const money = (amount) =>
+    new Intl.NumberFormat("en-AU", { style: "currency", currency }).format(Number(amount) || 0);
 
   function initBookingWizard() {
     const wizard = qs("#bookingWizard");
     const form = qs("#bookingForm", wizard || document);
     const status = qs("[data-form-status]", wizard || document);
     if (!wizard || !form || !status) return;
+
+    const payButton = qs("#payButton", wizard);
+    const payLabel = qs("[data-pay-label]", wizard);
+    const cardBlock = qs("#payCardBlock", wizard);
+    const quoteBlock = qs("#payQuoteBlock", wizard);
+    let squareReady = false;
+    let paymentFallback = false; // true when Square is unavailable → use free request flow
 
     const fieldLabels = {
       customer_address: "service address or suburb",
@@ -21,6 +33,15 @@
       date: "preferred date",
       time: "preferred time window"
     };
+
+    function selectedPackage() {
+      const el = findFieldByName("package");
+      return el ? el.value : "";
+    }
+
+    function packagePrice(pkg) {
+      return Number(pricing[pkg] || 0);
+    }
 
     function goToStep(step) {
       qsa("[data-panel]", wizard).forEach((panel) => {
@@ -70,6 +91,65 @@
       return false;
     }
 
+    function fieldValue(name) {
+      const el = findFieldByName(name);
+      return el ? el.value.trim() : "";
+    }
+
+    function buildSummary() {
+      const pkg = selectedPackage();
+      const price = packagePrice(pkg);
+      const setSummary = (key, value) => {
+        const el = qs(`[data-summary="${key}"]`, wizard);
+        if (el) el.textContent = value || "—";
+      };
+      setSummary("package", pkg);
+      setSummary("datetime", [fieldValue("date"), fieldValue("time")].filter(Boolean).join(" · "));
+      setSummary("location", fieldValue("formatted_address") || fieldValue("customer_address"));
+      setSummary("name", fieldValue("name"));
+      setSummary("total", price > 0 ? money(price) : "Quote on request");
+      return price;
+    }
+
+    function useRequestFallback(message) {
+      paymentFallback = true;
+      squareReady = false;
+      if (cardBlock) cardBlock.hidden = true;
+      if (quoteBlock) {
+        quoteBlock.hidden = false;
+        const note = qs(".panel-hint", quoteBlock);
+        if (note && message) note.textContent = message;
+      }
+      if (payLabel) payLabel.textContent = "Request Booking";
+    }
+
+    async function enterPaymentStep() {
+      paymentFallback = false;
+      const price = buildSummary();
+      const isQuote = price <= 0;
+      if (cardBlock) cardBlock.hidden = isQuote;
+      if (quoteBlock) quoteBlock.hidden = !isQuote;
+      if (payLabel) payLabel.textContent = isQuote ? "Request Booking" : `Pay ${money(price)} & Confirm`;
+
+      if (isQuote) {
+        squareReady = false;
+        return;
+      }
+      if (!window.SquarePayment) {
+        useRequestFallback("Online payment is temporarily unavailable. Submit your booking and we'll confirm and arrange payment with you.");
+        return;
+      }
+      status.textContent = "Loading secure payment…";
+      squareReady = await window.SquarePayment.init();
+      if (squareReady) {
+        status.textContent = "";
+      } else {
+        // Square not configured / failed → keep booking working via the request flow.
+        useRequestFallback("Online payment is temporarily unavailable. Submit your booking and we'll confirm and arrange payment with you.");
+        status.textContent = "";
+      }
+    }
+
     qsa(".step-next-btn", wizard).forEach((button) => {
       button.addEventListener("click", () => {
         const currentPanel = Number(button.closest("[data-panel]")?.dataset.panel || 1);
@@ -77,6 +157,7 @@
         if (!panelIsValid(currentPanel)) return;
         status.textContent = "";
         goToStep(next);
+        if (next === 4) enterPaymentStep();
       });
     });
 
@@ -86,6 +167,78 @@
         goToStep(Number(button.dataset.prev));
       });
     });
+
+    function setSubmitting(isLoading, labelText) {
+      payButton.disabled = isLoading;
+      if (payLabel && labelText) payLabel.textContent = labelText;
+    }
+
+    async function submitQuoteRequest() {
+      // Quote-only services keep the original "request booking" flow (no charge).
+      try {
+        const response = await fetch(config.contact?.bookingEndpoint || "/form", {
+          method: "POST",
+          body: new FormData(form)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          status.textContent = result.message || "Something went wrong. Please try again or contact us directly.";
+          window.ShiningGSAP?.playFormErrorAnimation(form);
+          return;
+        }
+        window.ShiningGSAP?.playFormSuccessAnimation(form);
+        window.location.href = result.redirect_url || `/thank-you?booking=${encodeURIComponent(result.booking_id || "")}`;
+      } catch {
+        status.textContent = "Something went wrong. Please try again or contact us directly.";
+        window.ShiningGSAP?.playFormErrorAnimation(form);
+      }
+    }
+
+    async function submitPayment() {
+      if (!squareReady || !window.SquarePayment) {
+        status.textContent = "Payment form is not ready. Please wait a moment and try again.";
+        return;
+      }
+      status.textContent = "Processing your payment…";
+      const tokenResult = await window.SquarePayment.tokenize();
+      if (!tokenResult.ok) {
+        status.textContent = tokenResult.error;
+        window.ShiningGSAP?.playFormErrorAnimation(form);
+        return;
+      }
+
+      const fd = new FormData(form);
+      const booking = {};
+      fd.forEach((value, key) => { booking[key] = value; });
+
+      const payload = {
+        sourceId: tokenResult.token,
+        idempotencyKey: (window.crypto?.randomUUID && window.crypto.randomUUID()) ||
+          ("idem-" + Date.now() + "-" + Math.random().toString(36).slice(2)),
+        booking
+      };
+
+      try {
+        const response = await fetch(window.squarePaymentEndpoint || "/api/payments/square", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          const firstError = result.errors ? Object.values(result.errors)[0] : "";
+          status.textContent = firstError || result.message || "Payment failed. Please try another card.";
+          window.ShiningGSAP?.playFormErrorAnimation(form);
+          return;
+        }
+        status.textContent = "Payment successful! Confirming your booking…";
+        window.ShiningGSAP?.playFormSuccessAnimation(form);
+        window.location.href = result.redirect_url || `/thank-you?booking=${encodeURIComponent(result.bookingId || "")}`;
+      } catch {
+        status.textContent = "We couldn't reach the payment server. Please try again.";
+        window.ShiningGSAP?.playFormErrorAnimation(form);
+      }
+    }
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -97,39 +250,20 @@
         return;
       }
 
-      const button = qs('button[type="submit"]', form);
-      button.disabled = true;
-      button.querySelector("span").textContent = "Sending...";
-      status.textContent = "";
+      const price = packagePrice(selectedPackage());
+      const useRequest = price <= 0 || paymentFallback;
+      setSubmitting(true, useRequest ? "Sending…" : "Processing…");
       window.ShiningGSAP?.playFormSubmittingAnimation(form);
 
       try {
-        const response = await fetch(config.contact?.bookingEndpoint || "/form", {
-          method: "POST",
-          body: new FormData(form)
-        });
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-          const firstError = result.errors ? Object.values(result.errors)[0] : "";
-          status.textContent = firstError || result.message || "Something went wrong. Please try again or contact us directly.";
-          const firstErrorField = result.errors ? findFieldByName(Object.keys(result.errors)[0]) : null;
-          if (firstErrorField) showInvalidField(firstErrorField);
-          window.ShiningGSAP?.playFormErrorAnimation(form);
-          return;
+        if (useRequest) {
+          await submitQuoteRequest();
+        } else {
+          await submitPayment();
         }
-        status.textContent = "Thanks! Your booking request has been received. We'll contact you shortly to confirm your mobile service.";
-        window.ShiningGSAP?.playFormSuccessAnimation(form);
-        const redirect = result.redirect_url || `/thank-you?booking=${encodeURIComponent(result.booking_id || "")}`;
-        window.setTimeout(() => {
-          window.location.href = redirect;
-        }, 650);
-      } catch {
-        status.textContent = "Something went wrong. Please try again or contact us directly.";
-        window.ShiningGSAP?.playFormErrorAnimation(form);
       } finally {
-        if (!status.textContent.startsWith("Thanks!")) {
-          button.disabled = false;
-          button.querySelector("span").textContent = "Request Booking";
+        if (!window.location.href.includes("/thank-you")) {
+          setSubmitting(false, useRequest ? "Request Booking" : `Pay ${money(price)} & Confirm`);
         }
       }
     });

@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/bookings.php';
 $current      = 'book';
 $page_title   = 'Book Now | ' . $SITE['name'];
 $page_desc    = 'Book your mobile headlight restoration in Brisbane. Tell us where your car is located and we will confirm your booking.';
-$page_scripts = ['booking', 'countdown'];
+$page_scripts = ['booking', 'countdown', 'square'];
 $page_maps    = true;
 $body_class   = 'booking-page';
 include __DIR__ . '/includes/header.php';
@@ -37,6 +38,8 @@ include __DIR__ . '/includes/header.php';
               <div class="form-step" data-step-indicator="2"><span class="step-num">2</span><span class="step-label">Service</span></div>
               <span class="step-line" aria-hidden="true"></span>
               <div class="form-step" data-step-indicator="3"><span class="step-num">3</span><span class="step-label">Details</span></div>
+              <span class="step-line" aria-hidden="true"></span>
+              <div class="form-step" data-step-indicator="4"><span class="step-num">4</span><span class="step-label">Pay</span></div>
             </div>
 
             <form id="bookingForm" action="/form" method="post" enctype="multipart/form-data" novalidate>
@@ -149,14 +152,55 @@ include __DIR__ . '/includes/header.php';
                   <button class="button button-secondary step-back-btn" type="button" data-prev="2">
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg><span>Back</span>
                   </button>
-                  <button class="button button-primary form-submit" type="submit">
-                    <span>Request Booking</span>
+                  <button class="button button-primary step-next-btn" type="button" data-next="4">
+                    <span>Review &amp; pay</span>
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-panel" data-panel="4" hidden>
+                <h3 class="panel-title">Review &amp; confirm</h3>
+                <div class="pay-summary" id="paySummary" aria-live="polite">
+                  <div class="pay-summary-row"><span>Service</span><strong data-summary="package">—</strong></div>
+                  <div class="pay-summary-row"><span>Date &amp; time</span><strong data-summary="datetime">—</strong></div>
+                  <div class="pay-summary-row"><span>Location</span><strong data-summary="location">—</strong></div>
+                  <div class="pay-summary-row"><span>Name</span><strong data-summary="name">—</strong></div>
+                  <div class="pay-summary-total"><span>Total</span><strong data-summary="total">—</strong></div>
+                </div>
+
+                <div class="pay-card-block" id="payCardBlock">
+                  <p class="panel-hint">Enter your card details to confirm your booking. Payments are securely processed by Square.</p>
+                  <div id="squareCard" class="square-card-field"></div>
+                  <p class="pay-secure-note">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-4Z"/></svg>
+                    Secure payment · We never store your card details.
+                  </p>
+                </div>
+
+                <div class="pay-quote-block" id="payQuoteBlock" hidden>
+                  <p class="panel-hint">This option is quote-only. Submit your request and we'll contact you with pricing — no payment needed now.</p>
+                </div>
+
+                <div class="step-nav">
+                  <button class="button button-secondary step-back-btn" type="button" data-prev="3">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg><span>Back</span>
+                  </button>
+                  <button class="button button-primary form-submit" id="payButton" type="submit">
+                    <span data-pay-label>Pay &amp; Confirm Booking</span>
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
                   </button>
                 </div>
               </div>
               <p class="form-status" role="status" aria-live="polite" data-form-status></p>
             </form>
+
+            <script>
+              window.bookingPricing = <?= json_encode(BOOKING_PACKAGE_PRICES, JSON_UNESCAPED_UNICODE) ?>;
+              window.squareConfigEndpoint = '/api/square-config';
+              window.squarePaymentEndpoint = '/api/payments/square';
+              window.bookingCurrency = '<?= htmlspecialchars(strtoupper(getenv('SQUARE_CURRENCY') ?: 'AUD')) ?>';
+            </script>
           </div>
         </div>
       </section>

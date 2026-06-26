@@ -2779,6 +2779,7 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 .eofy-landing-hero {
   position: relative;
+  isolation: isolate;
   min-height: 100svh;
   overflow: hidden;
   display: grid;
@@ -2789,45 +2790,49 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
     linear-gradient(180deg, #020817 0%, #030b1f 54%, #020817 100%);
 }
 
+.hero-video-bg,
+.hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hero-video-bg {
+  z-index: 0;
+  background: #020817;
+}
+
+.hero-video-bg video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.92;
+}
+
+.hero-video-overlay {
+  z-index: 1;
+  background:
+    radial-gradient(circle at 72% 42%, rgba(0, 216, 255, 0.12), transparent 34%),
+    linear-gradient(90deg, rgba(2, 8, 23, 0.9) 0%, rgba(2, 8, 23, 0.62) 44%, rgba(2, 8, 23, 0.38) 100%),
+    rgba(2, 8, 23, 0.2);
+}
+
 .hero-ambient {
   position: absolute;
   inset: 0;
+  z-index: 2;
   pointer-events: none;
   background:
     linear-gradient(120deg, rgba(126, 239, 255, 0.06), transparent 34%),
     repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 34px);
-  opacity: 0.7;
-}
-
-.hero-product-light {
-  position: absolute;
-  right: -34%;
-  top: 90px;
-  width: min(88vw, 620px);
-  margin: 0;
-  opacity: 0.62;
-  filter: saturate(1.05) contrast(1.08) drop-shadow(0 0 44px rgba(0, 216, 255, 0.18));
-  transform: rotate(-7deg);
-  pointer-events: none;
-}
-
-.hero-product-light::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, #020817 0%, transparent 34%, #020817 100%);
-}
-
-.hero-product-light img {
-  width: 100%;
-  height: auto;
-  border-radius: 28px;
-  object-fit: cover;
+  opacity: 0.42;
 }
 
 .eofy-landing-inner {
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 
 .eofy-hero-copy {
@@ -3145,13 +3150,6 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 }
 
 @media (min-width: 760px) {
-  .hero-product-light {
-    right: -12%;
-    top: 98px;
-    width: 48vw;
-    opacity: 0.72;
-  }
-
   .landing-card-grid,
   .landing-review-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3174,13 +3172,6 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
   .eofy-landing-hero {
     padding-top: 106px;
-  }
-
-  .hero-product-light {
-    right: -56%;
-    top: 86px;
-    width: 112vw;
-    opacity: 0.38;
   }
 
   .landing-countdown {
@@ -3216,13 +3207,6 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   .eofy-landing-hero {
     min-height: 92vh;
     padding: 138px 0 88px;
-  }
-
-  .hero-product-light {
-    right: max(-80px, calc((100vw - 1180px) / 2 - 130px));
-    top: 130px;
-    width: min(46vw, 660px);
-    opacity: 0.78;
   }
 
   .eofy-hero-copy {
@@ -3330,3 +3314,79 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   color:var(--success);background:rgba(52,201,143,.14);border:1px solid rgba(52,201,143,.4);font-size:30px;font-weight:900}
 .pay-ref{margin:6px 0 18px;font-size:13px;font-weight:700;color:var(--muted)}
 .pay-ref[hidden]{display:none}
+
+/* ── Square payment step (booking wizard step 4) ─────────────────────────── */
+.pay-summary {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  background: var(--ice);
+}
+.pay-summary-row,
+.pay-summary-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  font-size: 14px;
+}
+.pay-summary-row span { color: var(--muted); }
+.pay-summary-row strong { color: var(--ink); text-align: right; }
+.pay-summary-total {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 17px;
+}
+.pay-summary-total span { color: var(--ink); font-weight: 700; }
+.pay-summary-total strong { color: var(--navy); font-size: 19px; }
+
+.square-card-field {
+  min-height: 56px;
+  margin: 4px 0 12px;
+  padding: 4px 2px;
+  border-radius: var(--radius);
+}
+.pay-secure-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+.pay-secure-note svg { width: 16px; height: 16px; fill: var(--success); flex: none; }
+.pay-card-block[hidden],
+.pay-quote-block[hidden] { display: none; }
+
+/* ── Success / confirmation screen ───────────────────────────────────────── */
+.success-card { text-align: center; }
+.success-check {
+  width: 76px; height: 76px;
+  margin: 0 auto 18px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: rgba(52, 201, 143, 0.12);
+  border: 1px solid rgba(52, 201, 143, 0.4);
+}
+.success-check svg { width: 48px; height: 48px; stroke: var(--success); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.success-check circle { stroke: rgba(52, 201, 143, 0.45); stroke-width: 2; }
+.success-details {
+  text-align: left;
+  margin: 22px auto 24px;
+  max-width: 420px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.success-details > div {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.success-details > div:last-child { border-bottom: 0; }
+.success-details dt { color: var(--muted); margin: 0; }
+.success-details dd { margin: 0; color: var(--ink); font-weight: 600; text-align: right; }
+.success-details .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }

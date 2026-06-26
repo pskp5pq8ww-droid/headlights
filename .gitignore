@@ -7,6 +7,8 @@
 /private/admin.php
 /_private/maps.php
 /_private/admin.php
+/_private/square.php
+/private/square.php
 /env
 /_archive/generated-zips/*.zip
 *.zip

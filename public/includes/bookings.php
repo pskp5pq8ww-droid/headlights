@@ -4,6 +4,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/config.php';
 
 const BOOKING_STATUSES = ['new', 'contacted', 'confirmed', 'completed', 'cancelled', 'no_show'];
+// Separate from the workflow status above so existing dashboard logic is untouched.
+const BOOKING_PAYMENT_STATUSES = ['unpaid', 'pending', 'paid', 'failed', 'refunded'];
 const BOOKING_PACKAGE_PRICES = [
     'Basic Restore' => 99,
     'Crystal Restore' => 149,
@@ -11,6 +13,16 @@ const BOOKING_PACKAGE_PRICES = [
     'EOFY Launch Offer – $99' => 99,
     'Not sure / Quote' => 0,
 ];
+
+function normalize_payment_status(string $status): string {
+    $status = strtolower(trim($status));
+    return in_array($status, BOOKING_PAYMENT_STATUSES, true) ? $status : 'unpaid';
+}
+
+/** Canonical price (in cents) for a package, validated server-side. 0 = quote only. */
+function booking_amount_cents(string $package): int {
+    return package_price($package) * 100;
+}
 
 function booking_storage_base(): string {
     $env = getenv('BOOKING_STORAGE_PATH');
@@ -126,6 +138,16 @@ function normalize_booking(array $booking): array {
         'preferredContactMethod' => (string)($booking['preferredContactMethod'] ?? $booking['preferred_contact_method'] ?? 'Phone'),
         'message' => (string)($booking['message'] ?? ''),
         'source' => (string)($booking['source'] ?? 'website'),
+        // ── Payment fields (Square) ──────────────────────────────────────────
+        'amount' => (float)($booking['amount'] ?? 0),
+        'currency' => (string)($booking['currency'] ?? 'AUD'),
+        'paymentStatus' => normalize_payment_status((string)($booking['paymentStatus'] ?? $booking['payment_status'] ?? 'unpaid')),
+        'squarePaymentId' => (string)($booking['squarePaymentId'] ?? $booking['square_payment_id'] ?? ''),
+        'squareOrderId' => (string)($booking['squareOrderId'] ?? $booking['square_order_id'] ?? ''),
+        'squareReceiptUrl' => (string)($booking['squareReceiptUrl'] ?? $booking['square_receipt_url'] ?? ''),
+        'cardBrand' => (string)($booking['cardBrand'] ?? ''),
+        'cardLast4' => (string)($booking['cardLast4'] ?? ''),
+        'paidAt' => (string)($booking['paidAt'] ?? ''),
         'adminNotes' => (string)($booking['adminNotes'] ?? $booking['admin_notes'] ?? ''),
         'followUpRequired' => (bool)($booking['followUpRequired'] ?? $booking['follow_up_required'] ?? false),
         'followUpDate' => (string)($booking['followUpDate'] ?? $booking['follow_up_date'] ?? ''),
@@ -261,6 +283,34 @@ function updateBooking(string $id, array $updates): ?array {
     return writeBooking($booking);
 }
 
+/**
+ * Apply a payment result to a booking. Keeps the workflow status separate and
+ * records a history entry. Used by the Square payment endpoint.
+ */
+function updateBookingPayment(string $id, array $payment): ?array {
+    $booking = getBookingById($id);
+    if (!$booking) return null;
+    $now = booking_now();
+    $status = normalize_payment_status((string)($payment['paymentStatus'] ?? 'paid'));
+    $booking['paymentStatus'] = $status;
+    if (isset($payment['amount'])) $booking['amount'] = (float)$payment['amount'];
+    if (!empty($payment['currency'])) $booking['currency'] = (string)$payment['currency'];
+    foreach (['squarePaymentId', 'squareOrderId', 'squareReceiptUrl', 'cardBrand', 'cardLast4'] as $key) {
+        if (isset($payment[$key])) $booking[$key] = (string)$payment[$key];
+    }
+    if ($status === 'paid') {
+        $booking['paidAt'] = $now;
+        if (in_array($booking['status'], ['new'], true)) $booking['status'] = 'confirmed';
+    }
+    $booking['updatedAt'] = $now;
+    $booking['history'][] = [
+        'at' => $now,
+        'type' => 'payment',
+        'message' => 'Payment ' . $status . ($booking['squarePaymentId'] ? ' (Square ' . $booking['squarePaymentId'] . ')' : '') . '.',
+    ];
+    return writeBooking($booking);
+}
+
 function deleteBooking(string $id): ?array {
     $booking = getBookingById($id);
     if (!$booking) return null;
@@ -302,6 +352,9 @@ function getBookingStats(array $bookings = null): array {
         'week' => 0,
         'month' => 0,
         'estimatedRevenue' => 0,
+        'paid' => 0,
+        'paidRevenue' => 0,
+        'todayCreated' => 0,
         'pendingFollowUps' => 0,
         'mostSelectedPackage' => 'None',
         'packageBreakdown' => [],
@@ -318,6 +371,11 @@ function getBookingStats(array $bookings = null): array {
         if (in_array($status, ['confirmed', 'completed'], true)) {
             $stats['estimatedRevenue'] += package_price($b['packageSelected'] ?? '');
         }
+        if (($b['paymentStatus'] ?? 'unpaid') === 'paid') {
+            $stats['paid']++;
+            $stats['paidRevenue'] += (float)($b['amount'] ?? package_price($b['packageSelected'] ?? ''));
+        }
+        if (str_starts_with((string)($b['createdAt'] ?? ''), $today)) $stats['todayCreated']++;
         if (!empty($b['followUpRequired']) || $status === 'new' || $status === 'contacted') $stats['pendingFollowUps']++;
         $pkg = $b['packageSelected'] ?: 'Not sure / Quote';
         $stats['packageBreakdown'][$pkg] = ($stats['packageBreakdown'][$pkg] ?? 0) + 1;
@@ -330,6 +388,46 @@ function getBookingStats(array $bookings = null): array {
     $stats['mostSelectedPackage'] = array_key_first($stats['packageBreakdown']) ?: 'None';
     $stats['conversionEstimate'] = $stats['total'] > 0 ? round((($stats['confirmed'] + $stats['completed']) / $stats['total']) * 100, 1) : 0;
     return $stats;
+}
+
+function send_booking_email(array $booking): void {
+    $adminEmail = getenv('ADMIN_EMAIL') ?: ($GLOBALS['SITE']['email'] ?? 'hello@shiningheadlights.com.au');
+    $paid = ($booking['paymentStatus'] ?? '') === 'paid';
+    $subject = ($paid ? 'PAID booking' : 'New booking request') . ' - ' . ($booking['fullName'] ?? 'Customer');
+    $body  = "Booking from shiningheadlights.com.au\n\n";
+    $body .= "Name: " . ($booking['fullName'] ?? '') . "\n";
+    $body .= "Phone: " . ($booking['phone'] ?? '') . "\n";
+    $body .= "Email: " . ($booking['email'] ?? '') . "\n";
+    $body .= "Location: " . ($booking['addressOrSuburb'] ?? '') . "\n";
+    if (!empty($booking['formattedAddress'])) $body .= "Google Address: " . $booking['formattedAddress'] . "\n";
+    if (!empty($booking['addressSuburb'])) $body .= "Suburb: " . $booking['addressSuburb'] . "\n";
+    if (!empty($booking['addressPostcode'])) $body .= "Postcode: " . $booking['addressPostcode'] . "\n";
+    if (!empty($booking['addressState'])) $body .= "State: " . $booking['addressState'] . "\n";
+    if (!empty($booking['addressCountry'])) $body .= "Country: " . $booking['addressCountry'] . "\n";
+    if (!empty($booking['addressLat']) && !empty($booking['addressLng'])) $body .= "Map: https://www.google.com/maps?q=" . $booking['addressLat'] . "," . $booking['addressLng'] . "\n";
+    $body .= "Vehicle: " . ($booking['vehicleMakeModel'] ?? '') . "\n";
+    $body .= "Date: " . ($booking['preferredDate'] ?? '') . "\n";
+    $body .= "Time: " . ($booking['preferredTimeWindow'] ?? '') . "\n";
+    $body .= "Package: " . ($booking['packageSelected'] ?? '') . "\n";
+    $body .= "Condition: " . ($booking['headlightCondition'] ?? '') . "\n";
+    $body .= "Preferred contact: " . ($booking['preferredContactMethod'] ?? '') . "\n";
+    $body .= "Message: " . ($booking['message'] ?? '') . "\n";
+    if ($paid) {
+        $body .= "\n-- Payment --\n";
+        $body .= "Status: PAID\n";
+        $body .= "Amount: " . ($booking['currency'] ?? 'AUD') . ' $' . number_format((float)($booking['amount'] ?? 0), 2) . "\n";
+        $body .= "Square Payment ID: " . ($booking['squarePaymentId'] ?? '') . "\n";
+        if (!empty($booking['squareReceiptUrl'])) $body .= "Receipt: " . $booking['squareReceiptUrl'] . "\n";
+        if (!empty($booking['cardBrand'])) $body .= "Card: " . $booking['cardBrand'] . ' ****' . ($booking['cardLast4'] ?? '') . "\n";
+    }
+
+    $headers  = "From: " . ($GLOBALS['SITE']['email'] ?? 'hello@shiningheadlights.com.au') . "\r\n";
+    $headers .= "Reply-To: " . ($booking['email'] ?? '') . "\r\n";
+    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+
+    if (!@mail($adminEmail, $subject, $body, $headers)) {
+        booking_log_error('mail() failed for booking ' . ($booking['id'] ?? 'unknown'));
+    }
 }
 
 function booking_json_response(array $payload, int $status = 200): void {
