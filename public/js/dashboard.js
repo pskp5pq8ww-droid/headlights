@@ -38,4 +38,16 @@
       }
     });
   });
+
+  // Compact bookings: click a summary row to expand its details card.
+  document.querySelectorAll("[data-booking-toggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const card = btn.closest("[data-booking-card]");
+      const body = card && card.querySelector(".booking-card-body");
+      if (!body) return;
+      const open = card.classList.toggle("is-expanded");
+      btn.setAttribute("aria-expanded", String(open));
+      body.hidden = !open;
+    });
+  });
 })();

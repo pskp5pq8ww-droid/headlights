@@ -19,9 +19,9 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .auth-card{width:100%;max-width:400px;background:rgba(13,34,50,.72);border:1px solid var(--line);
   border-radius:16px;padding:34px;backdrop-filter:blur(18px);box-shadow:0 30px 80px rgba(0,0,0,.45)}
 .auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
-.auth-brand strong{display:block;font-size:15px;font-family:Sora,system-ui,sans-serif}
+.auth-brand strong{display:block;font-size:15px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif}
 .auth-brand small{display:block;color:var(--steel);font-size:12px}
-.auth-card h1{font-size:24px;font-family:Sora,system-ui,sans-serif;margin-bottom:6px}
+.auth-card h1{font-size:24px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;margin-bottom:6px}
 .auth-secure{color:var(--steel);font-size:13px;margin-bottom:22px}
 .auth-error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#fecaca;
   padding:11px 14px;border-radius:var(--radius);font-size:13px;font-weight:600;margin-bottom:18px}
@@ -45,7 +45,7 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .admin-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
 .admin-sidebar{display:flex;flex-direction:column;gap:8px;padding:22px 16px;
   background:rgba(3,7,11,.5);border-right:1px solid var(--line)}
-.admin-logo{display:flex;align-items:center;gap:10px;font-family:Sora,system-ui,sans-serif;
+.admin-logo{display:flex;align-items:center;gap:10px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;
   font-weight:800;font-size:15px;padding:6px 8px 18px}
 .admin-nav{display:flex;flex-direction:column;gap:2px}
 .admin-nav a{padding:11px 14px;border-radius:var(--radius);color:rgba(244,252,255,.74);font-weight:700;font-size:14px;
@@ -58,11 +58,11 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 
 .admin-main{padding:26px 30px 60px;overflow-x:hidden}
 .admin-topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:26px;flex-wrap:wrap}
-.admin-topbar h1{font-family:Sora,system-ui,sans-serif;font-size:26px}
+.admin-topbar h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;font-size:26px}
 .admin-topbar p{color:var(--steel);font-size:14px;margin-top:4px}
 .bne-clock{display:flex;flex-direction:column;align-items:flex-end;padding:12px 18px;border-radius:var(--radius);
   background:rgba(0,217,255,.07);border:1px solid rgba(0,217,255,.2);min-width:200px}
-.bne-time{font-family:Sora,system-ui,sans-serif;font-size:24px;font-weight:800;color:var(--cyan);line-height:1.1}
+.bne-time{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;font-size:24px;font-weight:800;color:var(--cyan);line-height:1.1}
 .bne-date{font-size:12px;color:rgba(244,252,255,.8);margin-top:3px}
 .bne-label{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin-top:6px}
 
@@ -72,15 +72,15 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .stat-card{padding:20px;border-radius:var(--radius);background:var(--card);border:1px solid var(--line);
   display:flex;flex-direction:column;gap:6px}
 .stat-card.highlight{background:linear-gradient(160deg,#0b2538,#103248);border-color:rgba(0,217,255,.3);box-shadow:0 0 26px rgba(0,217,255,.16)}
-.stat-num{font-family:Sora,system-ui,sans-serif;font-size:34px;font-weight:800;color:var(--cyan);line-height:1}
+.stat-num{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;font-size:34px;font-weight:800;color:var(--cyan);line-height:1}
 .stat-num.small{font-size:16px;line-height:1.25;color:#fff}
 .stat-label{font-size:12px;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.04em}
 .stat-card.wide{grid-column:span 2}
 
 /* ── Panels ────────────────────────────────────────────────────────────────── */
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:22px}
-.panel h2{font-family:Sora,system-ui,sans-serif;font-size:18px;margin-bottom:16px}
-.panel h3{font-family:Sora,system-ui,sans-serif;font-size:15px;margin-bottom:12px}
+.panel h2{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;font-size:18px;margin-bottom:16px}
+.panel h3{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;font-size:15px;margin-bottom:12px}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
 .panel-head h2{margin:0}
 .panel-head span{color:var(--steel);font-size:13px;font-weight:700}
@@ -126,7 +126,7 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .metric-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;
   border-radius:8px;background:rgba(255,255,255,.025);border:1px solid rgba(168,243,255,.08)}
 .metric-list span{color:rgba(244,252,255,.84);font-size:13px}
-.metric-list strong{color:var(--cyan);font-family:Sora,system-ui,sans-serif}
+.metric-list strong{color:var(--cyan);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif}
 
 .upcoming-list{list-style:none;display:flex;flex-direction:column;gap:8px}
 .upcoming-list li{display:grid;grid-template-columns:130px 1fr 1fr auto auto;gap:14px;align-items:center;
@@ -263,3 +263,29 @@ a.field-value{color:var(--cyan-soft)}
 .pay-unpaid   { color: #5a6b78; background: rgba(143, 163, 178, .12); border: 1px solid rgba(143, 163, 178, .32); }
 .detail-card .mono,
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+
+/* ── Compact, expandable booking cards ─────────────────────────────────────── */
+.admin-booking-card{display:block;padding:0;overflow:hidden;border-left:3px solid rgba(143,163,178,.5);
+  transition:border-color .16s ease,background .16s ease,box-shadow .16s ease}
+.admin-booking-card:hover{border-left-color:var(--cyan);box-shadow:0 8px 24px rgba(0,0,0,.22)}
+.admin-booking-card.is-expanded{border-left-color:var(--cyan);background:rgba(0,217,255,.05)}
+.booking-card-summary{width:100%;display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;
+  padding:13px 16px;background:transparent;border:0;cursor:pointer;text-align:left;color:inherit;
+  font:inherit;transition:background .15s ease}
+.booking-card-summary:hover{background:rgba(244,252,255,.035)}
+.bc-name{font-weight:800;font-size:15px;color:#fff;flex:1 1 150px;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bc-when{color:var(--steel);font-size:13px;font-weight:600}
+.bc-amount{font-weight:800;color:var(--cyan);font-size:14px;margin-left:auto}
+.bc-chevron{width:20px;height:20px;color:var(--steel);flex:0 0 auto;transition:transform .25s ease}
+.admin-booking-card.is-expanded .bc-chevron{transform:rotate(180deg);color:var(--cyan)}
+.booking-card-body{padding:0 16px 16px;border-top:1px solid var(--line);background:rgba(3,7,11,.18)}
+.booking-card-body[hidden]{display:none}
+.booking-card-body .booking-card-main{margin-top:14px}
+.booking-card-body .booking-quick-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.booking-card-body .booking-card-actions{margin-top:16px;justify-content:flex-start;
+  padding-top:14px;border-top:1px dashed rgba(168,243,255,.14)}
+@media (max-width:600px){
+  .bc-amount{margin-left:0}
+  .booking-card-summary{gap:6px 10px}
+}

@@ -271,13 +271,17 @@ function package_options(string $current = ''): string {
         <?php else: ?>
           <div class="booking-card-list">
             <?php foreach ($filtered as $b): $mapUrl = maps_link($b); $price = booking_price($b); ?>
-              <article class="admin-booking-card" id="booking-<?= h($b['id']) ?>">
+              <article class="admin-booking-card" id="booking-<?= h($b['id']) ?>" data-booking-card>
+                <button type="button" class="booking-card-summary" data-booking-toggle aria-expanded="false">
+                  <span class="bc-name"><?= h($b['fullName'] ?: 'Unnamed customer') ?></span>
+                  <span class="bc-when"><?= h(trim(($b['preferredDate'] ?? '') . ' · ' . ($b['preferredTimeWindow'] ?? ''), ' ·')) ?: 'No date' ?></span>
+                  <span class="bc-amount"><?= $price > 0 ? '$' . h((string)$price) : 'Quote' ?></span>
+                  <span class="badge <?= badge_class_admin($b['status']) ?>"><?= h(status_label($b['status'])) ?></span>
+                  <span class="<?= payment_badge_class($b) ?>"><?= h(payment_label($b)) ?></span>
+                  <svg class="bc-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="booking-card-body" hidden>
                 <div class="booking-card-main">
-                  <div class="booking-card-title">
-                    <h3><?= h($b['fullName'] ?: 'Unnamed customer') ?></h3>
-                    <span class="badge <?= badge_class_admin($b['status']) ?>"><?= h(status_label($b['status'])) ?></span>
-                    <span class="<?= payment_badge_class($b) ?>"><?= h(payment_label($b)) ?></span>
-                  </div>
                   <div class="booking-quick-grid">
                     <div>
                       <span class="field-label">Email</span>
@@ -322,6 +326,7 @@ function package_options(string $current = ''): string {
                     <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
                     <select name="status" onchange="this.form.submit()"><?= status_options($b['status']) ?></select>
                   </form>
+                </div>
                 </div>
               </article>
             <?php endforeach; ?>

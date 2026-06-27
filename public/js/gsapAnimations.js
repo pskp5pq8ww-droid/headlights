@@ -132,8 +132,17 @@
     const layer = ensureTransitionLayer();
     const star = qs(".transition-star-svg", layer);
 
-    return gsap
-      .timeline({ defaults: { ease: "power4.inOut" } })
+    // Always leave the overlay hidden, even if the timeline is interrupted
+    // (e.g. the click navigates away on mobile) so the giant star can never
+    // get stuck covering the page.
+    const cleanup = () => {
+      gsap.killTweensOf(star);
+      gsap.set(layer, { display: "none", autoAlpha: 0 });
+      gsap.set(star, { scale: 0 });
+    };
+
+    const tl = gsap
+      .timeline({ defaults: { ease: "power4.inOut" }, onInterrupt: cleanup })
       .set(layer, { display: "grid", autoAlpha: 1 })
       .set(star, { scale: 0, rotation: -18, transformOrigin: "50% 50%" })
       .to(star, { scale: 0.95, rotation: 0, duration: 0.2, ease: "back.out(2)" })
@@ -144,6 +153,10 @@
       .to(layer, { autoAlpha: 0, duration: 0.36, ease: "power2.out" })
       .set(layer, { display: "none" })
       .set(star, { scale: 0 });
+
+    // Hard safety net: force-hide after a max duration no matter what.
+    gsap.delayedCall(1.8, cleanup);
+    return tl;
   }
 
   function decorateCTAButtons(root = document) {
@@ -374,8 +387,29 @@
     });
   }
 
+  function clearStuckOverlays(includeLoader) {
+    const layer = qs("[data-star-transition]");
+    if (layer) { layer.style.display = "none"; layer.style.opacity = "0"; }
+    if (includeLoader) {
+      qs("[data-brand-loader]")?.remove();
+      document.body.classList.remove("brand-loader-active");
+    }
+  }
+
+  function initOverlayWatchdog() {
+    // Returning via back/forward cache, or refocusing the tab, must never leave
+    // a half-played full-screen star or loader covering the content.
+    window.addEventListener("pageshow", (event) => clearStuckOverlays(event.persisted));
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) clearStuckOverlays(false);
+    });
+    // Failsafe: the brand loader should never outlive the first few seconds.
+    window.setTimeout(() => clearStuckOverlays(true), 3500);
+  }
+
   function init() {
     initBrandLoader();
+    initOverlayWatchdog();
     decorateCTAButtons();
     initCTAFlash();
     initSectionReveals();

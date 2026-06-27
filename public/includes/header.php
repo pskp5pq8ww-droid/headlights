@@ -14,9 +14,6 @@ $minimal_header = str_contains(' ' . $body_class . ' ', ' booking-page ');
     <meta name="description" content="<?= htmlspecialchars($page_desc) ?>" />
     <meta name="theme-color" content="#071827" />
     <link rel="canonical" href="<?= htmlspecialchars($SITE['canonical']) ?>/" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="<?= asset('css/styles.css') ?>" />
   </head>
   <body<?= $body_class !== '' ? ' class="' . htmlspecialchars($body_class, ENT_QUOTES) . '"' : '' ?>>
