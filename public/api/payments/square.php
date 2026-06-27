@@ -50,6 +50,7 @@ $vehicle = clean_text($b['vehicle'] ?? $b['vehicleMakeModel'] ?? '', 160);
 $date    = clean_text($b['date'] ?? $b['preferredDate'] ?? '', 40);
 $time    = clean_text($b['time'] ?? $b['preferredTimeWindow'] ?? '', 80);
 $package = clean_text($b['package'] ?? $b['packageSelected'] ?? '', 120);
+$termsAccepted = terms_was_accepted($b['terms_accepted'] ?? $b['termsAccepted'] ?? '');
 
 $errors = [];
 if ($name === '')    $errors['name'] = 'Full name is required.';
@@ -59,6 +60,7 @@ if ($address === '') $errors['customer_address'] = 'Service address or suburb is
 if ($date === '')    $errors['date'] = 'Preferred date is required.';
 if ($time === '')    $errors['time'] = 'Preferred time window is required.';
 if ($package === '') $errors['package'] = 'Service is required.';
+if (!$termsAccepted) $errors['terms_accepted'] = 'You must accept the Terms & Conditions before booking.';
 if ($errors) {
     booking_json_response(['success' => false, 'message' => 'Please complete all required fields.', 'errors' => $errors], 422);
 }
@@ -128,6 +130,8 @@ try {
         'preferredContactMethod' => $b['preferred_contact_method'] ?? $b['preferredContactMethod'] ?? 'Phone',
         'message'              => $b['message'] ?? '',
         'source'              => 'square_' . square_environment(),
+        'termsAccepted'        => $termsAccepted,
+        'termsVersion'         => $b['terms_version'] ?? $b['termsVersion'] ?? '2026-06-27-eofy',
     ]);
 
     $booking = updateBookingPayment($booking['id'], [
@@ -191,4 +195,8 @@ try {
         'receiptUrl'=> $receiptUrl,
         'message'   => 'Your payment was received. We will email your confirmation shortly.',
     ]);
+}
+
+function terms_was_accepted(mixed $value): bool {
+    return in_array(strtolower(trim((string)$value)), ['1', 'yes', 'true', 'on', 'accepted'], true);
 }

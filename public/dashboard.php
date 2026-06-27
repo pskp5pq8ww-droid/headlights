@@ -29,6 +29,10 @@ try {
         $redirect = '/dashboard';
         if (!empty($_POST['selectedDate'])) $redirect .= '?date=' . urlencode((string)$_POST['selectedDate']);
         if (!empty($_POST['detail'])) $redirect .= (str_contains($redirect, '?') ? '&' : '?') . 'id=' . urlencode((string)$_POST['detail']);
+        $view = clean_text($_POST['view'] ?? '', 40);
+        if ($view !== '' && in_array($view, ['overview', 'calendar', 'bookings', 'reports', 'detail'], true)) {
+            $redirect .= '#' . $view;
+        }
         header('Location: ' . $redirect);
         exit;
     }
@@ -152,10 +156,12 @@ function package_options(string $current = ''): string {
         <span>Shining Admin</span>
       </a>
       <nav class="admin-nav">
-        <a class="is-active" href="/dashboard"><span>Dashboard</span></a>
-        <a href="#calendar"><span>Calendar</span></a>
-        <a href="#bookings"><span>Bookings</span></a>
-        <a href="#metrics"><span>Reports</span></a>
+        <a class="is-active" href="#overview" data-admin-view-link="overview"><span>Dashboard</span></a>
+        <a href="#calendar" data-admin-view-link="calendar"><span>Calendar</span></a>
+        <a href="#bookings" data-admin-view-link="bookings"><span>Bookings</span></a>
+        <a href="#reports" data-admin-view-link="reports"><span>Reports</span></a>
+        <a href="/analytics"><span>Analytics</span></a>
+        <a href="/bookings-map"><span>Map</span></a>
         <a href="/users"><span>Users</span></a>
       </nav>
       <a class="admin-logout" href="/logout">Logout</a>
@@ -176,23 +182,26 @@ function package_options(string $current = ''): string {
 
       <?php if ($error): ?><p class="admin-error" role="alert"><?= h($error) ?></p><?php endif; ?>
 
-      <section class="stat-grid" id="metrics" aria-label="Dashboard metrics">
-        <div class="stat-card"><span class="stat-num"><?= $stats['total'] ?></span><span class="stat-label">Total Bookings</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['new'] ?></span><span class="stat-label">New Bookings</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['confirmed'] ?></span><span class="stat-label">Confirmed Bookings</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['completed'] ?></span><span class="stat-label">Completed Bookings</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['cancelled'] ?></span><span class="stat-label">Cancelled Bookings</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['today'] ?></span><span class="stat-label">Today's Bookings</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['contacted'] ?></span><span class="stat-label">Contacted</span></div>
-        <div class="stat-card highlight"><span class="stat-num">$<?= number_format((float)$stats['paidRevenue'], 2) ?></span><span class="stat-label">Paid Revenue (Square)</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['paid'] ?></span><span class="stat-label">Paid Bookings</span></div>
-        <div class="stat-card"><span class="stat-num">$<?= $stats['estimatedRevenue'] ?></span><span class="stat-label">Estimated Revenue</span></div>
-        <div class="stat-card"><span class="stat-num"><?= $stats['pendingFollowUps'] ?></span><span class="stat-label">Pending Follow-ups</span></div>
-        <div class="stat-card wide"><span class="stat-num small"><?= h($stats['mostSelectedPackage']) ?></span><span class="stat-label">Most Selected Package</span></div>
+      <section class="admin-view is-active" id="overview" data-admin-view="overview" aria-label="Dashboard overview">
+        <div class="stat-grid" aria-label="Dashboard metrics">
+          <div class="stat-card"><span class="stat-num"><?= $stats['total'] ?></span><span class="stat-label">Total Bookings</span></div>
+          <div class="stat-card"><span class="stat-num"><?= $stats['new'] ?></span><span class="stat-label">New Bookings</span></div>
+          <div class="stat-card"><span class="stat-num"><?= $stats['confirmed'] ?></span><span class="stat-label">Confirmed Bookings</span></div>
+          <div class="stat-card"><span class="stat-num"><?= $stats['completed'] ?></span><span class="stat-label">Completed Bookings</span></div>
+          <div class="stat-card"><span class="stat-num"><?= $stats['cancelled'] ?></span><span class="stat-label">Cancelled Bookings</span></div>
+          <div class="stat-card"><span class="stat-num"><?= $stats['today'] ?></span><span class="stat-label">Today's Bookings</span></div>
+          <div class="stat-card"><span class="stat-num"><?= $stats['contacted'] ?></span><span class="stat-label">Contacted</span></div>
+          <div class="stat-card highlight"><span class="stat-num">$<?= number_format((float)$stats['paidRevenue'], 2) ?></span><span class="stat-label">Paid Revenue (Square)</span></div>
+          <div class="stat-card"><span class="stat-num"><?= $stats['paid'] ?></span><span class="stat-label">Paid Bookings</span></div>
+          <div class="stat-card"><span class="stat-num">$<?= $stats['estimatedRevenue'] ?></span><span class="stat-label">Estimated Revenue</span></div>
+          <div class="stat-card"><span class="stat-num"><?= $stats['pendingFollowUps'] ?></span><span class="stat-label">Pending Follow-ups</span></div>
+          <div class="stat-card wide"><span class="stat-num small"><?= h($stats['mostSelectedPackage']) ?></span><span class="stat-label">Most Selected Package</span></div>
+        </div>
       </section>
 
-      <section class="dashboard-grid">
-        <div class="panel" id="calendar">
+      <section class="admin-view" id="calendar" data-admin-view="calendar" aria-label="Calendar">
+        <div class="dashboard-grid">
+        <div class="panel">
           <div class="panel-head">
             <h2>Booking Calendar</h2>
             <span><?= h($monthStart->format('F Y')) ?></span>
@@ -230,6 +239,7 @@ function package_options(string $current = ''): string {
                   <input type="hidden" name="action" value="quick_status" />
                   <input type="hidden" name="id" value="<?= h($b['id']) ?>" />
                   <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
+                  <input type="hidden" name="view" value="calendar" />
                   <select name="status" onchange="this.form.submit()"><?= status_options($b['status']) ?></select>
                 </form>
                 <a class="up-action" href="/dashboard?date=<?= h($selectedDate) ?>&id=<?= h($b['id']) ?>#detail">View details</a>
@@ -238,14 +248,15 @@ function package_options(string $current = ''): string {
             </ul>
           <?php endif; ?>
         </div>
+        </div>
       </section>
 
-      <section class="panel" id="bookings">
+      <section class="admin-view panel" id="bookings" data-admin-view="bookings" aria-label="Bookings">
         <div class="panel-head">
           <h2>Bookings</h2>
           <span><?= count($filtered) ?> shown</span>
         </div>
-        <form class="admin-filters" method="get">
+        <form class="admin-filters" method="get" action="/dashboard#bookings">
           <input type="search" name="search" value="<?= h($_GET['search'] ?? '') ?>" placeholder="Search name, phone, email, vehicle, suburb" />
           <select name="status"><option value="">All statuses</option><?= status_options($statusFilter) ?></select>
           <select name="package"><?= package_options($packageFilter) ?></select>
@@ -324,6 +335,7 @@ function package_options(string $current = ''): string {
                     <input type="hidden" name="action" value="quick_status" />
                     <input type="hidden" name="id" value="<?= h($b['id']) ?>" />
                     <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
+                    <input type="hidden" name="view" value="bookings" />
                     <select name="status" onchange="this.form.submit()"><?= status_options($b['status']) ?></select>
                   </form>
                 </div>
@@ -334,7 +346,8 @@ function package_options(string $current = ''): string {
         <?php endif; ?>
       </section>
 
-      <section class="dashboard-grid">
+      <section class="admin-view" id="reports" data-admin-view="reports" aria-label="Reports">
+        <div class="dashboard-grid">
         <div class="panel">
           <h2>Package breakdown</h2>
           <?php if (!$stats['packageBreakdown']): ?><p class="empty">No bookings found.</p><?php else: ?>
@@ -347,9 +360,10 @@ function package_options(string $current = ''): string {
             <ul class="metric-list"><?php foreach ($stats['topSuburbs'] as $label => $count): ?><li><span><?= h($label) ?></span><strong><?= $count ?></strong></li><?php endforeach; ?></ul>
           <?php endif; ?>
         </div>
+        </div>
       </section>
 
-      <section class="panel" id="detail">
+      <section class="admin-view panel" id="detail" data-admin-view="detail" aria-label="Booking details">
         <h2>Booking details</h2>
         <?php if (!$selectedBooking): ?>
           <p class="empty">Select a booking to view details.</p>
@@ -359,6 +373,7 @@ function package_options(string $current = ''): string {
             <input type="hidden" name="id" value="<?= h($b['id']) ?>" />
             <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
             <input type="hidden" name="detail" value="<?= h($b['id']) ?>" />
+            <input type="hidden" name="view" value="detail" />
             <div class="detail-card">
               <h3>Customer Details</h3>
               <p><strong><?= h($b['fullName']) ?></strong></p>
@@ -428,6 +443,7 @@ function package_options(string $current = ''): string {
             <input type="hidden" name="action" value="delete_booking" />
             <input type="hidden" name="id" value="<?= h($b['id']) ?>" />
             <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
+            <input type="hidden" name="view" value="detail" />
             <input type="hidden" name="confirm_delete" value="yes" />
             <button type="submit">Delete booking</button>
           </form>

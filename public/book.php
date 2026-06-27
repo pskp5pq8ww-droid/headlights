@@ -218,6 +218,12 @@ include __DIR__ . '/includes/header.php';
                   <p class="panel-hint">This option is quote-only. Submit your request and we'll contact you with pricing — no payment needed now.</p>
                 </div>
 
+                <label class="terms-consent" for="termsAccepted">
+                  <input id="termsAccepted" name="terms_accepted" type="checkbox" value="1" required />
+                  <span>I have read and accept the <a href="/terms" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</span>
+                </label>
+                <input type="hidden" name="terms_version" value="2026-06-27-eofy" />
+
                 <div class="step-nav">
                   <button class="button button-secondary step-back-btn" type="button" data-prev="3">
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg><span>Back</span>
@@ -227,6 +233,7 @@ include __DIR__ . '/includes/header.php';
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M6 11h12v10H6z"/></svg>
                   </button>
                 </div>
+                <p class="terms-short">T&amp;Cs apply. $99 EOFY offer applies to standard front headlight restoration within selected Brisbane service areas. Results vary depending on lens condition. Service does not repair internal moisture, cracks, broken seals, electrical faults, bulbs, or internal damage. Customer must provide a safe, legal, and accessible workspace. Children, pets, and customers must remain clear of the work area during service. Mobile service included in selected suburbs only.</p>
                 <div class="checkout-total">
                   <span>Total</span>
                   <strong data-summary="total">—</strong>

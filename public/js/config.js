@@ -3,7 +3,7 @@ window.siteConfig = {
     businessName: "Shining Headlights Australia",
     phoneDisplay: "0400 000 000",
     phoneHref: "tel:+61400000000",
-    email: "hello@shiningheadlights.com.au",
+    email: "hello@shiningaus.com",
     bookingEndpoint: "/form",
     instagram: "#",
     facebook: "#"
@@ -27,7 +27,7 @@ window.siteConfig = {
       name: "Crystal Restore",
       badge: "Most Popular",
       bestFor: "For yellow, cloudy or heavily oxidised headlights.",
-      price: "From $149",
+      price: "From $220",
       cta: "Book Crystal Restore",
       featured: true,
       inclusions: [

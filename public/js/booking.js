@@ -31,7 +31,8 @@
       email: "email",
       vehicle: "vehicle make and model",
       date: "preferred date",
-      time: "preferred time window"
+      time: "preferred time window",
+      terms_accepted: "Terms & Conditions acceptance"
     };
 
     function selectedPackage() {
@@ -127,6 +128,13 @@
       if (payLabel) payLabel.textContent = "Request Booking";
     }
 
+    function squareUnavailableMessage() {
+      const detail = window.SquarePayment?.lastError || "";
+      return detail
+        ? `Online payment is temporarily unavailable (${detail}). Submit your booking and we'll confirm and arrange payment with you.`
+        : "Online payment is temporarily unavailable. Submit your booking and we'll confirm and arrange payment with you.";
+    }
+
     async function enterPaymentStep() {
       paymentFallback = false;
       const price = buildSummary();
@@ -140,7 +148,7 @@
         return;
       }
       if (!window.SquarePayment) {
-        useRequestFallback("Online payment is temporarily unavailable. Submit your booking and we'll confirm and arrange payment with you.");
+        useRequestFallback(squareUnavailableMessage());
         return;
       }
       status.textContent = "Loading secure payment…";
@@ -149,7 +157,7 @@
         status.textContent = "";
       } else {
         // Square not configured / failed → keep booking working via the request flow.
-        useRequestFallback("Online payment is temporarily unavailable. Submit your booking and we'll confirm and arrange payment with you.");
+        useRequestFallback(squareUnavailableMessage());
         status.textContent = "";
       }
     }

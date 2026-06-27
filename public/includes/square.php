@@ -25,6 +25,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/bookings.php';
 
 const SQUARE_API_VERSION = '2025-01-23';
+const SQUARE_SANDBOX_LOCATION_ID = 'LVZNGRSMG6QV3';
 
 // ── Configuration loading ───────────────────────────────────────────────────
 function square_env_value(string $name): string {
@@ -68,7 +69,11 @@ function square_environment(): string {
 
 function square_application_id(): string { return square_setting('SQUARE_APPLICATION_ID', 'application_id'); }
 function square_access_token(): string   { return square_setting('SQUARE_ACCESS_TOKEN', 'access_token'); }
-function square_location_id(): string    { return square_setting('SQUARE_LOCATION_ID', 'location_id'); }
+function square_location_id(): string {
+    $locationId = square_setting('SQUARE_LOCATION_ID', 'location_id');
+    if ($locationId !== '') return $locationId;
+    return square_environment() === 'sandbox' ? SQUARE_SANDBOX_LOCATION_ID : '';
+}
 function square_currency(): string       { return strtoupper(square_setting('SQUARE_CURRENCY', 'currency', 'AUD')); }
 
 function square_api_base(): string {
@@ -88,15 +93,30 @@ function square_is_configured(): bool {
     return square_application_id() !== '' && square_access_token() !== '' && square_location_id() !== '';
 }
 
+function square_config_status(): array {
+    $missing = [];
+    if (square_application_id() === '') $missing[] = 'application_id';
+    if (square_access_token() === '') $missing[] = 'access_token';
+    if (square_location_id() === '') $missing[] = 'location_id';
+    if (!function_exists('curl_init')) $missing[] = 'php_curl';
+
+    return [
+        'ready' => $missing === [],
+        'missing' => $missing,
+    ];
+}
+
 /** Config safe to expose to the browser — NEVER includes the access token. */
 function square_public_config(): array {
+    $status = square_config_status();
     return [
         'applicationId' => square_application_id(),
         'locationId'    => square_location_id(),
         'environment'   => square_environment(),
         'currency'      => square_currency(),
         'sdkUrl'        => square_web_sdk_url(),
-        'configured'    => square_application_id() !== '' && square_location_id() !== '',
+        'configured'    => $status['ready'],
+        'missing'       => $status['missing'],
     ];
 }
 
@@ -178,9 +198,9 @@ function square_create_payment(string $sourceId, int $amountCents, string $idemp
         'location_id'     => square_location_id(),
         'autocomplete'    => true,
     ];
-    if (!empty($meta['note']))        $body['note'] = mb_substr((string)$meta['note'], 0, 500);
-    if (!empty($meta['email']))       $body['buyer_email_address'] = mb_substr((string)$meta['email'], 0, 255);
-    if (!empty($meta['referenceId'])) $body['reference_id'] = mb_substr((string)$meta['referenceId'], 0, 40);
+    if (!empty($meta['note']))        $body['note'] = square_truncate((string)$meta['note'], 500);
+    if (!empty($meta['email']))       $body['buyer_email_address'] = square_truncate((string)$meta['email'], 255);
+    if (!empty($meta['referenceId'])) $body['reference_id'] = square_truncate((string)$meta['referenceId'], 40);
 
     $ch = curl_init(square_api_base() . '/v2/payments');
     curl_setopt_array($ch, [
@@ -215,4 +235,11 @@ function square_create_payment(string $sourceId, int $amountCents, string $idemp
     $code   = $data['errors'][0]['code']   ?? 'UNKNOWN';
     square_log('Square error HTTP ' . $httpCode . ' code=' . $code . ' detail=' . $detail);
     return ['ok' => false, 'error' => $detail, 'code' => $code, 'http' => $httpCode];
+}
+
+function square_truncate(string $value, int $max): string {
+    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+        return mb_strlen($value) > $max ? mb_substr($value, 0, $max) : $value;
+    }
+    return strlen($value) > $max ? substr($value, 0, $max) : $value;
 }

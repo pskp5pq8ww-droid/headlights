@@ -24,11 +24,14 @@ http
     let urlPath = decodeURIComponent(req.url.split("?")[0]);
     if (urlPath === "/") urlPath = "/index.php";
 
-    const filePath = path.join(ROOT, urlPath);
+    let filePath = path.join(ROOT, urlPath);
     if (!filePath.startsWith(ROOT)) {
       res.writeHead(403);
       res.end("Forbidden");
       return;
+    }
+    if (!path.extname(filePath) && fs.existsSync(`${filePath}.php`)) {
+      filePath = `${filePath}.php`;
     }
 
     fs.readFile(filePath, (err, data) => {

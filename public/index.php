@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/config.php';
 $current      = 'home';
 $page_title   = '$99 EOFY Headlight Restoration | ' . $SITE['name'];
-$page_desc    = 'EOFY Sale: mobile headlight restoration for $99, was $149. Limited time offer with countdown. Brisbane mobile service.';
+$page_desc    = 'EOFY Sale: mobile headlight restoration for $99, was $220. Limited time offer with countdown. Brisbane mobile service.';
 $page_scripts = ['countdown'];
 $body_class   = 'landing-home';
 include __DIR__ . '/includes/header.php';

@@ -5,7 +5,7 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '20';
+const ASSET_VER = '22';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [
@@ -13,9 +13,9 @@ $SITE = [
     'tagline'      => 'Mobile Headlight Restoration',
     'phone_label'  => '0400 000 000',
     'phone_href'   => 'tel:+61400000000',
-    'email'        => 'hello@shiningheadlights.com.au',
+    'email'        => 'hello@shiningaus.com',
     'region'       => 'Brisbane, Queensland',
-    'canonical'    => 'https://shiningheadlights.com.au',
+    'canonical'    => 'https://shiningaus.com',
 ];
 
 // ── EOFY offer ───────────────────────────────────────────────────────────────
@@ -26,8 +26,8 @@ $EOFY = [
     'sub'      => 'We come to you anywhere in Brisbane.',
     'support'  => 'Crystal-clear headlights. Safer driving. Better looks. Professional restoration at your home, workplace or driveway.',
     'now'      => 99,
-    'was'      => 149,
-    'save'     => 50,
+    'was'      => 220,
+    'save'     => 121,
     'note'     => 'EOFY launch price. Limited time only.',
     'target'   => '2026-06-30T23:59:59+10:00',
 ];
@@ -40,7 +40,7 @@ $PACKAGES = [
         'inclusions' => ['Light oxidation removal', 'Headlight clarity restoration', 'Final clean finish'],
     ],
     [
-        'name' => 'Crystal Restore', 'price' => 'From $149', 'featured' => true, 'badge' => 'Most Popular',
+        'name' => 'Crystal Restore', 'price' => 'From $220', 'featured' => true, 'badge' => 'Most Popular',
         'bestFor' => 'For yellow, cloudy or heavily oxidised headlights.',
         'inclusions' => ['Multi-stage sanding process', 'Professional clarity restoration', 'Glossy clear finish', 'Basic UV protection'],
     ],

@@ -103,7 +103,7 @@ Preferred option: configure environment variables in Hostinger:
 ```text
 ADMIN_USERNAME=your-admin-user
 ADMIN_PASSWORD=your-strong-password
-ADMIN_EMAIL=bookings@yourdomain.com
+ADMIN_EMAIL=bookings@shiningaus.com
 ```
 
 Alternative option: create this private file outside `public_html`:

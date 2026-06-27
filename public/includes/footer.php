@@ -27,6 +27,7 @@ $page_scripts = $page_scripts ?? [];
           <a href="/services">Services</a>
           <a href="/pricing">Pricing</a>
           <a href="/faq">FAQ</a>
+          <a href="/terms">Terms &amp; Conditions</a>
           <a href="/contact">Contact</a>
         </div>
       </div>
@@ -56,5 +57,19 @@ $page_scripts = $page_scripts ?? [];
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=<?= rawurlencode($mapsKey) ?>&libraries=places&callback=initGoogleBookingAutocomplete"></script>
 <?php endif; ?>
 <?php endif; ?>
+
+    <script>
+    /* Non-blocking analytics beacon — fire and forget, never delays the page. */
+    (function () {
+      try {
+        var payload = JSON.stringify({ p: location.pathname, r: document.referrer });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon("/api/track", new Blob([payload], { type: "application/json" }));
+        } else {
+          fetch("/api/track", { method: "POST", body: payload, headers: { "Content-Type": "application/json" }, keepalive: true });
+        }
+      } catch (e) {}
+    })();
+    </script>
   </body>
 </html>

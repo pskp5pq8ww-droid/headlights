@@ -106,7 +106,7 @@ Environment variable option:
 ```text
 ADMIN_USERNAME=your-admin-user
 ADMIN_PASSWORD=your-strong-password
-ADMIN_EMAIL=bookings@yourdomain.com
+ADMIN_EMAIL=bookings@shiningaus.com
 ```
 
 Private file option:

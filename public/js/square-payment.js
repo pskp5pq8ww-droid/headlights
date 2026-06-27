@@ -6,6 +6,7 @@
     card: null,
     ready: false,
     _loading: null,
+    lastError: "",
 
     /** Fetch public config + mount the card field once. Returns true if ready. */
     init() {
@@ -13,15 +14,29 @@
       if (this._loading) return this._loading;
       this._loading = (async () => {
         try {
+          this.lastError = "";
           const res = await fetch(window.squareConfigEndpoint || "/api/square-config", {
             headers: { Accept: "application/json" }
           });
+          if (!res.ok) {
+            this.lastError = `Square config failed with HTTP ${res.status}.`;
+            return false;
+          }
           const data = await res.json();
           this.config = (data && data.config) || null;
-          if (!this.config || !this.config.configured) return false;
+          if (!this.config || !this.config.configured) {
+            const missing = this.config && Array.isArray(this.config.missing) ? this.config.missing.join(", ") : "";
+            this.lastError = missing
+              ? `Square is missing: ${missing}.`
+              : "Square is not configured.";
+            return false;
+          }
 
           await this._loadSdk(this.config.sdkUrl);
-          if (!window.Square) return false;
+          if (!window.Square) {
+            this.lastError = "Square SDK loaded but Square was not available.";
+            return false;
+          }
 
           this.payments = window.Square.payments(this.config.applicationId, this.config.locationId);
           this.card = await this.payments.card();
@@ -29,6 +44,8 @@
           this.ready = true;
           return true;
         } catch (err) {
+          this.lastError = err && err.message ? err.message : "Square payment form could not be loaded.";
+          if (window.console && window.console.warn) window.console.warn("[SquarePayment]", err);
           this._loading = null;
           return false;
         }

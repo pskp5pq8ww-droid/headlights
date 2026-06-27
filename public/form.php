@@ -19,6 +19,7 @@ $fieldAliases = [
     'date' => ['date', 'preferredDate', 'preferred_date'],
     'time' => ['time', 'preferredTimeWindow', 'preferred_time_window'],
     'package' => ['package', 'packageSelected', 'package_selected'],
+    'terms_accepted' => ['terms_accepted', 'termsAccepted'],
 ];
 
 $required = [
@@ -30,11 +31,15 @@ $required = [
     'date' => 'Preferred date is required.',
     'time' => 'Preferred time window is required.',
     'package' => 'Package is required.',
+    'terms_accepted' => 'You must accept the Terms & Conditions before booking.',
 ];
 
 $errors = [];
 foreach ($required as $field => $message) {
     if (booking_post_value($fieldAliases[$field] ?? [$field]) === '') $errors[$field] = $message;
+}
+if (!terms_was_accepted($_POST['terms_accepted'] ?? $_POST['termsAccepted'] ?? '')) {
+    $errors['terms_accepted'] = 'You must accept the Terms & Conditions before booking.';
 }
 if (!filter_var(booking_post_value($fieldAliases['email']), FILTER_VALIDATE_EMAIL)) {
     $errors['email'] = 'A valid email is required.';
@@ -71,6 +76,8 @@ try {
         'preferredContactMethod' => $_POST['preferred_contact_method'] ?? 'Phone',
         'message' => $_POST['message'] ?? '',
         'source' => $_POST['source'] ?? 'public_booking_form',
+        'termsAccepted' => terms_was_accepted($_POST['terms_accepted'] ?? $_POST['termsAccepted'] ?? ''),
+        'termsVersion' => $_POST['terms_version'] ?? '2026-06-27-eofy',
     ]);
 
     $photos = handle_booking_uploads($booking['id']);
@@ -141,4 +148,8 @@ function booking_post_value(array $names): string {
         }
     }
     return '';
+}
+
+function terms_was_accepted(mixed $value): bool {
+    return in_array(strtolower(trim((string)$value)), ['1', 'yes', 'true', 'on', 'accepted'], true);
 }

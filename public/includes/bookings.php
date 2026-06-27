@@ -8,7 +8,7 @@ const BOOKING_STATUSES = ['new', 'contacted', 'confirmed', 'completed', 'cancell
 const BOOKING_PAYMENT_STATUSES = ['unpaid', 'pending', 'paid', 'failed', 'refunded'];
 const BOOKING_PACKAGE_PRICES = [
     'Basic Restore' => 99,
-    'Crystal Restore' => 149,
+    'Crystal Restore' => 220,
     'Premium Protection Restore' => 199,
     'EOFY Launch Offer – $99' => 99,
     'Not sure / Quote' => 0,
@@ -138,6 +138,9 @@ function normalize_booking(array $booking): array {
         'preferredContactMethod' => (string)($booking['preferredContactMethod'] ?? $booking['preferred_contact_method'] ?? 'Phone'),
         'message' => (string)($booking['message'] ?? ''),
         'source' => (string)($booking['source'] ?? 'website'),
+        'termsAccepted' => (bool)($booking['termsAccepted'] ?? $booking['terms_accepted'] ?? false),
+        'termsAcceptedAt' => (string)($booking['termsAcceptedAt'] ?? $booking['terms_accepted_at'] ?? ''),
+        'termsVersion' => (string)($booking['termsVersion'] ?? $booking['terms_version'] ?? ''),
         // ── Payment fields (Square) ──────────────────────────────────────────
         'amount' => (float)($booking['amount'] ?? 0),
         'currency' => (string)($booking['currency'] ?? 'AUD'),
@@ -236,6 +239,9 @@ function createBooking(array $data): array {
         'preferredContactMethod' => clean_text($data['preferredContactMethod'] ?? 'Phone', 40),
         'message' => clean_text($data['message'] ?? '', 2000),
         'source' => clean_text($data['source'] ?? 'website', 80),
+        'termsAccepted' => !empty($data['termsAccepted']) || !empty($data['terms_accepted']),
+        'termsAcceptedAt' => (!empty($data['termsAccepted']) || !empty($data['terms_accepted'])) ? $now : '',
+        'termsVersion' => clean_text($data['termsVersion'] ?? $data['terms_version'] ?? '2026-06-27-eofy', 80),
         'adminNotes' => '',
         'history' => [[
             'at' => $now,
@@ -391,10 +397,10 @@ function getBookingStats(array $bookings = null): array {
 }
 
 function send_booking_email(array $booking): void {
-    $adminEmail = getenv('ADMIN_EMAIL') ?: ($GLOBALS['SITE']['email'] ?? 'hello@shiningheadlights.com.au');
+    $adminEmail = getenv('ADMIN_EMAIL') ?: ($GLOBALS['SITE']['email'] ?? 'hello@shiningaus.com');
     $paid = ($booking['paymentStatus'] ?? '') === 'paid';
     $subject = ($paid ? 'PAID booking' : 'New booking request') . ' - ' . ($booking['fullName'] ?? 'Customer');
-    $body  = "Booking from shiningheadlights.com.au\n\n";
+    $body  = "Booking from shiningaus.com\n\n";
     $body .= "Name: " . ($booking['fullName'] ?? '') . "\n";
     $body .= "Phone: " . ($booking['phone'] ?? '') . "\n";
     $body .= "Email: " . ($booking['email'] ?? '') . "\n";
@@ -411,6 +417,8 @@ function send_booking_email(array $booking): void {
     $body .= "Package: " . ($booking['packageSelected'] ?? '') . "\n";
     $body .= "Condition: " . ($booking['headlightCondition'] ?? '') . "\n";
     $body .= "Preferred contact: " . ($booking['preferredContactMethod'] ?? '') . "\n";
+    $body .= "Terms accepted: " . (!empty($booking['termsAccepted']) ? 'Yes' : 'No') . "\n";
+    if (!empty($booking['termsAcceptedAt'])) $body .= "Terms accepted at: " . $booking['termsAcceptedAt'] . "\n";
     $body .= "Message: " . ($booking['message'] ?? '') . "\n";
     if ($paid) {
         $body .= "\n-- Payment --\n";
@@ -421,7 +429,7 @@ function send_booking_email(array $booking): void {
         if (!empty($booking['cardBrand'])) $body .= "Card: " . $booking['cardBrand'] . ' ****' . ($booking['cardLast4'] ?? '') . "\n";
     }
 
-    $headers  = "From: " . ($GLOBALS['SITE']['email'] ?? 'hello@shiningheadlights.com.au') . "\r\n";
+    $headers  = "From: " . ($GLOBALS['SITE']['email'] ?? 'hello@shiningaus.com') . "\r\n";
     $headers .= "Reply-To: " . ($booking['email'] ?? '') . "\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
