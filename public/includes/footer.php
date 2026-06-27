@@ -33,6 +33,7 @@ $page_scripts = $page_scripts ?? [];
       <div class="container footer-note">
         <p>Results may vary depending on headlight condition, age, previous damage and exposure. UV protection is recommended for longer-lasting results.</p>
         <p>&copy; <span data-year><?= date('Y') ?></span> <?= htmlspecialchars($SITE['name']) ?>.</p>
+        <p class="footer-admin"><a href="/admin">Staff / Admin login</a></p>
       </div>
     </footer>
 

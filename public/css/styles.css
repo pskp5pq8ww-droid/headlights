@@ -4042,3 +4042,122 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 .success-details dt { color: var(--muted); margin: 0; }
 .success-details dd { margin: 0; color: var(--ink); font-weight: 600; text-align: right; }
 .success-details .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDESIGNED HEADER NAV — button on the right + slide-out drawer (all viewports)
+═══════════════════════════════════════════════════════════════════════════ */
+/* Retire every legacy top-bar element so it can never reappear. */
+.desktop-nav,
+.admin-btn,
+.mobile-nav,
+.menu-toggle { display: none !important; }
+
+.nav-toggle {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(168, 243, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(244, 252, 255, 0.06);
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+.nav-toggle:hover,
+.nav-toggle:focus-visible { border-color: var(--cyan); background: rgba(0, 217, 255, 0.1); outline: none; }
+.nav-toggle-bars { display: inline-grid; gap: 4px; }
+.nav-toggle-bars span {
+  display: block; width: 20px; height: 2px; background: #fff; border-radius: 2px;
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease;
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.nav-toggle-label { line-height: 1; }
+
+.drawer-backdrop {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(2, 6, 12, 0.55);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  opacity: 0; transition: opacity 300ms ease;
+}
+.drawer-backdrop.is-visible { opacity: 1; }
+
+.site-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 100;
+  width: min(360px, 86vw);
+  display: flex; flex-direction: column;
+  padding: 88px 26px 34px;
+  background: rgba(6, 12, 20, 0.98);
+  border-left: 1px solid rgba(168, 243, 255, 0.16);
+  box-shadow: -30px 0 60px rgba(0, 0, 0, 0.45);
+  transform: translateX(100%);
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+.site-drawer.is-open { transform: translateX(0); }
+.site-drawer-nav { display: grid; gap: 2px; }
+.site-drawer-nav a {
+  display: flex; align-items: center;
+  min-height: 52px; padding: 0 6px;
+  color: rgba(244, 252, 255, 0.86);
+  font-family: Sora, Montserrat, system-ui, sans-serif;
+  font-weight: 700; font-size: 18px;
+  border-bottom: 1px solid rgba(168, 243, 255, 0.08);
+  transition: color 160ms ease, padding-left 160ms ease;
+}
+.site-drawer-nav a:hover,
+.site-drawer-nav a:focus-visible { color: #fff; padding-left: 12px; }
+.site-drawer-nav a.is-active { color: var(--cyan); }
+.drawer-cta { margin-top: 20px; width: 100%; }
+
+/* Footer admin link (admin button moved out of the header) */
+.footer-admin { margin-top: 10px; }
+.footer-admin a { color: var(--steel); font-size: 12px; font-weight: 700; opacity: 0.72; }
+.footer-admin a:hover,
+.footer-admin a:focus-visible { opacity: 1; color: var(--cyan); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTO-SCROLLING REVIEWS (marquee)
+═══════════════════════════════════════════════════════════════════════════ */
+.reviews-rating { margin-top: 10px; color: var(--muted); font-weight: 700; font-size: 14px; }
+.reviews-rating span { color: #f4b63f; letter-spacing: 2px; }
+.reviews-marquee {
+  margin-top: 30px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.reviews-track {
+  display: flex;
+  gap: 18px;
+  width: max-content;
+  padding: 6px 9px;
+  animation: reviews-scroll 65s linear infinite;
+}
+.reviews-marquee:hover .reviews-track,
+.reviews-marquee:focus-within .reviews-track { animation-play-state: paused; }
+.reviews-track .landing-review-card {
+  flex: 0 0 auto;
+  width: 340px;
+  margin: 0;
+}
+@keyframes reviews-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (max-width: 560px) {
+  .reviews-track .landing-review-card { width: 82vw; }
+  .reviews-track { animation-duration: 48s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-drawer, .drawer-backdrop, .nav-toggle-bars span { transition: none !important; }
+  .reviews-track { animation: none; overflow-x: auto; }
+}

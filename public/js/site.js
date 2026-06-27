@@ -2,23 +2,41 @@
   const qs = (selector, parent = document) => parent.querySelector(selector);
   const qsa = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
 
+  function setMenu(open) {
+    const toggle = qs("[data-menu-toggle]");
+    const drawer = qs("[data-mobile-nav]");
+    const backdrop = qs("[data-drawer-backdrop]");
+    if (!toggle || !drawer) return;
+    drawer.classList.toggle("is-open", open);
+    document.body.classList.toggle("menu-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    drawer.setAttribute("aria-hidden", String(!open));
+    if (backdrop) {
+      if (open) {
+        backdrop.hidden = false;
+        requestAnimationFrame(() => backdrop.classList.add("is-visible"));
+      } else {
+        backdrop.classList.remove("is-visible");
+        window.setTimeout(() => { backdrop.hidden = true; }, 320);
+      }
+    }
+  }
+
   function closeMobileMenu() {
-    document.body.classList.remove("menu-open");
-    qs("[data-mobile-nav]")?.classList.remove("is-open");
-    qs("[data-menu-toggle]")?.setAttribute("aria-expanded", "false");
-    qs("[data-menu-toggle]")?.setAttribute("aria-label", "Open menu");
+    setMenu(false);
   }
 
   function initNavigation() {
     const toggle = qs("[data-menu-toggle]");
-    const nav = qs("[data-mobile-nav]");
-    if (!toggle || !nav) return;
+    const drawer = qs("[data-mobile-nav]");
+    if (!toggle || !drawer) return;
 
-    toggle.addEventListener("click", () => {
-      const isOpen = nav.classList.toggle("is-open");
-      document.body.classList.toggle("menu-open", isOpen);
-      toggle.setAttribute("aria-expanded", String(isOpen));
-      toggle.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+    toggle.addEventListener("click", () => setMenu(!drawer.classList.contains("is-open")));
+    qs("[data-drawer-backdrop]")?.addEventListener("click", closeMobileMenu);
+    qsa("a", drawer).forEach((link) => link.addEventListener("click", closeMobileMenu));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && drawer.classList.contains("is-open")) closeMobileMenu();
     });
 
     qsa('a[href^="#"]').forEach((link) => {

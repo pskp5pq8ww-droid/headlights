@@ -5,7 +5,7 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '17';
+const ASSET_VER = '18';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [
@@ -63,6 +63,15 @@ $REVIEWS = [
         ['text' => 'Came to my driveway and had both headlights crystal clear in under an hour. Looks like a new car.', 'name' => 'James R., Chermside'],
         ['text' => 'So easy — booked online, they came to my work. Night driving is so much better now.', 'name' => 'Priya M., Sunnybank'],
         ['text' => 'Professional, on time and a fraction of the cost of new headlights. Highly recommend.', 'name' => 'Daniel K., Redcliffe'],
+        ['text' => 'My old Hilux headlights were completely yellow. Now they look factory fresh. Great value.', 'name' => 'Mark T., Logan'],
+        ['text' => 'Booked for my mum in Ipswich, they texted before arriving and were super tidy. Lovely team.', 'name' => 'Sarah W., Ipswich'],
+        ['text' => 'Honestly thought I needed new headlights. Saved me hundreds and took 45 minutes in my carport.', 'name' => 'Nguyen P., Carindale'],
+        ['text' => 'Did both cars at our place in North Lakes. Massive difference, especially driving at night.', 'name' => 'Emma L., North Lakes'],
+        ['text' => 'On time, friendly and the finish is glossy and clear. Will be telling the neighbours.', 'name' => 'Brett H., Springfield Lakes'],
+        ['text' => 'Came to my office car park in the CBD on a lunch break. Couldn\'t be easier. 5 stars.', 'name' => 'Olivia S., Brisbane CBD'],
+        ['text' => 'The UV protection package was worth it. Still crystal clear months later. Highly recommend.', 'name' => 'Raj K., Mount Gravatt'],
+        ['text' => 'Quick reply, fair price and a fantastic result on my Mazda. Wynnum locals, book these guys.', 'name' => 'Tahlia B., Wynnum'],
+        ['text' => 'Restored the headlights on our caravan tow car before a trip. Professional and well priced.', 'name' => 'Greg M., Redland Bay'],
     ],
 ];
 

@@ -35,31 +35,23 @@ $minimal_header = str_contains(' ' . $body_class . ' ', ' booking-page ');
         </a>
 
 <?php if (!$minimal_header): ?>
-        <nav class="desktop-nav" aria-label="Main navigation">
-<?php foreach ($NAV as $key => $item): ?>
-          <a href="<?= $item[0] ?>"<?= $current === $key ? ' class="is-active"' : '' ?>><?= $item[1] ?></a>
-<?php endforeach; ?>
-        </nav>
-
-        <a class="admin-btn" href="/admin" aria-label="Admin login">
-          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4 0-7 2-7 5v2h14v-2c0-3-3-5-7-5Z"/></svg>
-          <span>Admin</span>
-        </a>
-
-        <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" data-menu-toggle>
-          <span></span><span></span><span></span>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="siteDrawer" data-menu-toggle>
+          <span class="nav-toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="nav-toggle-label">Menu</span>
         </button>
 <?php endif; ?>
       </div>
 
 <?php if (!$minimal_header): ?>
-      <nav class="mobile-nav" aria-label="Mobile navigation" data-mobile-nav>
+      <div class="drawer-backdrop" data-drawer-backdrop hidden></div>
+      <aside class="site-drawer" id="siteDrawer" data-mobile-nav aria-hidden="true" aria-label="Site navigation">
+        <nav class="site-drawer-nav">
 <?php foreach ($NAV as $key => $item): ?>
-        <a href="<?= $item[0] ?>"<?= $current === $key ? ' class="is-active"' : '' ?>><?= $item[1] ?></a>
+          <a href="<?= $item[0] ?>"<?= $current === $key ? ' class="is-active"' : '' ?>><?= $item[1] ?></a>
 <?php endforeach; ?>
-        <a class="button button-primary" href="/book">Claim EOFY Offer</a>
-        <a class="mobile-admin" href="/admin">Admin login</a>
-      </nav>
+        </nav>
+        <a class="button button-primary drawer-cta" href="/book">Claim EOFY Offer</a>
+      </aside>
 <?php endif; ?>
     </header>
 

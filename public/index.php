@@ -135,15 +135,20 @@ include __DIR__ . '/includes/header.php';
           <div class="landing-section-heading reveal">
             <p class="eyebrow">Reviews</p>
             <h2 id="reviews-title">Trusted By Brisbane Drivers</h2>
+            <p class="reviews-rating"><span aria-hidden="true">★★★★★</span> <?= htmlspecialchars($REVIEWS['rating']) ?> from <?= htmlspecialchars($REVIEWS['count']) ?> happy drivers</p>
           </div>
-          <div class="landing-review-grid">
-<?php foreach (array_slice($REVIEWS['items'], 0, 3) as $r): ?>
-            <figure class="landing-review-card reveal">
+        </div>
+        <div class="reviews-marquee" aria-label="Customer reviews">
+          <div class="reviews-track">
+<?php for ($pass = 0; $pass < 2; $pass++): ?>
+<?php foreach ($REVIEWS['items'] as $r): ?>
+            <figure class="landing-review-card"<?= $pass === 1 ? ' aria-hidden="true"' : '' ?>>
               <span class="stars" aria-hidden="true">★★★★★</span>
               <blockquote><?= htmlspecialchars($r['text']) ?></blockquote>
               <figcaption><?= htmlspecialchars($r['name']) ?></figcaption>
             </figure>
 <?php endforeach; ?>
+<?php endfor; ?>
           </div>
         </div>
       </section>
