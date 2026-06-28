@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/bookings.php';
+require_once __DIR__ . '/includes/service-cards.php';
 $current      = 'book';
 $page_title   = 'Book Now | ' . $SITE['name'];
 $page_desc    = 'Book your mobile headlight restoration in Brisbane. Tell us where your car is located and we will confirm your booking.';
@@ -8,6 +9,7 @@ $page_scripts = ['booking', 'countdown', 'square'];
 $page_maps    = true;
 $body_class   = 'booking-page';
 include __DIR__ . '/includes/header.php';
+$services = read_services(true);
 ?>
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
         <div class="container booking-grid">
@@ -81,13 +83,13 @@ include __DIR__ . '/includes/header.php';
 
               <div class="form-panel" data-panel="2" hidden>
                 <h3 class="panel-title">Choose your service</h3>
-                <label>Service/package selected
-                  <select name="package" id="hiddenPackage" required>
-                    <option value="EOFY Launch Offer – $99">EOFY Launch Offer - $99</option>
-                    <option>Basic Restore</option>
-                    <option>Crystal Restore</option>
-                    <option>Premium Protection Restore</option>
-                    <option>Not sure / Quote</option>
+                <input type="hidden" name="package" id="hiddenPackage" value="EOFY Launch Offer – $99" required />
+                <label>Vehicle size
+                  <select name="vehicle_size" id="vehicleSizeSelect" required>
+                    <option value="">Select vehicle size</option>
+<?php foreach (VEHICLE_SIZE_LABELS as $value => $label): ?>
+                    <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($label) ?></option>
+<?php endforeach; ?>
                   </select>
                 </label>
                 <label>Headlight condition
@@ -100,11 +102,20 @@ include __DIR__ . '/includes/header.php';
                   </select>
                 </label>
                 <label>Number of headlights
-                  <select name="number_of_headlights">
+                  <select name="number_of_headlights" id="numberOfHeadlights">
                     <option>2</option>
                     <option>1</option>
                   </select>
                 </label>
+                <div class="booking-services-block">
+                  <div class="booking-services-heading">
+                    <p class="eyebrow">Add extra shine to your booking</p>
+                    <p>Choose your main headlight restoration and any detailing extras. Prices update with your vehicle size.</p>
+                  </div>
+                  <div class="service-card-grid booking-service-grid">
+<?php render_service_cards($services, ['selectable' => true]); ?>
+                  </div>
+                </div>
                 <div class="step-nav">
                   <button class="button button-secondary step-back-btn" type="button" data-prev="1">
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg><span>Back</span>
@@ -197,10 +208,16 @@ include __DIR__ . '/includes/header.php';
                       <strong data-summary="name">—</strong>
                     </div>
                     <div>
-                      <span>Price</span>
+                      <span>Vehicle size</span>
+                      <strong data-summary="vehicleSize">—</strong>
+                    </div>
+                    <div>
+                      <span>Estimate</span>
                       <strong data-summary="price">—</strong>
                     </div>
                   </div>
+                  <div class="summary-services" data-summary-services></div>
+                  <p class="summary-note">Final price may change after inspection if vehicle condition is excessive.</p>
                 </div>
 
                 <div class="pay-card-block" id="payCardBlock">
@@ -244,6 +261,8 @@ include __DIR__ . '/includes/header.php';
 
             <script>
               window.bookingPricing = <?= json_encode(BOOKING_PACKAGE_PRICES, JSON_UNESCAPED_UNICODE) ?>;
+              window.bookingServices = <?= json_encode($services, JSON_UNESCAPED_UNICODE) ?>;
+              window.bookingVehicleSizes = <?= json_encode(VEHICLE_SIZE_LABELS, JSON_UNESCAPED_UNICODE) ?>;
               window.squareConfigEndpoint = '/api/square-config';
               window.squarePaymentEndpoint = '/api/payments/square';
               window.bookingCurrency = '<?= htmlspecialchars(strtoupper(getenv('SQUARE_CURRENCY') ?: 'AUD')) ?>';

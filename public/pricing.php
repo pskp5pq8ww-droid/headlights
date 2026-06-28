@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/service-cards.php';
 $current    = 'pricing';
 $page_title = 'Pricing | ' . $SITE['name'];
 $page_desc  = 'Mobile headlight restoration pricing in Brisbane — EOFY offer from $99, standard packages and travel info.';
 include __DIR__ . '/includes/header.php';
+$services = read_services(true);
 ?>
       <section class="section section-dark page-hero">
         <div class="hero-bg" aria-hidden="true"></div>
@@ -16,23 +18,10 @@ include __DIR__ . '/includes/header.php';
 
       <section class="section section-light packages" id="packages">
         <div class="container">
-          <div class="pricing-grid">
-<?php foreach ($PACKAGES as $pkg): ?>
-            <article class="pricing-card reveal<?= !empty($pkg['featured']) ? ' featured' : '' ?>">
-<?php if (!empty($pkg['badge'])): ?>              <span class="badge"><?= htmlspecialchars($pkg['badge']) ?></span>
-<?php endif; ?>
-              <h3><?= htmlspecialchars($pkg['name']) ?></h3>
-              <p class="best-for"><?= htmlspecialchars($pkg['bestFor']) ?></p>
-              <p class="price"><?= htmlspecialchars($pkg['price']) ?></p>
-              <ul>
-<?php foreach ($pkg['inclusions'] as $inc): ?>                <li><?= htmlspecialchars($inc) ?></li>
-<?php endforeach; ?>
-              </ul>
-              <a class="button <?= !empty($pkg['featured']) ? 'button-primary' : 'button-secondary' ?>" href="/book"><span>Book <?= htmlspecialchars($pkg['name']) ?></span></a>
-            </article>
-<?php endforeach; ?>
+          <div class="service-card-grid">
+<?php render_service_cards($services); ?>
           </div>
-          <p class="pricing-note reveal">Final price may vary depending on headlight condition, vehicle type and location. Travel fees may apply for outer areas (Gold Coast / Sunshine Coast by request).</p>
+          <p class="pricing-note reveal">All prices are in AUD and listed as from prices. Final pricing depends on vehicle size, condition, access, level of oxidation, dirt, stains, pet hair, sand and the amount of work required. Any extra cost will be confirmed before work begins.</p>
         </div>
       </section>
 <?php include __DIR__ . '/includes/footer.php'; ?>

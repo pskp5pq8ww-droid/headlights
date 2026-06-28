@@ -20,6 +20,7 @@ ini_set('display_errors', '0');
 error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../includes/square.php';
+require_once __DIR__ . '/../../includes/services.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     booking_json_response(['success' => false, 'message' => 'Method not allowed'], 405);
@@ -47,6 +48,7 @@ $email   = clean_text($b['email'] ?? '', 160);
 $phone   = clean_text($b['phone'] ?? '', 60);
 $address = clean_text($b['customer_address'] ?? $b['addressOrSuburb'] ?? $b['address'] ?? '', 240);
 $vehicle = clean_text($b['vehicle'] ?? $b['vehicleMakeModel'] ?? '', 160);
+$vehicleSize = clean_text($b['vehicle_size'] ?? $b['vehicleSize'] ?? '', 80);
 $date    = clean_text($b['date'] ?? $b['preferredDate'] ?? '', 40);
 $time    = clean_text($b['time'] ?? $b['preferredTimeWindow'] ?? '', 80);
 $package = clean_text($b['package'] ?? $b['packageSelected'] ?? '', 120);
@@ -57,6 +59,7 @@ if ($name === '')    $errors['name'] = 'Full name is required.';
 if ($phone === '')   $errors['phone'] = 'Phone is required.';
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors['email'] = 'A valid email is required.';
 if ($address === '') $errors['customer_address'] = 'Service address or suburb is required.';
+if (!array_key_exists($vehicleSize, VEHICLE_SIZE_LABELS)) $errors['vehicle_size'] = 'Please choose a valid vehicle size.';
 if ($date === '')    $errors['date'] = 'Preferred date is required.';
 if ($time === '')    $errors['time'] = 'Preferred time window is required.';
 if ($package === '') $errors['package'] = 'Service is required.';
@@ -66,7 +69,13 @@ if ($errors) {
 }
 
 // ── Validate price SERVER-SIDE (never trust the client) ──────────────────────
-$amountCents = booking_amount_cents($package);
+$selectedServices = build_selected_services_snapshot(
+    $b['selected_services'] ?? $b['selectedServices'] ?? [],
+    $vehicleSize,
+    $b['number_of_headlights'] ?? $b['numberOfHeadlights'] ?? '2'
+);
+$estimatedTotal = selected_services_total($selectedServices);
+$amountCents = (int)round($estimatedTotal * 100);
 if ($amountCents <= 0) {
     booking_json_response([
         'success' => false,
@@ -78,7 +87,7 @@ $amountDollars = $amountCents / 100;
 
 // ── Charge the card ──────────────────────────────────────────────────────────
 $result = square_create_payment($sourceId, $amountCents, $idempotencyKey, [
-    'note'  => 'Headlight restoration: ' . $package,
+    'note'  => 'Shining AUS booking: ' . $package,
     'email' => $email,
 ]);
 
@@ -121,6 +130,7 @@ try {
         'addressLat'           => $b['address_lat'] ?? $b['addressLat'] ?? '',
         'addressLng'           => $b['address_lng'] ?? $b['addressLng'] ?? '',
         'vehicleMakeModel'     => $vehicle,
+        'vehicleSize'          => $vehicleSize,
         'preferredDate'        => $date,
         'preferredTimeWindow'  => $time,
         'packageSelected'      => $package,
@@ -129,6 +139,9 @@ try {
         'numberOfHeadlights'   => $b['number_of_headlights'] ?? $b['numberOfHeadlights'] ?? '2',
         'preferredContactMethod' => $b['preferred_contact_method'] ?? $b['preferredContactMethod'] ?? 'Phone',
         'message'              => $b['message'] ?? '',
+        'selectedServices'     => $selectedServices,
+        'estimatedTotal'       => $estimatedTotal,
+        'pricingNote'          => 'Final price may change after inspection if vehicle condition is excessive.',
         'source'              => 'square_' . square_environment(),
         'termsAccepted'        => $termsAccepted,
         'termsVersion'         => $b['terms_version'] ?? $b['termsVersion'] ?? '2026-06-27-eofy',
@@ -162,6 +175,11 @@ try {
     ]);
 
     square_log('Paid booking ' . $booking['id'] . ' payment ' . $paymentId . ' amount ' . $amountDollars . ' ' . square_currency());
+
+    // Server-side Meta conversion (Conversions API). Same event_id as the
+    // browser pixel on /thank-you, so Meta de-duplicates and counts it once.
+    require_once __DIR__ . '/../../includes/meta-capi.php';
+    @meta_send_booking_event($booking, 'Purchase', true, meta_source_url('/thank-you?booking=' . $booking['id']));
 
     if (function_exists('send_booking_email')) {
         @send_booking_email($booking);

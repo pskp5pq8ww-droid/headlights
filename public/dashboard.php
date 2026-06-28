@@ -2,13 +2,55 @@
 require_once __DIR__ . '/includes/auth.php';
 require_admin();
 require_once __DIR__ . '/includes/bookings.php';
+require_once __DIR__ . '/includes/services.php';
 
 $error = '';
+$notice = '';
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
         $id = clean_text($_POST['id'] ?? '', 80);
-        if ($id !== '') {
+        if ($action === 'create_service' || $action === 'update_service') {
+            $services = read_services(false);
+            $payload = service_payload_from_post($_POST);
+            if ($action === 'create_service') {
+                $service = validate_service_payload($payload);
+                foreach ($services as $existing) {
+                    if ($existing['slug'] === $service['slug']) throw new InvalidArgumentException('Slug must be unique.');
+                }
+                $services[] = $service;
+            } else {
+                if ($id === '') throw new InvalidArgumentException('Missing service id.');
+                $updated = false;
+                foreach ($services as &$existing) {
+                    if ($existing['id'] !== $id) continue;
+                    $candidate = validate_service_payload($payload, $existing);
+                    foreach ($services as $other) {
+                        if ($other['id'] !== $id && $other['slug'] === $candidate['slug']) throw new InvalidArgumentException('Slug must be unique.');
+                    }
+                    $existing = $candidate;
+                    $updated = true;
+                    break;
+                }
+                unset($existing);
+                if (!$updated) throw new InvalidArgumentException('Service not found.');
+            }
+            write_services($services);
+            header('Location: /dashboard?notice=' . urlencode($action === 'create_service' ? 'Service created.' : 'Service updated.') . '#services');
+            exit;
+        } elseif ($action === 'deactivate_service') {
+            $services = read_services(false);
+            foreach ($services as &$service) {
+                if ($service['id'] !== $id) continue;
+                $service['isActive'] = false;
+                $service['updatedAt'] = booking_now();
+                break;
+            }
+            unset($service);
+            write_services($services);
+            header('Location: /dashboard?notice=' . urlencode('Service deactivated.') . '#services');
+            exit;
+        } elseif ($id !== '') {
             if ($action === 'update_booking') {
                 updateBooking($id, [
                     'status' => $_POST['status'] ?? '',
@@ -30,7 +72,7 @@ try {
         if (!empty($_POST['selectedDate'])) $redirect .= '?date=' . urlencode((string)$_POST['selectedDate']);
         if (!empty($_POST['detail'])) $redirect .= (str_contains($redirect, '?') ? '&' : '?') . 'id=' . urlencode((string)$_POST['detail']);
         $view = clean_text($_POST['view'] ?? '', 40);
-        if ($view !== '' && in_array($view, ['overview', 'calendar', 'bookings', 'reports', 'detail'], true)) {
+        if ($view !== '' && in_array($view, ['overview', 'calendar', 'bookings', 'services', 'reports', 'detail'], true)) {
             $redirect .= '#' . $view;
         }
         header('Location: ' . $redirect);
@@ -38,11 +80,14 @@ try {
     }
 
     $bookings = readBookings();
+    $services = read_services(false);
 } catch (Throwable $e) {
     booking_log_error('Dashboard failed: ' . $e->getMessage());
     $bookings = [];
+    $services = [];
     $error = 'Unable to load bookings. Please check server storage or permissions.';
 }
+$notice = clean_text($_GET['notice'] ?? '', 180);
 
 $stats = getBookingStats($bookings);
 $tz = new DateTimeZone('Australia/Brisbane');
@@ -112,7 +157,13 @@ function maps_link(array $b): string {
     $address = $b['formattedAddress'] ?: $b['addressOrSuburb'] ?? '';
     return $address !== '' ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($address) : '';
 }
-function booking_price(array $b): int { return package_price((string)($b['packageSelected'] ?? '')); }
+function booking_price(array $b): float {
+    $estimate = (float)($b['estimatedTotal'] ?? 0);
+    return $estimate > 0 ? $estimate : package_price((string)($b['packageSelected'] ?? ''));
+}
+function admin_money(float $amount): string {
+    return '$' . number_format($amount, fmod($amount, 1.0) === 0.0 ? 0 : 2);
+}
 function payment_label(array $b): string {
     $status = $b['paymentStatus'] ?? 'unpaid';
     return ucfirst($status);
@@ -139,6 +190,33 @@ function package_options(string $current = ''): string {
     }
     return $html;
 }
+function service_payload_from_post(array $post): array {
+    return [
+        'name' => $post['name'] ?? '',
+        'slug' => $post['slug'] ?? '',
+        'category' => $post['category'] ?? '',
+        'shortDescription' => $post['shortDescription'] ?? '',
+        'longDescription' => $post['longDescription'] ?? '',
+        'inclusions' => $post['inclusions'] ?? '',
+        'exclusions' => $post['exclusions'] ?? '',
+        'priceSmall' => $post['priceSmall'] ?? 0,
+        'priceMedium' => $post['priceMedium'] ?? 0,
+        'priceLarge' => $post['priceLarge'] ?? 0,
+        'priceSingle' => $post['priceSingle'] ?? 0,
+        'priceExtraPair' => $post['priceExtraPair'] ?? 0,
+        'estimatedTime' => $post['estimatedTime'] ?? '',
+        'isAddOn' => !empty($post['isAddOn']),
+        'isFeatured' => !empty($post['isFeatured']),
+        'isActive' => !empty($post['isActive']),
+        'sortOrder' => $post['sortOrder'] ?? 100,
+        'imageKey' => $post['imageKey'] ?? '',
+        'icon' => $post['icon'] ?? '',
+        'termsNote' => $post['termsNote'] ?? '',
+    ];
+}
+function service_lines(array $items): string {
+    return implode("\n", array_map('strval', $items));
+}
 ?><!doctype html>
 <html lang="en-AU">
 <head>
@@ -159,10 +237,12 @@ function package_options(string $current = ''): string {
         <a class="is-active" href="#overview" data-admin-view-link="overview"><span>Dashboard</span></a>
         <a href="#calendar" data-admin-view-link="calendar"><span>Calendar</span></a>
         <a href="#bookings" data-admin-view-link="bookings"><span>Bookings</span></a>
+        <a href="#services" data-admin-view-link="services"><span>Services</span></a>
         <a href="#reports" data-admin-view-link="reports"><span>Reports</span></a>
         <a href="/analytics"><span>Analytics</span></a>
         <a href="/bookings-map"><span>Map</span></a>
         <a href="/users"><span>Users</span></a>
+        <a href="/backups"><span>Backups</span></a>
       </nav>
       <a class="admin-logout" href="/logout">Logout</a>
     </aside>
@@ -181,6 +261,7 @@ function package_options(string $current = ''): string {
       </header>
 
       <?php if ($error): ?><p class="admin-error" role="alert"><?= h($error) ?></p><?php endif; ?>
+      <?php if ($notice): ?><p class="admin-notice" role="status"><?= h($notice) ?></p><?php endif; ?>
 
       <section class="admin-view is-active" id="overview" data-admin-view="overview" aria-label="Dashboard overview">
         <div class="stat-grid" aria-label="Dashboard metrics">
@@ -286,7 +367,7 @@ function package_options(string $current = ''): string {
                 <button type="button" class="booking-card-summary" data-booking-toggle aria-expanded="false">
                   <span class="bc-name"><?= h($b['fullName'] ?: 'Unnamed customer') ?></span>
                   <span class="bc-when"><?= h(trim(($b['preferredDate'] ?? '') . ' · ' . ($b['preferredTimeWindow'] ?? ''), ' ·')) ?: 'No date' ?></span>
-                  <span class="bc-amount"><?= $price > 0 ? '$' . h((string)$price) : 'Quote' ?></span>
+                  <span class="bc-amount"><?= $price > 0 ? h(admin_money((float)$price)) : 'Quote' ?></span>
                   <span class="badge <?= badge_class_admin($b['status']) ?>"><?= h(status_label($b['status'])) ?></span>
                   <span class="<?= payment_badge_class($b) ?>"><?= h(payment_label($b)) ?></span>
                   <svg class="bc-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -316,7 +397,7 @@ function package_options(string $current = ''): string {
                     </div>
                     <div>
                       <span class="field-label">Price</span>
-                      <span class="field-value"><?= $price > 0 ? '$' . h((string)$price) : 'Quote' ?></span>
+                      <span class="field-value"><?= $price > 0 ? h(admin_money((float)$price)) : 'Quote' ?></span>
                     </div>
                     <div>
                       <span class="field-label">Paid</span>
@@ -344,6 +425,90 @@ function package_options(string $current = ''): string {
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
+      </section>
+
+      <section class="admin-view panel" id="services" data-admin-view="services" aria-label="Services">
+        <div class="panel-head">
+          <h2>Services</h2>
+          <span><?= count($services) ?> stored</span>
+        </div>
+
+        <details class="service-admin-create">
+          <summary>Create service</summary>
+          <form method="post" class="service-admin-form">
+            <input type="hidden" name="action" value="create_service" />
+            <label>Name<input name="name" required /></label>
+            <label>Slug<input name="slug" placeholder="quick-exterior-wash" /></label>
+            <label>Category<input name="category" value="Add-on" /></label>
+            <label>Short description<textarea name="shortDescription" rows="2"></textarea></label>
+            <label>Long description<textarea name="longDescription" rows="3"></textarea></label>
+            <div class="service-price-admin-grid">
+              <label>Small<input name="priceSmall" type="number" min="0" step="0.01" value="0" required /></label>
+              <label>Medium<input name="priceMedium" type="number" min="0" step="0.01" value="0" required /></label>
+              <label>Large<input name="priceLarge" type="number" min="0" step="0.01" value="0" required /></label>
+              <label>Single<input name="priceSingle" type="number" min="0" step="0.01" value="0" /></label>
+              <label>Extra pair<input name="priceExtraPair" type="number" min="0" step="0.01" value="0" /></label>
+              <label>Sort order<input name="sortOrder" type="number" value="120" /></label>
+            </div>
+            <label>Estimated time<input name="estimatedTime" /></label>
+            <label>Inclusions <small>one per line</small><textarea name="inclusions" rows="4"></textarea></label>
+            <label>Exclusions <small>one per line</small><textarea name="exclusions" rows="3"></textarea></label>
+            <label>Terms note<textarea name="termsNote" rows="3"></textarea></label>
+            <div class="service-admin-checks">
+              <label><input type="checkbox" name="isActive" checked /> Active</label>
+              <label><input type="checkbox" name="isFeatured" /> Featured</label>
+              <label><input type="checkbox" name="isAddOn" checked /> Add-on</label>
+            </div>
+            <button class="auth-submit service-save-btn" type="submit">Create service</button>
+          </form>
+        </details>
+
+        <div class="service-admin-list">
+<?php foreach ($services as $service): ?>
+          <details class="service-admin-item">
+            <summary>
+              <span><?= h($service['name']) ?></span>
+              <small><?= h($service['slug']) ?> · <?= !empty($service['isActive']) ? 'Active' : 'Inactive' ?> · from $<?= h((string)service_from_price($service)) ?></small>
+            </summary>
+            <form method="post" class="service-admin-form">
+              <input type="hidden" name="action" value="update_service" />
+              <input type="hidden" name="id" value="<?= h($service['id']) ?>" />
+              <label>Name<input name="name" value="<?= h($service['name']) ?>" required /></label>
+              <label>Slug<input name="slug" value="<?= h($service['slug']) ?>" required /></label>
+              <label>Category<input name="category" value="<?= h($service['category']) ?>" /></label>
+              <label>Short description<textarea name="shortDescription" rows="2"><?= h($service['shortDescription']) ?></textarea></label>
+              <label>Long description<textarea name="longDescription" rows="3"><?= h($service['longDescription']) ?></textarea></label>
+              <div class="service-price-admin-grid">
+                <label>Small<input name="priceSmall" type="number" min="0" step="0.01" value="<?= h($service['priceSmall']) ?>" required /></label>
+                <label>Medium<input name="priceMedium" type="number" min="0" step="0.01" value="<?= h($service['priceMedium']) ?>" required /></label>
+                <label>Large<input name="priceLarge" type="number" min="0" step="0.01" value="<?= h($service['priceLarge']) ?>" required /></label>
+                <label>Single<input name="priceSingle" type="number" min="0" step="0.01" value="<?= h($service['priceSingle']) ?>" /></label>
+                <label>Extra pair<input name="priceExtraPair" type="number" min="0" step="0.01" value="<?= h($service['priceExtraPair']) ?>" /></label>
+                <label>Sort order<input name="sortOrder" type="number" value="<?= h($service['sortOrder']) ?>" /></label>
+              </div>
+              <label>Estimated time<input name="estimatedTime" value="<?= h($service['estimatedTime']) ?>" /></label>
+              <label>Image key<input name="imageKey" value="<?= h($service['imageKey']) ?>" /></label>
+              <label>Icon<input name="icon" value="<?= h($service['icon']) ?>" /></label>
+              <label>Inclusions <small>one per line</small><textarea name="inclusions" rows="4"><?= h(service_lines($service['inclusions'])) ?></textarea></label>
+              <label>Exclusions <small>one per line</small><textarea name="exclusions" rows="3"><?= h(service_lines($service['exclusions'])) ?></textarea></label>
+              <label>Terms note<textarea name="termsNote" rows="3"><?= h($service['termsNote']) ?></textarea></label>
+              <div class="service-admin-checks">
+                <label><input type="checkbox" name="isActive" <?= !empty($service['isActive']) ? 'checked' : '' ?> /> Active</label>
+                <label><input type="checkbox" name="isFeatured" <?= !empty($service['isFeatured']) ? 'checked' : '' ?> /> Featured</label>
+                <label><input type="checkbox" name="isAddOn" <?= !empty($service['isAddOn']) ? 'checked' : '' ?> /> Add-on</label>
+              </div>
+              <div class="service-admin-actions">
+                <button class="auth-submit service-save-btn" type="submit">Save service</button>
+              </div>
+            </form>
+            <form method="post" class="service-deactivate-form" onsubmit="return confirm('Deactivate this service? It will be hidden from public booking but kept in the service store.');">
+              <input type="hidden" name="action" value="deactivate_service" />
+              <input type="hidden" name="id" value="<?= h($service['id']) ?>" />
+              <button type="submit">Deactivate service</button>
+            </form>
+          </details>
+<?php endforeach; ?>
+        </div>
       </section>
 
       <section class="admin-view" id="reports" data-admin-view="reports" aria-label="Reports">
@@ -408,7 +573,14 @@ function package_options(string $current = ''): string {
               <label>Preferred time<input name="preferredTimeWindow" value="<?= h($b['preferredTimeWindow']) ?>" /></label>
               <p>Service selected: <?= h($b['packageSelected']) ?></p>
               <p>Promo selected: <?= str_contains($b['packageSelected'], 'EOFY') ? 'EOFY Sale' : 'None' ?></p>
-              <p>Price: <?= $price > 0 ? '$' . h((string)$price) : 'Quote' ?></p>
+              <p>Price: <?= $price > 0 ? h(admin_money((float)$price)) : 'Quote' ?></p>
+<?php if (!empty($b['selectedServices']) && is_array($b['selectedServices'])): ?>
+              <ul class="metric-list booking-service-snapshot">
+<?php foreach ($b['selectedServices'] as $item): ?>
+                <li><span><?= h($item['serviceName'] ?? 'Service') ?></span><strong><?= (float)($item['priceAtBooking'] ?? 0) > 0 ? h(admin_money((float)$item['priceAtBooking'])) : 'Quote' ?></strong></li>
+<?php endforeach; ?>
+              </ul>
+<?php endif; ?>
               <p>Created: <?= h($b['createdAt']) ?></p>
               <p>Last updated: <?= h($b['updatedAt']) ?></p>
             </div>

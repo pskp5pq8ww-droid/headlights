@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/service-cards.php';
 $current    = 'services';
 $page_title = 'Services | ' . $SITE['name'];
 $page_desc  = 'Professional mobile headlight restoration in Brisbane — our process, benefits and what is included.';
 include __DIR__ . '/includes/header.php';
+$services = read_services(true);
 ?>
       <section class="section section-dark page-hero">
         <div class="hero-bg" aria-hidden="true"></div>
@@ -19,6 +21,20 @@ include __DIR__ . '/includes/header.php';
           <h1 class="reveal">Mobile headlight restoration</h1>
           <p class="hero-lede reveal">Restore, don't replace. We bring your headlights back to life at your location — for clarity, shine and safer night driving.</p>
           <div class="hero-actions reveal center"><a class="button button-primary" href="/book"><span>Claim EOFY Offer</span></a></div>
+        </div>
+      </section>
+
+      <section class="section section-light service-catalog-section" aria-labelledby="services-catalog-title">
+        <div class="container">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Add extra shine to your booking</p>
+            <h2 id="services-catalog-title">Mobile services and add-ons</h2>
+            <p>Active services are loaded from the stored service catalog, so pricing updates from admin appear here automatically.</p>
+          </div>
+          <div class="service-card-grid">
+<?php render_service_cards($services); ?>
+          </div>
+          <p class="pricing-note reveal">All prices are in AUD and listed as from prices. Final pricing depends on vehicle size, condition, access, level of oxidation, dirt, stains, pet hair, sand and the amount of work required. Any extra cost will be confirmed before work begins.</p>
         </div>
       </section>
 

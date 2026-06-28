@@ -2,6 +2,8 @@
 (function () {
   const config = window.siteConfig || {};
   const pricing = window.bookingPricing || {};
+  const services = window.bookingServices || [];
+  const vehicleSizes = window.bookingVehicleSizes || {};
   const currency = window.bookingCurrency || "AUD";
   const qs = (selector, parent = document) => parent.querySelector(selector);
   const qsa = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
@@ -35,6 +37,8 @@
       terms_accepted: "Terms & Conditions acceptance"
     };
 
+    const servicesById = new Map(services.map((service) => [service.id, service]));
+
     function selectedPackage() {
       const el = findFieldByName("package");
       return el ? el.value : "";
@@ -42,6 +46,66 @@
 
     function packagePrice(pkg) {
       return Number(pricing[pkg] || 0);
+    }
+
+    function selectedVehicleSize() {
+      return fieldValue("vehicle_size");
+    }
+
+    function numberOfHeadlights() {
+      return fieldValue("number_of_headlights") || "2";
+    }
+
+    function servicePrice(service, size = selectedVehicleSize()) {
+      if (!service || size === "commercial" || !size) return 0;
+      if (service.slug === "headlight-restoration" && numberOfHeadlights() === "1" && Number(service.priceSingle) > 0) {
+        return Number(service.priceSingle);
+      }
+      const key = size === "medium" ? "priceMedium" : size === "large" ? "priceLarge" : "priceSmall";
+      return Number(service[key] || 0);
+    }
+
+    function selectedServiceItems() {
+      return qsa("[data-service-select]", form)
+        .filter((input) => input.checked)
+        .map((input) => servicesById.get(input.value))
+        .filter(Boolean)
+        .map((service) => ({
+          service,
+          price: servicePrice(service)
+        }));
+    }
+
+    function selectedServicesTotal() {
+      return selectedServiceItems().reduce((sum, item) => sum + item.price, 0);
+    }
+
+    function isQuoteSelection() {
+      return selectedVehicleSize() === "commercial" || selectedServiceItems().some((item) => item.price <= 0);
+    }
+
+    function refreshServiceCards() {
+      qsa("[data-service-card]", form).forEach((card) => {
+        const input = qs("[data-service-select]", card);
+        const button = qs("[data-service-button]", card);
+        const service = input ? servicesById.get(input.value) : null;
+        const priceEl = qs(".service-price-row span", card);
+        const price = servicePrice(service);
+        const quote = selectedVehicleSize() === "commercial" || price <= 0;
+        card.classList.toggle("is-selected", !!input?.checked);
+        card.classList.toggle("is-quote", quote);
+        if (priceEl) priceEl.textContent = quote ? "Quote required" : money(price);
+        if (button) {
+          const label = qs("span", button);
+          if (label) {
+            if (service?.slug === "headlight-restoration") {
+              label.textContent = input?.checked ? "Main service selected" : "Select main service";
+            } else {
+              label.textContent = input?.checked ? "Added" : (quote ? "Request quote" : "Add to booking");
+            }
+          }
+        }
+      });
     }
 
     function goToStep(step) {
@@ -99,7 +163,9 @@
 
     function buildSummary() {
       const pkg = selectedPackage();
-      const price = packagePrice(pkg);
+      const items = selectedServiceItems();
+      const price = selectedServicesTotal();
+      const quote = isQuoteSelection();
       const setSummary = (key, value) => {
         const el = qs(`[data-summary="${key}"]`, wizard);
         if (el) el.textContent = value || "—";
@@ -110,10 +176,24 @@
       setSummary("time", fieldValue("time"));
       setSummary("location", fieldValue("formatted_address") || fieldValue("customer_address"));
       setSummary("vehicle", fieldValue("vehicle"));
+      setSummary("vehicleSize", vehicleSizes[selectedVehicleSize()] || "—");
       setSummary("name", fieldValue("name"));
-      setSummary("price", price > 0 ? money(price) : "Quote");
-      setSummary("total", price > 0 ? money(price) : "Quote on request");
-      return price;
+      setSummary("price", !quote && price > 0 ? money(price) : "Quote");
+      setSummary("total", !quote && price > 0 ? money(price) : "Quote on request");
+      const servicesSummary = qs("[data-summary-services]", wizard);
+      if (servicesSummary) {
+        servicesSummary.replaceChildren();
+        items.forEach((item) => {
+          const row = document.createElement("div");
+          const name = document.createElement("span");
+          const amount = document.createElement("strong");
+          name.textContent = item.service.name;
+          amount.textContent = quote || item.price <= 0 ? "Quote" : money(item.price);
+          row.append(name, amount);
+          servicesSummary.append(row);
+        });
+      }
+      return quote ? 0 : price;
     }
 
     function useRequestFallback(message) {
@@ -180,6 +260,33 @@
       });
     });
 
+    qsa("[data-service-button]", form).forEach((button) => {
+      button.addEventListener("click", () => {
+        const card = button.closest("[data-service-card]");
+        const input = card && qs("[data-service-select]", card);
+        const service = input ? servicesById.get(input.value) : null;
+        if (!input || service?.slug === "headlight-restoration") return;
+        input.checked = !input.checked;
+        refreshServiceCards();
+        buildSummary();
+      });
+    });
+
+    ["vehicle_size", "number_of_headlights"].forEach((name) => {
+      const field = findFieldByName(name);
+      field?.addEventListener("change", () => {
+        refreshServiceCards();
+        buildSummary();
+      });
+    });
+
+    const requestedService = new URLSearchParams(window.location.search).get("service");
+    if (requestedService) {
+      const input = qsa("[data-service-select]", form).find((item) => item.value === requestedService);
+      if (input) input.checked = true;
+    }
+    refreshServiceCards();
+
     function setSubmitting(isLoading, labelText) {
       payButton.disabled = isLoading;
       if (payLabel && labelText) payLabel.textContent = labelText;
@@ -221,7 +328,15 @@
 
       const fd = new FormData(form);
       const booking = {};
-      fd.forEach((value, key) => { booking[key] = value; });
+      fd.forEach((value, key) => {
+        const cleanKey = key.endsWith("[]") ? key.slice(0, -2) : key;
+        if (key.endsWith("[]")) {
+          booking[cleanKey] = booking[cleanKey] || [];
+          booking[cleanKey].push(value);
+        } else {
+          booking[cleanKey] = value;
+        }
+      });
 
       const payload = {
         sourceId: tokenResult.token,
@@ -262,7 +377,7 @@
         return;
       }
 
-      const price = packagePrice(selectedPackage());
+      const price = buildSummary();
       const useRequest = price <= 0 || paymentFallback;
       setSubmitting(true, useRequest ? "Sending…" : "Processing…");
       window.ShiningGSAP?.playFormSubmittingAnimation(form);

@@ -129,6 +129,7 @@ function normalize_booking(array $booking): array {
         'addressLat' => (string)($booking['addressLat'] ?? $booking['address_lat'] ?? ''),
         'addressLng' => (string)($booking['addressLng'] ?? $booking['address_lng'] ?? ''),
         'vehicleMakeModel' => (string)($booking['vehicleMakeModel'] ?? $booking['vehicle'] ?? ''),
+        'vehicleSize' => (string)($booking['vehicleSize'] ?? $booking['vehicle_size'] ?? ''),
         'preferredDate' => (string)($booking['preferredDate'] ?? $booking['date'] ?? ''),
         'preferredTimeWindow' => (string)($booking['preferredTimeWindow'] ?? $booking['time'] ?? ''),
         'packageSelected' => (string)$package,
@@ -138,6 +139,9 @@ function normalize_booking(array $booking): array {
         'preferredContactMethod' => (string)($booking['preferredContactMethod'] ?? $booking['preferred_contact_method'] ?? 'Phone'),
         'message' => (string)($booking['message'] ?? ''),
         'source' => (string)($booking['source'] ?? 'website'),
+        'selectedServices' => is_array($booking['selectedServices'] ?? null) ? $booking['selectedServices'] : [],
+        'estimatedTotal' => (float)($booking['estimatedTotal'] ?? $booking['estimated_total'] ?? 0),
+        'pricingNote' => (string)($booking['pricingNote'] ?? $booking['pricing_note'] ?? ''),
         'termsAccepted' => (bool)($booking['termsAccepted'] ?? $booking['terms_accepted'] ?? false),
         'termsAcceptedAt' => (string)($booking['termsAcceptedAt'] ?? $booking['terms_accepted_at'] ?? ''),
         'termsVersion' => (string)($booking['termsVersion'] ?? $booking['terms_version'] ?? ''),
@@ -230,6 +234,7 @@ function createBooking(array $data): array {
         'addressLat' => clean_text($data['addressLat'] ?? $data['address_lat'] ?? '', 40),
         'addressLng' => clean_text($data['addressLng'] ?? $data['address_lng'] ?? '', 40),
         'vehicleMakeModel' => clean_text($data['vehicleMakeModel'] ?? $data['vehicle'] ?? '', 160),
+        'vehicleSize' => clean_text($data['vehicleSize'] ?? $data['vehicle_size'] ?? '', 80),
         'preferredDate' => clean_text($data['preferredDate'] ?? $data['date'] ?? '', 40),
         'preferredTimeWindow' => clean_text($data['preferredTimeWindow'] ?? $data['time'] ?? '', 80),
         'packageSelected' => clean_text($data['packageSelected'] ?? $data['package'] ?? 'Not sure / Quote', 120),
@@ -239,6 +244,9 @@ function createBooking(array $data): array {
         'preferredContactMethod' => clean_text($data['preferredContactMethod'] ?? 'Phone', 40),
         'message' => clean_text($data['message'] ?? '', 2000),
         'source' => clean_text($data['source'] ?? 'website', 80),
+        'selectedServices' => is_array($data['selectedServices'] ?? null) ? $data['selectedServices'] : [],
+        'estimatedTotal' => (float)($data['estimatedTotal'] ?? 0),
+        'pricingNote' => clean_text($data['pricingNote'] ?? '', 800),
         'termsAccepted' => !empty($data['termsAccepted']) || !empty($data['terms_accepted']),
         'termsAcceptedAt' => (!empty($data['termsAccepted']) || !empty($data['terms_accepted'])) ? $now : '',
         'termsVersion' => clean_text($data['termsVersion'] ?? $data['terms_version'] ?? '2026-06-27-eofy', 80),
@@ -261,8 +269,9 @@ function updateBooking(string $id, array $updates): ?array {
         'preferredTimeWindow', 'fullName', 'phone', 'email', 'addressOrSuburb',
         'formattedAddress', 'addressSuburb', 'addressPostcode', 'addressState',
         'addressCountry', 'googlePlaceId', 'addressLat', 'addressLng',
-        'vehicleMakeModel', 'packageSelected', 'headlightCondition',
+        'vehicleMakeModel', 'vehicleSize', 'packageSelected', 'headlightCondition',
         'vehicleLocationType', 'numberOfHeadlights', 'preferredContactMethod', 'message', 'photos',
+        'selectedServices', 'estimatedTotal', 'pricingNote',
     ];
     $oldStatus = $booking['status'];
     foreach ($allowed as $key) {
@@ -272,8 +281,10 @@ function updateBooking(string $id, array $updates): ?array {
             if (in_array($status, BOOKING_STATUSES, true)) $booking[$key] = $status;
         } elseif ($key === 'followUpRequired') {
             $booking[$key] = (bool)$updates[$key];
-        } elseif ($key === 'photos' && is_array($updates[$key])) {
+        } elseif (in_array($key, ['photos', 'selectedServices'], true) && is_array($updates[$key])) {
             $booking[$key] = $updates[$key];
+        } elseif ($key === 'estimatedTotal') {
+            $booking[$key] = (float)$updates[$key];
         } else {
             $booking[$key] = clean_text($updates[$key], $key === 'adminNotes' ? 2000 : 500);
         }
@@ -412,9 +423,17 @@ function send_booking_email(array $booking): void {
     if (!empty($booking['addressCountry'])) $body .= "Country: " . $booking['addressCountry'] . "\n";
     if (!empty($booking['addressLat']) && !empty($booking['addressLng'])) $body .= "Map: https://www.google.com/maps?q=" . $booking['addressLat'] . "," . $booking['addressLng'] . "\n";
     $body .= "Vehicle: " . ($booking['vehicleMakeModel'] ?? '') . "\n";
+    if (!empty($booking['vehicleSize'])) $body .= "Vehicle size: " . ($booking['vehicleSize'] ?? '') . "\n";
     $body .= "Date: " . ($booking['preferredDate'] ?? '') . "\n";
     $body .= "Time: " . ($booking['preferredTimeWindow'] ?? '') . "\n";
     $body .= "Package: " . ($booking['packageSelected'] ?? '') . "\n";
+    if (!empty($booking['selectedServices']) && is_array($booking['selectedServices'])) {
+        $body .= "Selected services:\n";
+        foreach ($booking['selectedServices'] as $item) {
+            $body .= "- " . ($item['serviceName'] ?? 'Service') . ": $" . number_format((float)($item['priceAtBooking'] ?? 0), 2) . "\n";
+        }
+    }
+    if (!empty($booking['estimatedTotal'])) $body .= "Estimated total: $" . number_format((float)$booking['estimatedTotal'], 2) . "\n";
     $body .= "Condition: " . ($booking['headlightCondition'] ?? '') . "\n";
     $body .= "Preferred contact: " . ($booking['preferredContactMethod'] ?? '') . "\n";
     $body .= "Terms accepted: " . (!empty($booking['termsAccepted']) ? 'Yes' : 'No') . "\n";

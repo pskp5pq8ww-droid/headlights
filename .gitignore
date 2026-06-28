@@ -9,6 +9,8 @@
 /_private/admin.php
 /_private/square.php
 /private/square.php
+/_private/meta.php
+/private/meta.php
 /env
 /_archive/generated-zips/*.zip
 *.zip

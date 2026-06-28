@@ -4239,3 +4239,207 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 /* Remove the duplicate static "Claim Offer" button on the landing page (mobile). */
 .landing-home .mobile-sticky-cta { display: none !important; }
+
+/* Dynamic services catalog */
+.service-catalog-section {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(244, 252, 255, 0.96), #fff 52%, rgba(244, 252, 255, 0.88)), var(--ice);
+}
+.service-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+.service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 100%;
+  padding: 18px;
+  border: 1px solid rgba(16, 32, 45, 0.1);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 252, 255, 0.86)), #fff;
+  box-shadow: 0 18px 46px rgba(3, 7, 11, 0.08);
+}
+.service-card-main {
+  grid-column: 1 / -1;
+  color: #fff;
+  border-color: rgba(0, 217, 255, 0.28);
+  background: linear-gradient(135deg, rgba(3, 7, 11, 0.96), rgba(7, 24, 39, 0.94) 54%, rgba(12, 49, 69, 0.94)), #071827;
+  box-shadow: 0 24px 70px rgba(3, 7, 11, 0.24);
+}
+.service-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.service-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  color: var(--black);
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-soft));
+  font-weight: 900;
+  box-shadow: 0 0 22px rgba(0, 217, 255, 0.2);
+}
+.service-category {
+  margin: 0 0 3px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.service-card-main .service-category,
+.service-card-main .service-copy,
+.service-card-main .service-price-row small,
+.service-card-main .service-details summary,
+.service-card-main .service-terms {
+  color: rgba(244, 252, 255, 0.74);
+}
+.service-card h3 { font-size: 20px; }
+.service-copy {
+  flex: 1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.eofy-service-promo {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 217, 255, 0.34);
+  border-radius: var(--radius);
+  color: var(--cyan-soft);
+  background: rgba(0, 217, 255, 0.1);
+  font-weight: 900;
+  line-height: 1.35;
+}
+.service-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.service-price-row span {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size: 25px;
+  font-weight: 900;
+  color: var(--ink);
+}
+.service-card-main .service-price-row span { color: #fff; }
+.service-price-row small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: right;
+}
+.service-details {
+  border-top: 1px solid rgba(143, 163, 178, 0.18);
+  padding-top: 12px;
+}
+.service-card-main .service-details { border-top-color: rgba(168, 243, 255, 0.16); }
+.service-details summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 900;
+  list-style-position: outside;
+}
+.service-pricing {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+.service-pricing span {
+  display: grid;
+  gap: 2px;
+  padding: 9px 10px;
+  border-radius: var(--radius);
+  background: rgba(143, 163, 178, 0.12);
+  color: var(--ink);
+  font-weight: 900;
+}
+.service-card-main .service-pricing span {
+  color: #fff;
+  background: rgba(244, 252, 255, 0.08);
+}
+.service-pricing b {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.service-card-main .service-pricing b { color: rgba(168, 243, 255, 0.72); }
+.service-details h4 {
+  margin: 14px 0 7px;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: inherit;
+}
+.service-details ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.service-card-main .service-details ul { color: rgba(244, 252, 255, 0.78); }
+.service-terms {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.service-card .button {
+  width: 100%;
+  margin-top: auto;
+}
+.booking-services-block {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0;
+}
+.booking-services-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.booking-service-grid { grid-template-columns: 1fr; }
+.booking-service-grid .service-card { box-shadow: none; }
+.booking-service-grid .service-card-main { grid-column: auto; }
+.booking-service-grid .service-card.is-selected {
+  border-color: rgba(0, 217, 255, 0.64);
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+}
+.summary-services {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(143, 163, 178, 0.18);
+}
+.summary-services div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.summary-services span,
+.summary-services strong,
+.summary-note { font-size: 13px; }
+.summary-services span,
+.summary-note { color: var(--muted); }
+.summary-note {
+  margin: 12px 0 0;
+  line-height: 1.45;
+}
+@media (max-width: 640px) {
+  .service-card-grid { grid-template-columns: 1fr; }
+  .service-card { padding: 16px; }
+  .service-price-row { align-items: flex-start; flex-direction: column; }
+  .service-price-row small { text-align: left; }
+}

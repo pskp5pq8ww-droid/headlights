@@ -1,11 +1,13 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/service-cards.php';
 $current      = 'home';
 $page_title   = '$99 EOFY Headlight Restoration | ' . $SITE['name'];
 $page_desc    = 'EOFY Sale: mobile headlight restoration for $99, was $220. Limited time offer with countdown. Brisbane mobile service.';
 $page_scripts = ['countdown'];
 $body_class   = 'landing-home';
 include __DIR__ . '/includes/header.php';
+$services = read_services(true);
 ?>
       <section class="eofy-landing-hero" id="home" aria-labelledby="hero-title">
         <div class="hero-video-bg" aria-hidden="true">
@@ -150,6 +152,20 @@ include __DIR__ . '/includes/header.php';
             </figure>
 <?php endforeach; ?>
           </div>
+        </div>
+      </section>
+
+      <section class="landing-section service-catalog-section" aria-labelledby="service-catalog-title">
+        <div class="container">
+          <div class="landing-section-heading reveal">
+            <p class="eyebrow">Add extra shine to your booking</p>
+            <h2 id="service-catalog-title">Headlights first, with detailing extras when you want more.</h2>
+            <p>Choose mobile headlight restoration, then add wash, interior, trim, glass or protection services from the live service list.</p>
+          </div>
+          <div class="service-card-grid">
+<?php render_service_cards($services); ?>
+          </div>
+          <p class="pricing-note reveal">All prices are in AUD and listed as from prices. Final pricing depends on vehicle size, condition, access, level of oxidation, dirt, stains, pet hair, sand and the amount of work required. Any extra cost will be confirmed before work begins.</p>
         </div>
       </section>
 

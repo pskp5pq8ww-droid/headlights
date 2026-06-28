@@ -60,6 +60,7 @@ function badge_class_admin(string $s): string { return 'badge-' . str_replace('_
         <a href="/analytics"><span>Analytics</span></a>
         <a class="is-active" href="/bookings-map"><span>Map</span></a>
         <a href="/users"><span>Users</span></a>
+        <a href="/backups"><span>Backups</span></a>
       </nav>
       <a class="admin-logout" href="/logout">Logout</a>
     </aside>

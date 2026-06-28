@@ -65,6 +65,7 @@ function h(mixed $value): string { return htmlspecialchars((string)$value, ENT_Q
         <a href="/analytics"><span>Analytics</span></a>
         <a href="/bookings-map"><span>Map</span></a>
         <a class="is-active" href="/users"><span>Users</span></a>
+        <a href="/backups"><span>Backups</span></a>
       </nav>
       <a class="admin-logout" href="/logout">Logout</a>
     </aside>

@@ -5,6 +5,7 @@ ini_set('display_errors', '0');
 error_reporting(E_ALL);
 
 require_once __DIR__ . '/includes/bookings.php';
+require_once __DIR__ . '/includes/services.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     booking_json_response(['success' => false, 'message' => 'Method not allowed'], 405);
@@ -16,6 +17,7 @@ $fieldAliases = [
     'email' => ['email'],
     'customer_address' => ['customer_address', 'addressOrSuburb', 'address_or_suburb', 'address', 'suburb'],
     'vehicle' => ['vehicle', 'vehicleMakeModel', 'vehicle_make_model'],
+    'vehicle_size' => ['vehicle_size', 'vehicleSize'],
     'date' => ['date', 'preferredDate', 'preferred_date'],
     'time' => ['time', 'preferredTimeWindow', 'preferred_time_window'],
     'package' => ['package', 'packageSelected', 'package_selected'],
@@ -28,6 +30,7 @@ $required = [
     'email' => 'A valid email is required.',
     'customer_address' => 'Service address or suburb is required.',
     'vehicle' => 'Vehicle make and model is required.',
+    'vehicle_size' => 'Vehicle size is required.',
     'date' => 'Preferred date is required.',
     'time' => 'Preferred time window is required.',
     'package' => 'Package is required.',
@@ -44,6 +47,10 @@ if (!terms_was_accepted($_POST['terms_accepted'] ?? $_POST['termsAccepted'] ?? '
 if (!filter_var(booking_post_value($fieldAliases['email']), FILTER_VALIDATE_EMAIL)) {
     $errors['email'] = 'A valid email is required.';
 }
+$vehicleSize = booking_post_value($fieldAliases['vehicle_size']);
+if (!array_key_exists($vehicleSize, VEHICLE_SIZE_LABELS)) {
+    $errors['vehicle_size'] = 'Please choose a valid vehicle size.';
+}
 if ($errors) {
     booking_json_response([
         'success' => false,
@@ -53,6 +60,12 @@ if ($errors) {
 }
 
 try {
+    $selectedServices = build_selected_services_snapshot(
+        $_POST['selected_services'] ?? [],
+        $vehicleSize,
+        $_POST['number_of_headlights'] ?? '2'
+    );
+    $estimatedTotal = selected_services_total($selectedServices);
     $booking = createBooking([
         'fullName' => booking_post_value($fieldAliases['name']),
         'phone' => booking_post_value($fieldAliases['phone']),
@@ -67,6 +80,7 @@ try {
         'addressLat' => $_POST['address_lat'] ?? '',
         'addressLng' => $_POST['address_lng'] ?? '',
         'vehicleMakeModel' => booking_post_value($fieldAliases['vehicle']),
+        'vehicleSize' => $vehicleSize,
         'preferredDate' => booking_post_value($fieldAliases['date']),
         'preferredTimeWindow' => booking_post_value($fieldAliases['time']),
         'packageSelected' => booking_post_value($fieldAliases['package']),
@@ -75,6 +89,9 @@ try {
         'numberOfHeadlights' => $_POST['number_of_headlights'] ?? '2',
         'preferredContactMethod' => $_POST['preferred_contact_method'] ?? 'Phone',
         'message' => $_POST['message'] ?? '',
+        'selectedServices' => $selectedServices,
+        'estimatedTotal' => $estimatedTotal,
+        'pricingNote' => 'Final price may change after inspection if vehicle condition is excessive.',
         'source' => $_POST['source'] ?? 'public_booking_form',
         'termsAccepted' => terms_was_accepted($_POST['terms_accepted'] ?? $_POST['termsAccepted'] ?? ''),
         'termsVersion' => $_POST['terms_version'] ?? '2026-06-27-eofy',
@@ -86,6 +103,11 @@ try {
     }
 
     send_booking_email($booking);
+
+    // Server-side Meta conversion (Conversions API). Same event_id as the
+    // browser pixel on /thank-you, so Meta de-duplicates and counts it once.
+    require_once __DIR__ . '/includes/meta-capi.php';
+    @meta_send_booking_event($booking, 'Lead', false, meta_source_url('/thank-you?booking=' . $booking['id']));
 
     booking_json_response([
         'success' => true,
