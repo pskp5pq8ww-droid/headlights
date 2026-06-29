@@ -27,6 +27,7 @@
     const fieldLabels = {
       customer_address: "service address or suburb",
       package: "service/package",
+      vehicle_size: "vehicle size",
       headlight_condition: "headlight condition",
       name: "full name",
       phone: "phone",
@@ -84,6 +85,35 @@
       return selectedVehicleSize() === "commercial" || selectedServiceItems().some((item) => item.price <= 0);
     }
 
+    function refreshCart() {
+      const cart = qs("[data-booking-cart]", form);
+      if (!cart) return;
+      const items = selectedServiceItems();
+      const showCart = items.length > 2;
+      cart.hidden = !showCart;
+      if (!showCart) return;
+
+      const quote = isQuoteSelection();
+      const cartCount = qs("[data-cart-count]", cart);
+      const cartItems = qs("[data-cart-items]", cart);
+      const cartTotal = qs("[data-cart-total]", cart);
+
+      if (cartCount) cartCount.textContent = `${items.length} services`;
+      if (cartItems) {
+        cartItems.replaceChildren();
+        items.forEach((item) => {
+          const row = document.createElement("div");
+          const name = document.createElement("span");
+          const amount = document.createElement("strong");
+          name.textContent = item.service.name;
+          amount.textContent = quote || item.price <= 0 ? "Quote" : money(item.price);
+          row.append(name, amount);
+          cartItems.append(row);
+        });
+      }
+      if (cartTotal) cartTotal.textContent = quote ? "Quote on request" : money(selectedServicesTotal());
+    }
+
     function refreshServiceCards() {
       qsa("[data-service-card]", form).forEach((card) => {
         const input = qs("[data-service-select]", card);
@@ -106,6 +136,7 @@
           }
         }
       });
+      refreshCart();
     }
 
     function goToStep(step) {
@@ -283,7 +314,11 @@
     const requestedService = new URLSearchParams(window.location.search).get("service");
     if (requestedService) {
       const input = qsa("[data-service-select]", form).find((item) => item.value === requestedService);
-      if (input) input.checked = true;
+      if (input) {
+        input.checked = true;
+        const extrasMenu = input.closest("[data-extras-menu]");
+        if (extrasMenu) extrasMenu.open = true;
+      }
     }
     refreshServiceCards();
 

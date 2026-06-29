@@ -10,6 +10,8 @@ $page_maps    = true;
 $body_class   = 'booking-page';
 include __DIR__ . '/includes/header.php';
 $services = read_services(true);
+$mainServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') === 'headlight-restoration'));
+$extraServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') !== 'headlight-restoration'));
 ?>
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
         <div class="container booking-grid">
@@ -109,12 +111,35 @@ $services = read_services(true);
                 </label>
                 <div class="booking-services-block">
                   <div class="booking-services-heading">
-                    <p class="eyebrow">Add extra shine to your booking</p>
-                    <p>Choose your main headlight restoration and any detailing extras. Prices update with your vehicle size.</p>
+                    <p class="eyebrow">Service menu</p>
+                    <p>Headlight restoration is selected first. Open extra services only if you want to add more shine.</p>
                   </div>
-                  <div class="service-card-grid booking-service-grid">
-<?php render_service_cards($services, ['selectable' => true]); ?>
+                  <div class="booking-primary-service">
+<?php render_service_cards($mainServices ?: array_slice($services, 0, 1), ['selectable' => true, 'compact' => true]); ?>
                   </div>
+<?php if ($extraServices): ?>
+                  <details class="booking-extras-menu" data-extras-menu>
+                    <summary>
+                      <span>Add extra shine</span>
+                      <small>Wash, interior, trim, glass and protection</small>
+                    </summary>
+                    <div class="service-card-grid booking-service-grid">
+<?php render_service_cards($extraServices, ['selectable' => true, 'compact' => true]); ?>
+                    </div>
+                  </details>
+<?php endif; ?>
+                  <aside class="booking-cart" data-booking-cart hidden aria-live="polite">
+                    <div class="booking-cart-head">
+                      <span>Cart</span>
+                      <strong data-cart-count>0 services</strong>
+                    </div>
+                    <div class="booking-cart-items" data-cart-items></div>
+                    <div class="booking-cart-total">
+                      <span>Estimated total</span>
+                      <strong data-cart-total>—</strong>
+                    </div>
+                    <p>Final price may change after inspection if vehicle condition is excessive.</p>
+                  </aside>
                 </div>
                 <div class="step-nav">
                   <button class="button button-secondary step-back-btn" type="button" data-prev="1">
