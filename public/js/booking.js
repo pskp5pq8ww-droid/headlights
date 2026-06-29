@@ -126,12 +126,16 @@
         card.classList.toggle("is-quote", quote);
         if (priceEl) priceEl.textContent = quote ? "Quote required" : money(price);
         if (button) {
+          const isMain = service?.slug === "headlight-restoration";
+          const checked = !!input?.checked;
+          // The main service can be removed so you can pay just the test item.
+          button.classList.toggle("is-remove", isMain && checked);
           const label = qs("span", button);
           if (label) {
-            if (service?.slug === "headlight-restoration") {
-              label.textContent = input?.checked ? "Main service selected" : "Select main service";
+            if (isMain) {
+              label.textContent = checked ? "− Remove main service" : "+ Add main service";
             } else {
-              label.textContent = input?.checked ? "Added" : (quote ? "Request quote" : "Add to booking");
+              label.textContent = checked ? "Added" : (quote ? "Request quote" : "Add to booking");
             }
           }
         }
