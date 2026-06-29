@@ -368,25 +368,6 @@
     });
   }
 
-  function initCountdownPulse() {
-    const gsap = getGsap();
-    if (!gsap || reduceMotion()) return;
-
-    qsa("[data-countdown]").forEach((countdown) => {
-      if (countdown.dataset.brandCountdownReady) return;
-      countdown.dataset.brandCountdownReady = "true";
-      const star = document.createElement("span");
-      star.className = "countdown-brand-star";
-      star.setAttribute("aria-hidden", "true");
-      star.innerHTML = starSvg("countdown-star-svg");
-      countdown.prepend(star);
-
-      window.setInterval(() => {
-        gsap.fromTo(star, { scale: 0.85, autoAlpha: 0.72 }, { scale: 1.18, autoAlpha: 1, duration: 0.32, yoyo: true, repeat: 1, ease: "sine.inOut" });
-      }, 9000);
-    });
-  }
-
   function clearStuckOverlays(includeLoader) {
     const layer = qs("[data-star-transition]");
     if (layer) { layer.style.display = "none"; layer.style.opacity = "0"; }
@@ -413,7 +394,6 @@
     decorateCTAButtons();
     initCTAFlash();
     initSectionReveals();
-    initCountdownPulse();
     initLandingHero();
     initLandingCountdownMotion();
     initMagneticButtons();

@@ -27,7 +27,7 @@ $extraServices = array_values(array_filter($services, fn($service) => ($service[
                 <span class="promo-was">Was $<?= $EOFY['was'] ?></span>
                 <span class="promo-save">Save $<?= $EOFY['save'] ?></span>
               </div>
-              <div class="countdown" data-countdown data-mode="daily-brisbane" aria-label="Daily offer countdown">
+              <div class="countdown" data-countdown data-target="<?= htmlspecialchars($EOFY['target']) ?>" aria-label="Offer countdown">
                 <span><strong data-days>00</strong><small>Days</small></span>
                 <span><strong data-hours>00</strong><small>Hours</small></span>
                 <span><strong data-minutes>00</strong><small>Minutes</small></span>
@@ -260,6 +260,11 @@ $extraServices = array_values(array_filter($services, fn($service) => ($service[
                   <p class="panel-hint">This option is quote-only. Submit your request and we'll contact you with pricing — no payment needed now.</p>
                 </div>
 
+                <div class="checkout-total">
+                  <span>Total</span>
+                  <strong data-summary="total">—</strong>
+                </div>
+
                 <label class="terms-consent" for="termsAccepted">
                   <input id="termsAccepted" name="terms_accepted" type="checkbox" value="1" required />
                   <span>I have read and accept the <a href="/terms" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</span>
@@ -276,10 +281,6 @@ $extraServices = array_values(array_filter($services, fn($service) => ($service[
                   </button>
                 </div>
                 <p class="terms-short">T&amp;Cs apply. $99 EOFY offer applies to standard front headlight restoration within selected Brisbane service areas. Results vary depending on lens condition. Service does not repair internal moisture, cracks, broken seals, electrical faults, bulbs, or internal damage. Customer must provide a safe, legal, and accessible workspace. Children, pets, and customers must remain clear of the work area during service. Mobile service included in selected suburbs only.</p>
-                <div class="checkout-total">
-                  <span>Total</span>
-                  <strong data-summary="total">—</strong>
-                </div>
               </div>
               <p class="form-status" role="status" aria-live="polite" data-form-status></p>
             </form>

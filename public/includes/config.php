@@ -5,7 +5,7 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '24';
+const ASSET_VER = '26';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [
@@ -31,6 +31,11 @@ $EOFY = [
     'note'     => 'EOFY launch price. Limited time only.',
     'target'   => '2026-06-30T23:59:59+10:00',
 ];
+
+$SITE_SETTINGS = site_settings_read();
+if (!empty($SITE_SETTINGS['countdownTarget'])) {
+    $EOFY['target'] = $SITE_SETTINGS['countdownTarget'];
+}
 
 // ── Packages ─────────────────────────────────────────────────────────────────
 $PACKAGES = [
@@ -145,6 +150,82 @@ $NAV = [
 // Helper: versioned asset URL
 function asset(string $path): string {
     return '/' . ltrim($path, '/') . '?v=' . ASSET_VER;
+}
+
+function site_settings_storage_base(): string {
+    $env = getenv('BOOKING_STORAGE_PATH');
+    if (is_string($env) && trim($env) !== '') return rtrim(trim($env), '/');
+    return dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/Storagehighlights';
+}
+
+function site_settings_path(): string {
+    return site_settings_storage_base() . '/site-settings.json';
+}
+
+function site_settings_defaults(): array {
+    return [
+        'countdownTarget' => '2026-06-30T23:59:59+10:00',
+        'updatedAt' => '',
+    ];
+}
+
+function site_settings_ensure_storage(): void {
+    $base = site_settings_storage_base();
+    if (!is_dir($base) && !mkdir($base, 0700, true) && !is_dir($base)) {
+        throw new RuntimeException('Unable to create settings storage directory.');
+    }
+    $htaccess = $base . '/.htaccess';
+    if (!is_file($htaccess)) {
+        @file_put_contents($htaccess, "Deny from all\n", LOCK_EX);
+        @chmod($htaccess, 0600);
+    }
+}
+
+function site_settings_normalize_target(string $value): string {
+    $value = trim($value);
+    if ($value === '') return '';
+    try {
+        $tz = new DateTimeZone('Australia/Brisbane');
+        $date = new DateTimeImmutable($value, $tz);
+        return $date->setTimezone($tz)->format(DateTimeInterface::ATOM);
+    } catch (Throwable) {
+        return '';
+    }
+}
+
+function site_settings_read(): array {
+    $defaults = site_settings_defaults();
+    $path = site_settings_path();
+    if (!is_file($path)) return $defaults;
+    $data = json_decode((string)@file_get_contents($path), true);
+    if (!is_array($data)) return $defaults;
+    $target = site_settings_normalize_target((string)($data['countdownTarget'] ?? ''));
+    return [
+        'countdownTarget' => $target !== '' ? $target : $defaults['countdownTarget'],
+        'updatedAt' => trim((string)($data['updatedAt'] ?? '')),
+    ];
+}
+
+function site_settings_write(array $settings): void {
+    site_settings_ensure_storage();
+    $current = site_settings_read();
+    $target = site_settings_normalize_target((string)($settings['countdownTarget'] ?? ''));
+    if ($target === '') throw new InvalidArgumentException('Please choose a valid countdown end date and time.');
+    $next = [
+        'countdownTarget' => $target,
+        'updatedAt' => (new DateTimeImmutable('now', new DateTimeZone('Australia/Brisbane')))->format(DateTimeInterface::ATOM),
+    ] + $current;
+    $path = site_settings_path();
+    $tmp = $path . '.tmp.' . bin2hex(random_bytes(4));
+    $json = json_encode($next, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    if ($json === false) throw new RuntimeException('Unable to encode settings JSON.');
+    if (file_put_contents($tmp, $json, LOCK_EX) === false) throw new RuntimeException('Unable to write settings file.');
+    @chmod($tmp, 0600);
+    if (!rename($tmp, $path)) {
+        @unlink($tmp);
+        throw new RuntimeException('Unable to publish settings file.');
+    }
+    @chmod($path, 0600);
 }
 
 // Google Maps key loader. Keep real keys outside public_html, ideally in private/maps.php.

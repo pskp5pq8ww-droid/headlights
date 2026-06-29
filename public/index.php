@@ -42,7 +42,7 @@ $services = read_services(true);
 
             <div class="eofy-countdown-card reveal" aria-label="EOFY offer countdown">
               <p>Offer ends in</p>
-              <div class="countdown landing-countdown" data-countdown data-mode="daily-brisbane">
+              <div class="countdown landing-countdown" data-countdown data-target="<?= htmlspecialchars($EOFY['target']) ?>">
                 <span><strong data-days>00</strong><small>Days</small></span>
                 <span><strong data-hours>00</strong><small>Hours</small></span>
                 <span><strong data-minutes>00</strong><small>Minutes</small></span>
@@ -85,6 +85,10 @@ $services = read_services(true);
 <?php endfor; ?>
           </div>
         </div>
+      </section>
+
+      <section class="landing-sms-banner reveal" aria-label="Mobile booking confirmation preview">
+        <img src="<?= asset('assets/mobile-booking-banner.png') ?>" alt="Mobile headlight restoration booking confirmation message with before and after photos" loading="lazy" />
       </section>
 
       <section class="landing-section landing-benefits" aria-labelledby="benefits-title">

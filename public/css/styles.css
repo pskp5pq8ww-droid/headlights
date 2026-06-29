@@ -305,7 +305,6 @@ svg {
 
 .brand-star-svg,
 .button-star-svg,
-.countdown-star-svg,
 .transition-star-svg {
   width: 100%;
   height: 100%;
@@ -759,20 +758,6 @@ p {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
   gap: 8px;
-}
-
-.countdown-brand-star {
-  position: absolute;
-  right: -8px;
-  top: -10px;
-  z-index: 2;
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  filter: drop-shadow(0 0 14px rgba(168, 243, 255, 0.82));
-  pointer-events: none;
 }
 
 .countdown span {
@@ -2908,27 +2893,35 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 .hero-direct span {
   color: #fff;
+  display: inline-block;
+  transform-origin: 50% 70%;
+  animation: offerAttentionShake 2.75s ease-in-out infinite;
 }
 
 .eofy-countdown-card {
   position: relative;
   width: min(100%, 720px);
   margin-top: 32px;
-  padding: clamp(18px, 4vw, 30px);
+  padding: 24px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.04);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 34px 90px rgba(0, 0, 0, 0.34);
-  backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 111, 63, 0.16);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(255, 111, 63, 0.055), rgba(255, 255, 255, 0.01) 38%, rgba(126, 239, 255, 0.038)),
+    rgba(4, 11, 18, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(255, 111, 63, 0.045),
+    0 22px 54px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
 }
 
 .eofy-countdown-card::before {
   content: "";
   position: absolute;
-  inset: -1px;
-  background: linear-gradient(110deg, transparent, rgba(126, 239, 255, 0.12), transparent);
-  transform: translateX(-70%);
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, #ff3d2e, #ff9f43, rgba(126, 239, 255, 0.64));
   pointer-events: none;
 }
 
@@ -2943,25 +2936,51 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 .landing-countdown {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(8px, 2vw, 14px);
+  gap: 12px;
 }
 
 .landing-countdown span {
+  position: relative;
   min-width: 0;
-  min-height: clamp(96px, 24vw, 132px);
-  border-color: rgba(255, 255, 255, 0.09);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.025));
+  min-height: 124px;
+  overflow: hidden;
+  border-color: rgba(255, 255, 255, 0.13);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 50% 0, rgba(255, 159, 67, 0.1), transparent 50%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.072), rgba(255, 255, 255, 0.01));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.095),
+    0 10px 22px rgba(0, 0, 0, 0.13);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.landing-countdown span::after {
+  content: "";
+  position: absolute;
+  inset: auto 12px 10px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 111, 63, 0.78), transparent);
+  opacity: 0.64;
+  pointer-events: none;
 }
 
 .landing-countdown strong {
-  font-size: clamp(42px, 11vw, 68px);
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  font-size: 62px;
   letter-spacing: 0;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
+  transition: color 0.18s ease, text-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .landing-countdown small {
+  position: relative;
+  z-index: 1;
   color: rgba(255, 255, 255, 0.58);
   font-size: 11px;
   letter-spacing: 0.08em;
@@ -2969,8 +2988,11 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 }
 
 .landing-countdown .is-ticking {
-  color: #7eefff;
-  text-shadow: 0 0 26px rgba(0, 216, 255, 0.38);
+  color: #ff7043;
+  text-shadow:
+    0 0 18px rgba(255, 61, 46, 0.48),
+    0 0 34px rgba(255, 159, 67, 0.34);
+  transform: scale(1.045);
 }
 
 .eofy-price {
@@ -3026,11 +3048,63 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   text-transform: uppercase;
 }
 
+.eofy-main-cta svg {
+  animation: ctaArrowNudge 1.55s ease-in-out infinite;
+}
+
+@keyframes offerAttentionShake {
+  0%,
+  66%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+  70% {
+    transform: translateX(-4px) rotate(-2.2deg);
+  }
+  74% {
+    transform: translateX(4px) rotate(2.2deg);
+  }
+  78% {
+    transform: translateX(-3px) rotate(-1.6deg);
+  }
+  82% {
+    transform: translateX(3px) rotate(1.3deg);
+  }
+  86% {
+    transform: translateX(-1px) rotate(-0.7deg);
+  }
+}
+
+@keyframes ctaArrowNudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(4px);
+  }
+}
+
 .landing-section {
   position: relative;
   padding: clamp(74px, 12vw, 132px) 0;
   color: #fff;
   background: #020817;
+}
+
+.landing-sms-banner {
+  position: relative;
+  overflow: hidden;
+  background: #020817;
+}
+
+.landing-sms-banner img {
+  width: 100%;
+  min-height: 360px;
+  display: block;
+  object-fit: cover;
+  object-position: center center;
+  aspect-ratio: 1916 / 821;
 }
 
 .landing-section-heading {
@@ -3211,7 +3285,16 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   }
 
   .landing-countdown span {
-    border-radius: 14px;
+    border-radius: var(--radius);
+  }
+
+  .landing-countdown strong {
+    font-size: 44px;
+  }
+
+  .landing-sms-banner img {
+    min-height: 560px;
+    aspect-ratio: auto;
   }
 }
 
@@ -3691,75 +3774,85 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 .booking-page .pay-summary {
   margin-bottom: 18px;
-  padding: 28px;
-  border: 1px solid rgba(229, 231, 235, 0.82);
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.05);
+  padding: 24px;
+  border: 1px solid rgba(229, 231, 235, 0.76);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 255, 0.88));
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.045);
 }
 
 .booking-page .summary-topline,
 .booking-page .summary-meta-row {
   display: grid;
-  grid-template-columns: 1.45fr 0.9fr 0.9fr;
-  gap: 24px;
+  gap: 14px;
+}
+
+.booking-page .summary-topline {
+  grid-template-columns: minmax(0, 1.55fr) repeat(2, minmax(110px, 0.72fr));
 }
 
 .booking-page .summary-meta-row {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 24px;
-  padding-top: 22px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+  padding-top: 18px;
   border-top: 1px solid #f1f5f9;
 }
 
 .booking-page .pay-summary span {
   display: block;
   color: var(--checkout-muted);
-  font-size: 13px;
-  font-weight: 650;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   line-height: 1.3;
+  text-transform: uppercase;
 }
 
 .booking-page .pay-summary strong {
   display: block;
-  margin-top: 8px;
+  margin-top: 6px;
   color: #111827;
-  font-size: 16px;
-  line-height: 1.45;
-  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.42;
+  font-weight: 520;
   text-align: left;
+  overflow-wrap: anywhere;
 }
 
 .booking-page .summary-location-row {
   display: grid;
-  grid-template-columns: 24px 1fr auto;
-  gap: 14px;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 12px;
   align-items: center;
-  margin-top: 26px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid #eef2f7;
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.72);
 }
 
 .booking-page .summary-location-icon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   display: grid;
   place-items: center;
   color: #64748b;
 }
 
 .booking-page .summary-location-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .booking-page .summary-edit {
-  min-height: 36px;
-  padding: 0 16px;
+  min-height: 34px;
+  padding: 0 14px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   color: #111827;
   background: #fff;
-  font-size: 13px;
-  font-weight: 750;
+  font-size: 12px;
+  font-weight: 650;
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
@@ -3883,20 +3976,24 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   align-items: baseline;
   gap: 16px;
   margin-top: 18px;
-  padding: 20px 8px 0;
-  border-top: 1px solid #f1f5f9;
+  padding: 18px 20px;
+  border: 1px solid rgba(0, 113, 227, 0.12);
+  border-radius: 14px;
+  background: #f8fbff;
 }
 
 .booking-page .checkout-total span {
   color: #6b7280;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .booking-page .checkout-total strong {
   color: #111827;
-  font-size: 20px;
-  font-weight: 900;
+  font-size: 22px;
+  font-weight: 760;
 }
 
 .booking-page .form-status {
@@ -3948,10 +4045,11 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 }
 
 .booking-page .terms-short {
-  margin: 12px 0 0;
+  margin: 14px 0 0;
   color: #6b7280;
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: 11px;
+  line-height: 1.6;
+  font-weight: 400;
 }
 
 @media (max-width: 980px) {
@@ -4081,7 +4179,7 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   }
 
   .booking-page .checkout-total {
-    padding-inline: 0;
+    padding: 16px;
   }
 }
 
@@ -4542,24 +4640,31 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 }
 .summary-services {
   display: grid;
-  gap: 8px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(143, 163, 178, 0.18);
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #f1f5f9;
 }
 .summary-services div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: baseline;
 }
 .summary-services span,
 .summary-services strong,
-.summary-note { font-size: 13px; }
+.summary-note { font-size: 12px; }
 .summary-services span,
 .summary-note { color: var(--muted); }
+.summary-services span { font-weight: 450; }
+.summary-services strong {
+  color: #111827;
+  font-weight: 650;
+}
 .summary-note {
   margin: 12px 0 0;
   line-height: 1.45;
+  font-weight: 400;
 }
 @media (max-width: 640px) {
   .service-card-grid { grid-template-columns: 1fr; }

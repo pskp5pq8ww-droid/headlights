@@ -106,22 +106,48 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .calendar-day.is-selected{box-shadow:0 0 0 2px rgba(0,217,255,.5);border-color:var(--cyan)}
 .calendar-day strong{position:absolute;right:7px;bottom:7px;display:grid;place-items:center;min-width:22px;height:22px;
   padding:0 6px;border-radius:999px;background:var(--cyan);color:#03111b;font-size:11px}
-.daily-list{list-style:none;display:flex;flex-direction:column;gap:10px}
-.daily-list li{display:grid;grid-template-columns:1.1fr 1.2fr auto auto;gap:12px;align-items:center;
-  padding:12px;border-radius:var(--radius);background:rgba(255,255,255,.025);border:1px solid rgba(168,243,255,.09)}
-.daily-list strong,.daily-list span,.daily-list small{display:block}
-.daily-list span{color:rgba(244,252,255,.82);font-size:13px;margin-top:2px}
-.daily-list small{color:var(--steel);font-size:12px;margin-top:2px}
-.inline-status select{min-width:132px;padding:8px 10px;font-size:12px;color:var(--ice);background:rgba(3,7,11,.5);
+/* Day schedule: bookings grouped into Morning / Midday / Afternoon slots */
+.day-schedule{display:flex;flex-direction:column;gap:18px}
+.slot-group{display:flex;flex-direction:column;gap:8px}
+.slot-group-head{display:flex;align-items:center;gap:8px;padding:0 2px}
+.slot-group-icon{font-size:14px;color:var(--cyan)}
+.slot-group-label{font-weight:900;font-size:13px;letter-spacing:.02em;color:var(--ice)}
+.slot-group-range{font-size:11px;font-weight:700;color:var(--steel)}
+.slot-group-count{margin-left:auto;display:grid;place-items:center;min-width:20px;height:20px;padding:0 6px;
+  border-radius:999px;background:rgba(0,217,255,.12);color:var(--cyan);font-size:11px;font-weight:800}
+.slot-card{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius);
+  background:rgba(255,255,255,.025);border:1px solid rgba(168,243,255,.09);border-left:3px solid var(--steel)}
+.slot-card.badge-new{border-left-color:var(--blue)}
+.slot-card.badge-contacted{border-left-color:#a855f7}
+.slot-card.badge-confirmed{border-left-color:var(--ok)}
+.slot-card.badge-completed{border-left-color:#cbd5e1}
+.slot-card.badge-cancelled{border-left-color:var(--bad)}
+.slot-hour{flex:none;width:48px;font-weight:900;font-size:13px;color:var(--cyan-soft);
+  font-variant-numeric:tabular-nums;text-align:right}
+.slot-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.slot-line1{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.slot-name{font-weight:800;font-size:14px;color:var(--ice);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-price{flex:none;font-weight:900;font-size:13px;color:var(--ok)}
+.slot-line2{font-size:12px;color:rgba(244,252,255,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-line3{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.status-badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.03em}
+.slot-phone{font-size:12px;color:var(--steel);text-decoration:none}
+.slot-phone:hover{color:var(--cyan)}
+.slot-actions{flex:none;display:flex;align-items:center;gap:8px}
+.slot-open{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;font-size:20px;line-height:1;
+  background:rgba(0,217,255,.1);color:var(--cyan);text-decoration:none}
+.slot-open:hover{background:rgba(0,217,255,.2)}
+.inline-status select{min-width:120px;padding:8px 10px;font-size:12px;color:var(--ice);background:rgba(3,7,11,.5);
   border:1px solid rgba(143,163,178,.32);border-radius:8px}
 
 /* ── Filters + metrics ────────────────────────────────────────────────────── */
 .admin-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
 .admin-filters input[type="search"]{grid-column:span 2}
-.admin-filters input,.admin-filters select,.detail-card input,.detail-card select,.detail-card textarea{
+.admin-filters input,.admin-filters select,.detail-card input,.detail-card select,.detail-card textarea,.config-form input{
   width:100%;min-height:40px;padding:9px 11px;color:var(--ice);background:rgba(3,7,11,.46);
   border:1px solid rgba(143,163,178,.32);border-radius:8px;outline:none}
-.admin-filters input:focus,.admin-filters select:focus,.detail-card input:focus,.detail-card select:focus,.detail-card textarea:focus{
+.admin-filters input:focus,.admin-filters select:focus,.detail-card input:focus,.detail-card select:focus,.detail-card textarea:focus,.config-form input:focus{
   border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,217,255,.12)}
 .admin-filters button{min-height:40px;padding:0 18px;border:none;border-radius:8px;background:var(--cyan);
   color:#03111b;font-weight:900;cursor:pointer}
@@ -200,6 +226,22 @@ a.field-value{color:var(--cyan-soft)}
 .delete-booking-form button{min-height:38px;padding:9px 14px;border-radius:8px;border:1px solid rgba(248,113,113,.34);
   background:rgba(248,113,113,.1);color:#fecaca;font-weight:900;cursor:pointer}
 
+/* ── Site config ──────────────────────────────────────────────────────────── */
+.config-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,420px);gap:20px;align-items:start;
+  padding:18px;border-radius:var(--radius);border:1px solid rgba(168,243,255,.1);
+  background:linear-gradient(135deg,rgba(0,217,255,.08),rgba(3,7,11,.28))}
+.config-card-copy{display:flex;flex-direction:column;gap:8px}
+.config-eyebrow{color:var(--cyan);font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.config-card h3{font-size:20px;margin:0;color:#fff}
+.config-card p{color:var(--steel);font-size:13px;line-height:1.55}
+.config-current{margin-top:4px}
+.config-current strong{color:var(--ice);font-weight:800}
+.config-form{display:grid;gap:12px;padding:16px;border-radius:var(--radius);border:1px solid rgba(168,243,255,.12);
+  background:rgba(3,7,11,.34)}
+.config-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.config-form label{display:grid;gap:6px;color:var(--steel);font-size:12px;font-weight:800}
+.config-save-btn{width:auto;justify-self:start;min-width:170px;margin-top:0}
+
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width:980px){
   .stat-grid{grid-template-columns:repeat(2,1fr)}
@@ -215,7 +257,10 @@ a.field-value{color:var(--cyan-soft)}
   .admin-booking-card{grid-template-columns:1fr}
   .booking-card-actions{justify-content:flex-start}
   .upcoming-list li{grid-template-columns:1fr 1fr;gap:8px}
-  .daily-list li{grid-template-columns:1fr;align-items:start}
+  .slot-card{flex-wrap:wrap}
+  .slot-actions{margin-left:60px;width:100%;justify-content:space-between}
+  .inline-status select{flex:1}
+  .config-card{grid-template-columns:1fr}
 }
 @media (max-width:560px){
   .admin-main{padding:18px 16px 50px}
@@ -226,6 +271,7 @@ a.field-value{color:var(--cyan-soft)}
   .mini-action{width:auto}
   .calendar-day{min-height:44px;padding:7px}
   .bne-clock{min-width:0;align-items:flex-start}
+  .config-form-grid{grid-template-columns:1fr}
 }
 
 @media (min-width:1180px){
@@ -240,7 +286,6 @@ a.field-value{color:var(--cyan-soft)}
   .dashboard-grid{grid-template-columns:minmax(520px,1.08fr) minmax(430px,.92fr);gap:24px}
   .panel{padding:24px}
   .calendar-day{min-height:64px}
-  .daily-list li{grid-template-columns:minmax(160px,.8fr) minmax(260px,1fr) 140px 112px}
   .admin-filters{grid-template-columns:minmax(260px,1.8fr) repeat(7,minmax(130px,1fr)) 104px;gap:12px}
   .bookings-table{min-width:1080px;font-size:13px}
   .bookings-table th,.bookings-table td{padding:13px 14px}
@@ -436,19 +481,84 @@ a.field-value{color:var(--cyan-soft)}
 .service-admin-actions{
   grid-column:1/-1;
 }
-.service-deactivate-form{
-  padding:0 16px 16px;
+/* Compact service rows: name + on/off switch for booking visibility */
+.service-row{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:rgba(3,7,11,.24);
+  margin-bottom:8px;
+  overflow:hidden;
+  transition:opacity .18s ease,border-color .18s ease;
 }
-.service-deactivate-form button{
-  min-height:38px;
-  padding:9px 14px;
-  border-radius:8px;
-  border:1px solid rgba(248,113,113,.34);
-  background:rgba(248,113,113,.1);
-  color:#fecaca;
+.service-row.is-off{opacity:.62}
+.service-row-head{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:11px 14px;
+}
+.service-row-info{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+  flex:1;
+}
+.service-row-name{
   font-weight:900;
-  cursor:pointer;
+  color:var(--ice);
+  font-size:14px;
+  line-height:1.2;
 }
+.service-row-state{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.02em;
+  color:var(--steel);
+}
+.service-row:not(.is-off) .service-row-state{color:var(--ok)}
+.service-row-meta{
+  color:var(--steel);
+  font-size:11px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.service-toggle-form{margin:0;flex:none}
+.switch{display:inline-flex;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .switch-track{
+  position:relative;
+  width:42px;
+  height:24px;
+  border-radius:999px;
+  background:rgba(143,163,178,.26);
+  border:1px solid rgba(143,163,178,.34);
+  transition:background .18s ease,border-color .18s ease;
+}
+.switch .switch-thumb{
+  position:absolute;
+  top:2px;left:2px;
+  width:18px;height:18px;
+  border-radius:50%;
+  background:var(--ice);
+  transition:transform .18s ease;
+}
+.switch input:checked + .switch-track{
+  background:rgba(52,201,143,.4);
+  border-color:var(--ok);
+}
+.switch input:checked + .switch-track .switch-thumb{transform:translateX(18px)}
+.switch input:focus-visible + .switch-track{box-shadow:0 0 0 3px rgba(0,217,255,.18)}
+.service-row-edit{border-top:1px solid var(--line)}
+.service-row-edit>summary{
+  padding:9px 14px;
+  cursor:pointer;
+  font-weight:800;
+  font-size:12px;
+  color:var(--cyan-soft);
+}
+.service-row-edit[open]>summary{border-bottom:1px solid var(--line)}
+.service-row-edit .service-admin-form{padding-top:14px}
 @media (max-width:900px){
   .service-admin-form,
   .service-price-admin-grid{grid-template-columns:1fr 1fr}
@@ -456,6 +566,5 @@ a.field-value{color:var(--cyan-soft)}
 @media (max-width:560px){
   .service-admin-form,
   .service-price-admin-grid{grid-template-columns:1fr}
-  .service-admin-item>summary{align-items:flex-start;flex-direction:column}
-  .service-admin-item>summary small{text-align:left}
+  .service-row-meta{display:none}
 }

@@ -10,7 +10,22 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
         $id = clean_text($_POST['id'] ?? '', 80);
-        if ($action === 'create_service' || $action === 'update_service') {
+        if ($action === 'update_countdown') {
+            $date = clean_text($_POST['countdown_date'] ?? '', 40);
+            $time = clean_text($_POST['countdown_time'] ?? '', 20);
+            $time = substr($time, 0, 5);
+            $dateParts = preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $matches) ? $matches : [];
+            $timeParts = preg_match('/^(\d{2}):(\d{2})$/', $time, $matches) ? $matches : [];
+            if (
+                !$dateParts || !checkdate((int)$dateParts[2], (int)$dateParts[3], (int)$dateParts[1]) ||
+                !$timeParts || (int)$timeParts[1] > 23 || (int)$timeParts[2] > 59
+            ) {
+                throw new InvalidArgumentException('Choose both a valid countdown end date and time.');
+            }
+            site_settings_write(['countdownTarget' => $date . 'T' . $time . ':00+10:00']);
+            header('Location: /dashboard?notice=' . urlencode('Countdown end time updated.') . '#config');
+            exit;
+        } elseif ($action === 'create_service' || $action === 'update_service') {
             $services = read_services(false);
             $payload = service_payload_from_post($_POST);
             if ($action === 'create_service') {
@@ -38,17 +53,22 @@ try {
             write_services($services);
             header('Location: /dashboard?notice=' . urlencode($action === 'create_service' ? 'Service created.' : 'Service updated.') . '#services');
             exit;
-        } elseif ($action === 'deactivate_service') {
+        } elseif ($action === 'toggle_service' || $action === 'deactivate_service') {
             $services = read_services(false);
+            $newState = $action === 'deactivate_service' ? false : !empty($_POST['isActive']);
+            $name = '';
             foreach ($services as &$service) {
                 if ($service['id'] !== $id) continue;
-                $service['isActive'] = false;
+                $service['isActive'] = $newState;
                 $service['updatedAt'] = booking_now();
+                $name = (string)$service['name'];
                 break;
             }
             unset($service);
             write_services($services);
-            header('Location: /dashboard?notice=' . urlencode('Service deactivated.') . '#services');
+            $msg = $newState ? ($name !== '' ? $name . ' is now shown in booking.' : 'Service shown in booking.')
+                             : ($name !== '' ? $name . ' is now hidden from booking.' : 'Service hidden from booking.');
+            header('Location: /dashboard?notice=' . urlencode($msg) . '#services');
             exit;
         } elseif ($id !== '') {
             if ($action === 'update_booking') {
@@ -72,7 +92,7 @@ try {
         if (!empty($_POST['selectedDate'])) $redirect .= '?date=' . urlencode((string)$_POST['selectedDate']);
         if (!empty($_POST['detail'])) $redirect .= (str_contains($redirect, '?') ? '&' : '?') . 'id=' . urlencode((string)$_POST['detail']);
         $view = clean_text($_POST['view'] ?? '', 40);
-        if ($view !== '' && in_array($view, ['overview', 'calendar', 'bookings', 'services', 'reports', 'detail'], true)) {
+        if ($view !== '' && in_array($view, ['overview', 'calendar', 'bookings', 'services', 'config', 'reports', 'detail'], true)) {
             $redirect .= '#' . $view;
         }
         header('Location: ' . $redirect);
@@ -81,11 +101,13 @@ try {
 
     $bookings = readBookings();
     $services = read_services(false);
+    $settings = site_settings_read();
 } catch (Throwable $e) {
     booking_log_error('Dashboard failed: ' . $e->getMessage());
     $bookings = [];
     $services = [];
-    $error = 'Unable to load bookings. Please check server storage or permissions.';
+    $settings = site_settings_read();
+    $error = $e instanceof InvalidArgumentException ? $e->getMessage() : 'Unable to load bookings. Please check server storage or permissions.';
 }
 $notice = clean_text($_GET['notice'] ?? '', 180);
 
@@ -95,6 +117,7 @@ $now = new DateTimeImmutable('now', $tz);
 $selectedDate = clean_text($_GET['date'] ?? $now->format('Y-m-d'), 40);
 $selectedId = clean_text($_GET['id'] ?? '', 80);
 $selectedBooking = $selectedId ? getBookingById($selectedId) : null;
+$countdownSettings = countdown_target_parts($settings);
 
 $search = strtolower(clean_text($_GET['search'] ?? '', 120));
 $statusFilter = clean_text($_GET['status'] ?? '', 40);
@@ -138,6 +161,12 @@ usort($filtered, function ($a, $b) use ($sort) {
 });
 
 $dailyBookings = getBookingsByDate($selectedDate);
+// Group the day's bookings into Morning / Midday / Afternoon slots; each booking is a 1-hour block.
+$dailyByWindow = ['morning' => [], 'midday' => [], 'afternoon' => [], 'unset' => []];
+foreach ($dailyBookings as $b) {
+    $meta = time_window_meta((string)($b['preferredTimeWindow'] ?? ''));
+    $dailyByWindow[$meta['key']][] = $b;
+}
 $monthCursor = DateTimeImmutable::createFromFormat('!Y-m-d', substr($selectedDate, 0, 7) . '-01', $tz) ?: $now->modify('first day of this month');
 $monthStart = $monthCursor->modify('first day of this month');
 $monthEnd = $monthCursor->modify('last day of this month');
@@ -152,6 +181,19 @@ foreach ($bookings as $b) {
 function h(mixed $value): string { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
 function status_label(string $status): string { return ucwords(str_replace('_', ' ', $status)); }
 function badge_class_admin(string $status): string { return 'badge-' . str_replace('_', '-', strtolower($status)); }
+// Maps a preferred time window to a calendar slot: label, icon and the hour block it starts at.
+function time_window_meta(string $tw): array {
+    $key = strtolower(trim($tw));
+    if (str_contains($key, 'morning'))   return ['key' => 'morning',   'label' => 'Morning',   'range' => '8am – 12pm',  'icon' => '☀', 'start' => 8];
+    if (str_contains($key, 'midday') || str_contains($key, 'noon') || str_contains($key, 'lunch')) return ['key' => 'midday', 'label' => 'Midday', 'range' => '12pm – 3pm', 'icon' => '◐', 'start' => 12];
+    if (str_contains($key, 'afternoon') || str_contains($key, 'evening')) return ['key' => 'afternoon', 'label' => 'Afternoon', 'range' => '3pm – 6pm', 'icon' => '☾', 'start' => 15];
+    return ['key' => 'unset', 'label' => $tw !== '' ? $tw : 'No time set', 'range' => '', 'icon' => '·', 'start' => 0];
+}
+// Format an integer 24h hour as a tidy 12h label, e.g. 8 -> "8:00", 15 -> "3:00".
+function slot_hour_label(int $hour): string {
+    $h12 = $hour % 12; if ($h12 === 0) $h12 = 12;
+    return $h12 . ':00';
+}
 function maps_link(array $b): string {
     if (!empty($b['addressLat']) && !empty($b['addressLng'])) return 'https://www.google.com/maps?q=' . rawurlencode($b['addressLat'] . ',' . $b['addressLng']);
     $address = $b['formattedAddress'] ?: $b['addressOrSuburb'] ?? '';
@@ -189,6 +231,22 @@ function package_options(string $current = ''): string {
         $html .= '<option value="' . h($package) . '"' . $selected . '>' . h($package) . '</option>';
     }
     return $html;
+}
+function countdown_target_parts(array $settings): array {
+    $tz = new DateTimeZone('Australia/Brisbane');
+    $target = site_settings_normalize_target((string)($settings['countdownTarget'] ?? ''));
+    if ($target === '') $target = site_settings_defaults()['countdownTarget'];
+    try {
+        $date = (new DateTimeImmutable($target))->setTimezone($tz);
+    } catch (Throwable) {
+        $date = new DateTimeImmutable(site_settings_defaults()['countdownTarget'], $tz);
+    }
+    return [
+        'date' => $date->format('Y-m-d'),
+        'time' => $date->format('H:i'),
+        'display' => $date->format('D, j M Y g:i A') . ' Brisbane time',
+        'iso' => $date->format(DateTimeInterface::ATOM),
+    ];
 }
 function service_payload_from_post(array $post): array {
     return [
@@ -238,6 +296,7 @@ function service_lines(array $items): string {
         <a href="#calendar" data-admin-view-link="calendar"><span>Calendar</span></a>
         <a href="#bookings" data-admin-view-link="bookings"><span>Bookings</span></a>
         <a href="#services" data-admin-view-link="services"><span>Services</span></a>
+        <a href="#config" data-admin-view-link="config"><span>Config</span></a>
         <a href="#reports" data-admin-view-link="reports"><span>Reports</span></a>
         <a href="/analytics"><span>Analytics</span></a>
         <a href="/bookings-map"><span>Map</span></a>
@@ -311,22 +370,51 @@ function service_lines(array $items): string {
           <?php if (!$dailyBookings): ?>
             <p class="empty">No bookings found.</p>
           <?php else: ?>
-            <ul class="daily-list">
-              <?php foreach ($dailyBookings as $b): ?>
-              <li>
-                <div><strong><?= h($b['preferredTimeWindow']) ?></strong><span><?= h($b['fullName']) ?> · <?= h($b['phone']) ?></span></div>
-                <div><span><?= h($b['addressOrSuburb']) ?></span><small><?= h($b['vehicleMakeModel']) ?> · <?= h($b['packageSelected']) ?></small></div>
-                <form method="post" class="inline-status">
-                  <input type="hidden" name="action" value="quick_status" />
-                  <input type="hidden" name="id" value="<?= h($b['id']) ?>" />
-                  <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
-                  <input type="hidden" name="view" value="calendar" />
-                  <select name="status" onchange="this.form.submit()"><?= status_options($b['status']) ?></select>
-                </form>
-                <a class="up-action" href="/dashboard?date=<?= h($selectedDate) ?>&id=<?= h($b['id']) ?>#detail">View details</a>
-              </li>
-              <?php endforeach; ?>
-            </ul>
+            <div class="day-schedule">
+            <?php foreach (['morning', 'midday', 'afternoon', 'unset'] as $wk):
+                $group = $dailyByWindow[$wk];
+                if (!$group) continue;
+                $meta = time_window_meta($wk === 'unset' ? '' : $wk);
+            ?>
+              <div class="slot-group slot-group-<?= h($wk) ?>">
+                <div class="slot-group-head">
+                  <span class="slot-group-icon" aria-hidden="true"><?= $meta['icon'] ?></span>
+                  <span class="slot-group-label"><?= h($meta['label']) ?></span>
+                  <?php if ($meta['range']): ?><span class="slot-group-range"><?= h($meta['range']) ?></span><?php endif; ?>
+                  <span class="slot-group-count"><?= count($group) ?></span>
+                </div>
+                <?php foreach ($group as $i => $b):
+                    $price = booking_price($b);
+                    $hour = $meta['start'] > 0 ? slot_hour_label($meta['start'] + $i) : '—';
+                ?>
+                <div class="slot-card <?= badge_class_admin($b['status']) ?>">
+                  <span class="slot-hour"><?= h($hour) ?></span>
+                  <div class="slot-body">
+                    <div class="slot-line1">
+                      <strong class="slot-name"><?= h($b['fullName']) ?: 'Unnamed' ?></strong>
+                      <?php if ($price > 0): ?><span class="slot-price"><?= h(admin_money($price)) ?></span><?php endif; ?>
+                    </div>
+                    <div class="slot-line2"><?= h(trim(($b['vehicleMakeModel'] ?? '') . ' · ' . ($b['packageSelected'] ?? ''), " ·\t")) ?: '—' ?></div>
+                    <div class="slot-line3">
+                      <span class="status-badge <?= badge_class_admin($b['status']) ?>"><?= h(status_label($b['status'])) ?></span>
+                      <?php if (!empty($b['phone'])): ?><a class="slot-phone" href="tel:<?= h($b['phone']) ?>"><?= h($b['phone']) ?></a><?php endif; ?>
+                    </div>
+                  </div>
+                  <div class="slot-actions">
+                    <form method="post" class="inline-status">
+                      <input type="hidden" name="action" value="quick_status" />
+                      <input type="hidden" name="id" value="<?= h($b['id']) ?>" />
+                      <input type="hidden" name="selectedDate" value="<?= h($selectedDate) ?>" />
+                      <input type="hidden" name="view" value="calendar" />
+                      <select name="status" onchange="this.form.submit()" aria-label="Change status"><?= status_options($b['status']) ?></select>
+                    </form>
+                    <a class="slot-open" href="/dashboard?date=<?= h($selectedDate) ?>&id=<?= h($b['id']) ?>#detail" aria-label="View details">›</a>
+                  </div>
+                </div>
+                <?php endforeach; ?>
+              </div>
+            <?php endforeach; ?>
+            </div>
           <?php endif; ?>
         </div>
         </div>
@@ -464,12 +552,26 @@ function service_lines(array $items): string {
         </details>
 
         <div class="service-admin-list">
-<?php foreach ($services as $service): ?>
-          <details class="service-admin-item">
-            <summary>
-              <span><?= h($service['name']) ?></span>
-              <small><?= h($service['slug']) ?> · <?= !empty($service['isActive']) ? 'Active' : 'Inactive' ?> · from $<?= h((string)service_from_price($service)) ?></small>
-            </summary>
+<?php foreach ($services as $service): $on = !empty($service['isActive']); ?>
+          <div class="service-row<?= $on ? '' : ' is-off' ?>">
+            <div class="service-row-head">
+              <form method="post" class="service-toggle-form" title="<?= $on ? 'Showing in booking — click to hide' : 'Hidden from booking — click to show' ?>">
+                <input type="hidden" name="action" value="toggle_service" />
+                <input type="hidden" name="id" value="<?= h($service['id']) ?>" />
+                <input type="hidden" name="isActive" value="<?= $on ? '0' : '1' ?>" />
+                <label class="switch">
+                  <input type="checkbox" <?= $on ? 'checked' : '' ?> onchange="this.form.submit()" aria-label="Show <?= h($service['name']) ?> in booking" />
+                  <span class="switch-track"><span class="switch-thumb"></span></span>
+                </label>
+              </form>
+              <div class="service-row-info">
+                <span class="service-row-name"><?= h($service['name']) ?></span>
+                <span class="service-row-state"><?= $on ? 'Visible in booking' : 'Hidden from booking' ?></span>
+              </div>
+              <small class="service-row-meta"><?= h($service['slug']) ?> · from $<?= h((string)service_from_price($service)) ?></small>
+            </div>
+            <details class="service-row-edit">
+              <summary>Edit details</summary>
             <form method="post" class="service-admin-form">
               <input type="hidden" name="action" value="update_service" />
               <input type="hidden" name="id" value="<?= h($service['id']) ?>" />
@@ -501,13 +603,37 @@ function service_lines(array $items): string {
                 <button class="auth-submit service-save-btn" type="submit">Save service</button>
               </div>
             </form>
-            <form method="post" class="service-deactivate-form" onsubmit="return confirm('Deactivate this service? It will be hidden from public booking but kept in the service store.');">
-              <input type="hidden" name="action" value="deactivate_service" />
-              <input type="hidden" name="id" value="<?= h($service['id']) ?>" />
-              <button type="submit">Deactivate service</button>
-            </form>
-          </details>
+            </details>
+          </div>
 <?php endforeach; ?>
+        </div>
+      </section>
+
+      <section class="admin-view panel" id="config" data-admin-view="config" aria-label="Site configuration">
+        <div class="panel-head">
+          <h2>Config</h2>
+          <span>Homepage countdown</span>
+        </div>
+        <div class="config-card">
+          <div class="config-card-copy">
+            <p class="config-eyebrow">Countdown</p>
+            <h3>Offer end time</h3>
+            <p>Controls the countdown shown on the home page, booking page and EOFY offer page.</p>
+            <p class="config-current">Current: <strong><?= h($countdownSettings['display']) ?></strong></p>
+          </div>
+          <form method="post" class="config-form">
+            <input type="hidden" name="action" value="update_countdown" />
+            <div class="config-form-grid">
+              <label>End date
+                <input name="countdown_date" type="date" value="<?= h($countdownSettings['date']) ?>" required />
+              </label>
+              <label>End time
+                <input name="countdown_time" type="time" value="<?= h($countdownSettings['time']) ?>" required />
+              </label>
+            </div>
+            <p>Time is saved in Brisbane time (UTC+10).</p>
+            <button class="auth-submit config-save-btn" type="submit">Save countdown</button>
+          </form>
         </div>
       </section>
 
