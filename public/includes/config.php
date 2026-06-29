@@ -5,7 +5,7 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '27';
+const ASSET_VER = '28';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [

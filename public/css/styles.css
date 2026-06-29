@@ -2743,6 +2743,7 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 .landing-home .brand {
   gap: 8px;
+  transition: opacity 220ms ease, transform 220ms ease, visibility 220ms ease;
 }
 
 .landing-home .brand-mark {
@@ -4239,7 +4240,7 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+  transition: opacity 220ms ease, visibility 220ms ease, border-color 180ms ease, background 180ms ease, transform 220ms ease;
 }
 .nav-toggle:hover,
 .nav-toggle:focus-visible { border-color: var(--cyan); background: rgba(0, 217, 255, 0.1); outline: none; }
@@ -4348,6 +4349,22 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 .landing-home .nav-toggle {
   display: inline-flex !important;
+}
+
+.landing-home .site-header.is-scrolled .brand,
+.landing-home .site-header.is-scrolled .nav-toggle {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-8px);
+}
+
+.landing-home.menu-open .site-header .brand,
+.landing-home.menu-open .site-header .nav-toggle {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 /* Dynamic services catalog */

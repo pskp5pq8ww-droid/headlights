@@ -295,8 +295,7 @@
       button.addEventListener("click", () => {
         const card = button.closest("[data-service-card]");
         const input = card && qs("[data-service-select]", card);
-        const service = input ? servicesById.get(input.value) : null;
-        if (!input || service?.slug === "headlight-restoration") return;
+        if (!input) return;
         input.checked = !input.checked;
         refreshServiceCards();
         buildSummary();

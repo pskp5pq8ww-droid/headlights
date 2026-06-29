@@ -50,6 +50,25 @@
     });
   }
 
+  function initHeaderFade() {
+    const header = qs("[data-header]");
+    if (!header || !document.body.classList.contains("landing-home")) return;
+
+    let ticking = false;
+    const update = () => {
+      header.classList.toggle("is-scrolled", window.scrollY > 24);
+      ticking = false;
+    };
+    const requestUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+  }
+
   function initComparisonSliders() {
     qsa(".comparison-slider").forEach((slider) => {
       const input = qs('input[type="range"]', slider);
@@ -91,6 +110,7 @@
   }
 
   initNavigation();
+  initHeaderFade();
   initComparisonSliders();
   initRevealAnimations();
   initYear();

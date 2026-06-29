@@ -10,6 +10,7 @@ $page_maps    = true;
 $body_class   = 'booking-page';
 include __DIR__ . '/includes/header.php';
 $services = read_services(true);
+$services[] = test_payment_service(); // TEMP: $1 gateway-test item (remove before launch)
 $mainServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') === 'headlight-restoration'));
 $extraServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') !== 'headlight-restoration'));
 ?>
