@@ -27,3 +27,6 @@ yarn-error.log
 /.idea
 /.vscode
 .DS_Store
+
+# Ad campaign source media (not served by the site)
+public/ads/headlight-restoration-video-campaign/
