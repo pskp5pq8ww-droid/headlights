@@ -11,7 +11,7 @@ $body_class   = 'booking-page';
 include __DIR__ . '/includes/header.php';
 $services = read_services(true);
 $mainServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') === 'headlight-restoration'));
-$extraServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') !== 'headlight-restoration'));
+$bookingServices = $mainServices ?: array_slice($services, 0, 1);
 ?>
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
         <div class="container booking-grid">
@@ -111,23 +111,12 @@ $extraServices = array_values(array_filter($services, fn($service) => ($service[
                 </label>
                 <div class="booking-services-block">
                   <div class="booking-services-heading">
-                    <p class="eyebrow">Service menu</p>
-                    <p>Headlight restoration is selected first. Open extra services only if you want to add more shine.</p>
+                    <p class="eyebrow">Selected service</p>
+                    <p>Headlight restoration is selected for this booking. Extra detailing services can be arranged after confirmation.</p>
                   </div>
                   <div class="booking-primary-service">
-<?php render_service_cards($mainServices ?: array_slice($services, 0, 1), ['selectable' => true, 'compact' => true]); ?>
+<?php render_service_cards($bookingServices, ['selectable' => true, 'compact' => true]); ?>
                   </div>
-<?php if ($extraServices): ?>
-                  <details class="booking-extras-menu" data-extras-menu>
-                    <summary>
-                      <span>Add extra shine</span>
-                      <small>Wash, interior, trim, glass and protection</small>
-                    </summary>
-                    <div class="service-card-grid booking-service-grid">
-<?php render_service_cards($extraServices, ['selectable' => true, 'compact' => true]); ?>
-                    </div>
-                  </details>
-<?php endif; ?>
                   <aside class="booking-cart" data-booking-cart hidden aria-live="polite">
                     <div class="booking-cart-head">
                       <span>Cart</span>
@@ -287,7 +276,7 @@ $extraServices = array_values(array_filter($services, fn($service) => ($service[
 
             <script>
               window.bookingPricing = <?= json_encode(BOOKING_PACKAGE_PRICES, JSON_UNESCAPED_UNICODE) ?>;
-              window.bookingServices = <?= json_encode($services, JSON_UNESCAPED_UNICODE) ?>;
+              window.bookingServices = <?= json_encode($bookingServices, JSON_UNESCAPED_UNICODE) ?>;
               window.bookingVehicleSizes = <?= json_encode(VEHICLE_SIZE_LABELS, JSON_UNESCAPED_UNICODE) ?>;
               window.squareConfigEndpoint = '/api/square-config';
               window.squarePaymentEndpoint = '/api/payments/square';

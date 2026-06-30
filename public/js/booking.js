@@ -128,12 +128,13 @@
         if (button) {
           const isMain = service?.slug === "headlight-restoration";
           const checked = !!input?.checked;
-          // The main service can be removed so you can pay just the test item.
-          button.classList.toggle("is-remove", isMain && checked);
+          button.disabled = isMain;
+          button.setAttribute("aria-disabled", String(isMain));
           const label = qs("span", button);
           if (label) {
             if (isMain) {
-              label.textContent = checked ? "− Remove main service" : "+ Add main service";
+              input.checked = true;
+              label.textContent = "Main service selected";
             } else {
               label.textContent = checked ? "Added" : (quote ? "Request quote" : "Add to booking");
             }
@@ -300,6 +301,13 @@
         const card = button.closest("[data-service-card]");
         const input = card && qs("[data-service-select]", card);
         if (!input) return;
+        const service = servicesById.get(input.value);
+        if (service?.slug === "headlight-restoration") {
+          input.checked = true;
+          refreshServiceCards();
+          buildSummary();
+          return;
+        }
         input.checked = !input.checked;
         refreshServiceCards();
         buildSummary();
@@ -319,8 +327,6 @@
       const input = qsa("[data-service-select]", form).find((item) => item.value === requestedService);
       if (input) {
         input.checked = true;
-        const extrasMenu = input.closest("[data-extras-menu]");
-        if (extrasMenu) extrasMenu.open = true;
       }
     }
     refreshServiceCards();

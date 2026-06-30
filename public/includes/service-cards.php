@@ -91,7 +91,7 @@ function render_service_cards(array $services, array $options = []): void {
               </details>
 <?php if ($selectable): ?>
               <input type="checkbox" name="selected_services[]" value="<?= service_h($service['id']) ?>" data-service-select hidden<?= $isMain ? ' checked' : '' ?> />
-              <button class="button <?= $quoteOnly ? 'button-secondary' : 'button-primary' ?> service-select-btn" type="button" data-service-button>
+              <button class="button <?= $quoteOnly ? 'button-secondary' : 'button-primary' ?> service-select-btn" type="button" data-service-button<?= $isMain ? ' disabled aria-disabled="true"' : '' ?>>
                 <span><?= $isMain ? 'Main service selected' : ($quoteOnly ? 'Request quote' : 'Add to booking') ?></span>
               </button>
 <?php else: ?>

@@ -4618,18 +4618,10 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 .service-card-compact .service-select-btn {
   min-height: 40px;
 }
-/* Main service in "remove" state — lets you drop the $99 promo (e.g. to pay just the test item). */
-.service-card .service-select-btn.is-remove {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  color: #fff;
+.service-card .service-select-btn:disabled {
+  cursor: default;
+  opacity: 1;
   box-shadow: none;
-}
-.service-card .service-select-btn.is-remove:hover,
-.service-card .service-select-btn.is-remove:focus-visible {
-  border-color: #ff7a7a;
-  color: #ff7a7a;
-  background: rgba(255, 122, 122, 0.08);
 }
 .booking-extras-menu {
   border: 1px solid rgba(16, 32, 45, 0.1);
