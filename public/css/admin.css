@@ -386,9 +386,18 @@ a.field-value{color:var(--cyan-soft)}
 .bar-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),#7eefff)}
 .bar-count{font-size:13px;font-weight:800;color:var(--cyan);white-space:nowrap}
 .panel h2 small{font-weight:600;color:var(--steel);font-size:12px}
+.visit-table-wrap{overflow-x:auto}
+.visit-table{width:100%;min-width:820px;border-collapse:collapse;font-size:12.5px}
+.visit-table th{text-align:left;padding:9px 10px;color:var(--steel);font-weight:900;
+  border-bottom:1px solid var(--line);text-transform:uppercase;font-size:10px;letter-spacing:.04em}
+.visit-table td{padding:10px;border-bottom:1px solid rgba(168,243,255,.07);color:rgba(244,252,255,.86);vertical-align:middle}
+.visit-table tr:hover td{background:rgba(244,252,255,.025)}
+.visit-pill{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:999px;background:rgba(52,201,143,.14);
+  color:var(--ok);border:1px solid rgba(52,201,143,.3);font-size:10px;font-weight:900;text-transform:uppercase}
 @media (max-width:600px){
   .bar-list li{grid-template-columns:minmax(80px,40%) 1fr auto}
   .chart-bars{height:140px}
+  .visit-table{min-width:720px}
 }
 
 /* ── Services admin ───────────────────────────────────────────────────────── */

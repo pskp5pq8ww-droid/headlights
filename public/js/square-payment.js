@@ -1,4 +1,4 @@
-/* square-payment.js — Square Web Payments SDK wrapper (Sandbox + Production). */
+/* square-payment.js — Square Web Payments SDK wrapper (Production). */
 (function () {
   const SquarePayment = {
     config: null,
@@ -63,7 +63,7 @@
           return;
         }
         const script = document.createElement("script");
-        script.src = url || "https://sandbox.web.squarecdn.com/v1/square.js";
+        script.src = url || "https://web.squarecdn.com/v1/square.js";
         script.async = true;
         script.setAttribute("data-square-sdk", "true");
         script.onload = () => resolve();

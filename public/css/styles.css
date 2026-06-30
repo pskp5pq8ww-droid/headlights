@@ -4091,12 +4091,16 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 @media (max-width: 640px) {
   .booking-page .section.booking {
-    padding-top: 26px;
+    padding: 10px 0 30px;
   }
 
   .booking-page .booking-grid {
-    width: min(100% - 32px, 520px);
-    gap: 22px;
+    width: min(100% - 18px, 520px);
+    gap: 10px;
+  }
+
+  .booking-page .section-copy {
+    display: none;
   }
 
   .booking-page .section-copy p {
@@ -4136,13 +4140,13 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   }
 
   .booking-page #bookingWizard {
-    padding: 20px;
-    border-radius: 20px;
+    padding: 12px;
+    border-radius: 12px;
   }
 
   .booking-page .form-steps {
     gap: 0;
-    margin-bottom: 28px;
+    margin-bottom: 12px;
   }
 
   .booking-page .form-step {
@@ -4158,29 +4162,34 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   }
 
   .booking-page .panel-title {
-    margin-bottom: 18px;
-    font-size: 22px;
+    margin-bottom: 10px;
+    font-size: 18px;
   }
 
   .booking-page .pay-summary,
   .booking-page .pay-card-block {
-    padding: 18px;
-    border-radius: 16px;
+    padding: 10px;
+    border-radius: 10px;
   }
 
   .booking-page .summary-topline,
   .booking-page .summary-meta-row {
-    grid-template-columns: 1fr;
-    gap: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .booking-page .summary-location-row {
-    grid-template-columns: 22px 1fr;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    padding: 9px;
   }
 
   .booking-page .summary-edit {
-    grid-column: 2;
+    grid-column: auto;
     width: max-content;
+    min-height: 30px;
+    margin-top: 0;
+    padding: 0 10px;
   }
 
   .booking-page .checkout-panel .step-nav {
@@ -4192,7 +4201,23 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   }
 
   .booking-page .checkout-total {
-    padding: 16px;
+    margin-top: 10px;
+    padding: 10px 12px;
+  }
+
+  .booking-page .checkout-total strong {
+    font-size: 18px;
+  }
+
+  .booking-page .checkout-panel .step-nav {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .booking-page .button {
+    min-height: 46px;
+    border-radius: 10px;
+    font-size: 14px;
   }
 }
 
@@ -4737,9 +4762,8 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   .service-price-row small { text-align: left; }
   .booking-page .summary-topline,
   .booking-page .summary-meta-row,
-  .booking-page .summary-location-row,
   .summary-services div {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .booking-page .summary-location-icon {
     display: none;
@@ -4747,5 +4771,84 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   .booking-page .summary-edit {
     width: max-content;
     margin-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .booking-page .checkout-panel {
+    display: grid;
+    gap: 8px;
+  }
+  .booking-page .checkout-panel .panel-title {
+    margin: 0;
+  }
+  .booking-page .pay-summary {
+    gap: 8px;
+    margin-bottom: 0;
+    box-shadow: none;
+  }
+  .booking-page .summary-topline > div,
+  .booking-page .summary-meta-row > div {
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .booking-page .pay-summary span {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+  }
+  .booking-page .pay-summary strong {
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+  .booking-page .summary-services {
+    gap: 5px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .summary-services span,
+  .summary-services strong,
+  .summary-note {
+    font-size: 11px;
+  }
+  .summary-note {
+    display: none;
+  }
+  .booking-page .pay-card-block {
+    margin-top: 0;
+    box-shadow: none;
+  }
+  .booking-page .square-card-label {
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+  .booking-page .square-card-shell {
+    min-height: 74px;
+    padding: 8px 10px;
+    border-radius: 9px;
+  }
+  .booking-page .square-card-field {
+    min-height: 58px;
+  }
+  .booking-page .pay-secure-note {
+    margin-top: 7px;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .booking-page .terms-consent {
+    grid-template-columns: 18px 1fr;
+    gap: 8px;
+    margin-top: 0;
+    padding: 9px 10px;
+    border-radius: 9px;
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+  .booking-page .terms-short {
+    display: none;
+  }
+  .booking-page .form-status {
+    margin-top: 8px;
+    font-size: 12px;
   }
 }

@@ -200,15 +200,27 @@ function analytics_aggregate(array $events, array $bookings, int $days): array {
     $regions = [];
     $cities = [];
     $byDay = [];
+    $byHour = [];
+    $ipHashes = [];
     $viewsToday = 0;
     $visitorsToday = [];
+    $recentVisits = [];
 
     foreach ($events as $e) {
         $views++;
-        $day = substr((string)($e['t'] ?? ''), 0, 10);
+        $time = (string)($e['t'] ?? '');
+        $day = substr($time, 0, 10);
         if ($day !== '') $byDay[$day] = ($byDay[$day] ?? 0) + 1;
+        $hour = '';
+        try {
+            if ($time !== '') $hour = (new DateTimeImmutable($time))->setTimezone($tz)->format('H:00');
+        } catch (Throwable) {
+            $hour = substr($time, 11, 2) !== '' ? substr($time, 11, 2) . ':00' : '';
+        }
+        if ($hour !== '') $byHour[$hour] = ($byHour[$hour] ?? 0) + 1;
         if (!empty($e['vid'])) $visitors[$e['vid']] = true;
         if (!empty($e['sid'])) $sessions[$e['sid']] = true;
+        if (!empty($e['iph'])) $ipHashes[$e['iph']] = ($ipHashes[$e['iph']] ?? 0) + 1;
         $pages[$e['p'] ?? '/'] = ($pages[$e['p'] ?? '/'] ?? 0) + 1;
         $ref = $e['ref'] ?? 'direct';
         $referrers[$ref] = ($referrers[$ref] ?? 0) + 1;
@@ -221,6 +233,17 @@ function analytics_aggregate(array $events, array $bookings, int $days): array {
             $viewsToday++;
             if (!empty($e['vid'])) $visitorsToday[$e['vid']] = true;
         }
+        $recentVisits[] = [
+            'time' => $time,
+            'page' => (string)($e['p'] ?? '/'),
+            'visitor' => (string)($e['vid'] ?? ''),
+            'session' => (string)($e['sid'] ?? ''),
+            'ipHash' => (string)($e['iph'] ?? ''),
+            'device' => (string)($e['dev'] ?? ''),
+            'referrer' => (string)($e['ref'] ?? 'direct'),
+            'newVisitor' => !empty($e['nv']),
+            'newSession' => !empty($e['ns']),
+        ];
     }
 
     // Bookings within the same window (by createdAt).
@@ -242,7 +265,10 @@ function analytics_aggregate(array $events, array $bookings, int $days): array {
     }
 
     $uniqueVisitors = count($visitors);
-    arsort($pages); arsort($referrers); arsort($countries); arsort($regions); arsort($cities); arsort($suburbs);
+    arsort($pages); arsort($referrers); arsort($countries); arsort($regions); arsort($cities); arsort($suburbs); arsort($byHour); arsort($ipHashes);
+    usort($recentVisits, fn($a, $b) => strcmp((string)$b['time'], (string)$a['time']));
+    $peakHour = $byHour ? (string)array_key_first($byHour) : '';
+    $peakHourViews = $byHour ? (int)reset($byHour) : 0;
 
     // Build an ordered day series for the chart.
     $series = [];
@@ -259,6 +285,9 @@ function analytics_aggregate(array $events, array $bookings, int $days): array {
         'sessions' => count($sessions),
         'viewsToday' => $viewsToday,
         'visitorsToday' => count($visitorsToday),
+        'uniqueIpHashes' => count($ipHashes),
+        'peakHour' => $peakHour,
+        'peakHourViews' => $peakHourViews,
         'bookings' => $bookingCount,
         'paid' => $paidCount,
         'revenue' => $revenue,
@@ -266,6 +295,9 @@ function analytics_aggregate(array $events, array $bookings, int $days): array {
         'paidConversion' => $bookingCount > 0 ? round($paidCount / $bookingCount * 100, 1) : 0.0,
         'topPages' => array_slice($pages, 0, 8, true),
         'topReferrers' => array_slice($referrers, 0, 8, true),
+        'topIpHashes' => array_slice($ipHashes, 0, 8, true),
+        'hourlyPeaks' => array_slice($byHour, 0, 8, true),
+        'recentVisits' => array_slice($recentVisits, 0, 25),
         'devices' => $devices,
         'countries' => array_slice($countries, 0, 8, true),
         'regions' => array_slice($regions, 0, 8, true),

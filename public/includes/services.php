@@ -14,29 +14,6 @@ function services_file_path(): string {
     return booking_storage_base() . '/services.json';
 }
 
-/**
- * TEMP — $1 payment-test item. Used only to verify the Square gateway end to end.
- * It is NOT persisted to services.json and is hidden from the public catalog
- * (services / pricing pages + public API). It only shows on the booking page and
- * is recognised by server-side price validation so a real $1 charge can complete.
- * To remove it before launch: delete this function, the booking-page append in
- * book.php, and the $byId injection in build_selected_services_snapshot().
- */
-function test_payment_service(): array {
-    return normalize_service([
-        'id' => 'svc_test_payment',
-        'slug' => 'payment-test',
-        'name' => 'Payment Test ($1)',
-        'category' => 'Test',
-        'shortDescription' => 'Temporary $1 item to test the payment gateway. Remove before launch.',
-        'longDescription' => 'Temporary $1 item used only to verify Square payments end to end.',
-        'inclusions' => [], 'exclusions' => [],
-        'priceSmall' => 1, 'priceMedium' => 1, 'priceLarge' => 1, 'priceSingle' => 1, 'priceExtraPair' => 0,
-        'estimatedTime' => '', 'isAddOn' => true, 'isFeatured' => false, 'isActive' => true, 'sortOrder' => 999,
-        'imageKey' => '', 'icon' => 'sparkles', 'termsNote' => 'Test item only — not a real service.',
-    ]);
-}
-
 function default_services(): array {
     $now = booking_now();
     $base = [
@@ -185,9 +162,6 @@ function build_selected_services_snapshot(mixed $rawIds, string $vehicleSize, st
     $services = read_services(true);
     $byId = [];
     foreach ($services as $service) $byId[$service['id']] = $service;
-    // TEMP: recognise the $1 payment-test item for server-side price validation.
-    $test = test_payment_service();
-    $byId[$test['id']] = $test;
     $snapshot = [];
     foreach ($ids as $id) {
         if (!isset($byId[$id])) continue;
@@ -222,4 +196,3 @@ function validate_service_payload(array $payload, array $existing = null): array
     if (!$existing) $service['createdAt'] = $service['updatedAt'];
     return $service;
 }
-
