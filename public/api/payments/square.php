@@ -149,6 +149,7 @@ try {
 
     $booking = updateBookingPayment($booking['id'], [
         'paymentStatus'    => 'paid',
+        'paymentMethod'    => 'card',
         'amount'           => $amountDollars,
         'currency'         => square_currency(),
         'squarePaymentId'  => $paymentId,

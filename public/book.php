@@ -234,6 +234,37 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
                   <p class="summary-note">Final price may change after inspection if vehicle condition is excessive.</p>
                 </div>
 
+                <div class="pay-method" id="payMethod" role="radiogroup" aria-label="How would you like to pay?">
+                  <label class="pay-method-option">
+                    <input type="radio" name="payment_method" value="card" checked data-pay-method />
+                    <span class="pay-method-body">
+                      <span class="pay-method-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M3 10h18"/></svg>
+                      </span>
+                      <span>
+                        <strong>Pay by card now</strong>
+                        <small>Secure online payment with Square</small>
+                      </span>
+                    </span>
+                  </label>
+                  <label class="pay-method-option">
+                    <input type="radio" name="payment_method" value="cash" data-pay-method />
+                    <span class="pay-method-body">
+                      <span class="pay-method-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                      </span>
+                      <span>
+                        <strong>Pay cash on service</strong>
+                        <small>Pay the technician when we arrive</small>
+                      </span>
+                    </span>
+                  </label>
+                </div>
+
+                <div class="pay-cash-block" id="payCashBlock" hidden>
+                  <p class="panel-hint">No payment needed now. You'll pay <strong data-cash-amount>—</strong> in cash to our technician at the time of service. We'll contact you to confirm your booking.</p>
+                </div>
+
                 <div class="pay-card-block" id="payCardBlock">
                   <label class="square-card-label" for="squareCard">Card details</label>
                   <div class="square-card-shell">

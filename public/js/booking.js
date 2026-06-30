@@ -21,6 +21,9 @@
     const payLabel = qs("[data-pay-label]", wizard);
     const cardBlock = qs("#payCardBlock", wizard);
     const quoteBlock = qs("#payQuoteBlock", wizard);
+    const cashBlock = qs("#payCashBlock", wizard);
+    const payMethodWrap = qs("#payMethod", wizard);
+    const payMethodRadios = qsa("[data-pay-method]", wizard);
     let squareReady = false;
     let paymentFallback = false; // true when Square is unavailable → use free request flow
 
@@ -144,9 +147,28 @@
       refreshCart();
     }
 
+    // Scroll-reveal elements (class "reveal") start at opacity:0 once
+    // "animations-ready" is on the body and only fade in when an
+    // IntersectionObserver sees them. Content inside a hidden wizard panel
+    // (display:none) never triggers that observer, so it would stay invisible
+    // when the step opens. Force any reveal content in a panel visible.
+    function revealPanelContent(panel) {
+      if (!panel) return;
+      const targets = qsa(".reveal", panel);
+      if (panel.classList.contains("reveal")) targets.push(panel);
+      targets.forEach((el) => {
+        el.classList.add("is-visible");
+        el.style.opacity = "";
+        el.style.visibility = "";
+        el.style.transform = "";
+      });
+    }
+
     function goToStep(step) {
       qsa("[data-panel]", wizard).forEach((panel) => {
-        panel.hidden = Number(panel.dataset.panel) !== step;
+        const isCurrent = Number(panel.dataset.panel) === step;
+        panel.hidden = !isCurrent;
+        if (isCurrent) revealPanelContent(panel);
       });
       qsa("[data-step-indicator]", wizard).forEach((indicator) => {
         const number = Number(indicator.dataset.stepIndicator);
@@ -251,18 +273,51 @@
         : "Online payment is temporarily unavailable. Submit your booking and we'll confirm and arrange payment with you.";
     }
 
+    function selectedPaymentMethod() {
+      const checked = payMethodRadios.find((radio) => radio.checked);
+      return checked ? checked.value : "card";
+    }
+
     async function enterPaymentStep() {
       paymentFallback = false;
       const price = buildSummary();
       const isQuote = price <= 0;
-      if (cardBlock) cardBlock.hidden = isQuote;
-      if (quoteBlock) quoteBlock.hidden = !isQuote;
-      if (payLabel) payLabel.textContent = isQuote ? "Request Booking" : `Pay ${money(price)} & Confirm Booking`;
+      const method = selectedPaymentMethod();
+
+      // Quote-only selections (commercial / quote services) can't be pre-paid,
+      // so the card/cash picker is irrelevant — hide it.
+      if (payMethodWrap) payMethodWrap.hidden = isQuote;
 
       if (isQuote) {
         squareReady = false;
+        if (cardBlock) cardBlock.hidden = true;
+        if (cashBlock) cashBlock.hidden = true;
+        if (quoteBlock) quoteBlock.hidden = false;
+        if (payLabel) payLabel.textContent = "Request Booking";
+        status.textContent = "";
         return;
       }
+
+      if (quoteBlock) quoteBlock.hidden = true;
+
+      // Cash: no online payment, customer pays on service via the request flow.
+      if (method === "cash") {
+        squareReady = false;
+        if (cardBlock) cardBlock.hidden = true;
+        if (cashBlock) {
+          cashBlock.hidden = false;
+          const amount = qs("[data-cash-amount]", cashBlock);
+          if (amount) amount.textContent = money(price);
+        }
+        if (payLabel) payLabel.textContent = "Confirm Booking";
+        status.textContent = "";
+        return;
+      }
+
+      // Card: load Square and show the card field.
+      if (cashBlock) cashBlock.hidden = true;
+      if (cardBlock) cardBlock.hidden = false;
+      if (payLabel) payLabel.textContent = `Pay ${money(price)} & Confirm Booking`;
       if (!window.SquarePayment) {
         useRequestFallback(squareUnavailableMessage());
         return;
@@ -319,6 +374,13 @@
       field?.addEventListener("change", () => {
         refreshServiceCards();
         buildSummary();
+      });
+    });
+
+    payMethodRadios.forEach((radio) => {
+      radio.addEventListener("change", () => {
+        status.textContent = "";
+        enterPaymentStep();
       });
     });
 
@@ -422,9 +484,15 @@
       }
 
       const price = buildSummary();
-      const useRequest = price <= 0 || paymentFallback;
+      const method = selectedPaymentMethod();
+      const isCash = method === "cash" && price > 0;
+      const useRequest = price <= 0 || paymentFallback || isCash;
       setSubmitting(true, useRequest ? "Sending…" : "Processing…");
       window.ShiningGSAP?.playFormSubmittingAnimation(form);
+
+      const idleLabel = isCash
+        ? "Confirm Booking"
+        : (price <= 0 || paymentFallback ? "Request Booking" : `Pay ${money(price)} & Confirm Booking`);
 
       try {
         if (useRequest) {
@@ -434,7 +502,7 @@
         }
       } finally {
         if (!window.location.href.includes("/thank-you")) {
-          setSubmitting(false, useRequest ? "Request Booking" : `Pay ${money(price)} & Confirm Booking`);
+          setSubmitting(false, idleLabel);
         }
       }
     });

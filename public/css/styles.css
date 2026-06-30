@@ -3474,7 +3474,9 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 }
 .pay-secure-note svg { width: 16px; height: 16px; fill: var(--success); flex: none; }
 .pay-card-block[hidden],
-.pay-quote-block[hidden] { display: none; }
+.pay-quote-block[hidden],
+.pay-cash-block[hidden],
+.pay-method[hidden] { display: none; }
 
 /* ── Premium checkout redesign ───────────────────────────────────────────── */
 .booking-page {
@@ -3936,6 +3938,95 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 .booking-page .pay-secure-note strong {
   color: #374151;
+}
+
+/* Payment method picker: card vs cash on service */
+.booking-page .pay-method {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+}
+.booking-page .pay-method-option {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+.booking-page .pay-method-option input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.booking-page .pay-method-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 16px;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  border-radius: 14px;
+  background: #fff;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.booking-page .pay-method-option input:checked + .pay-method-body {
+  border-color: rgba(0, 122, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+  background: #f5faff;
+}
+.booking-page .pay-method-option input:focus-visible + .pay-method-body {
+  border-color: rgba(0, 122, 255, 0.6);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.18);
+}
+.booking-page .pay-method-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #eef2f7;
+  color: #111827;
+}
+.booking-page .pay-method-option input:checked + .pay-method-body .pay-method-icon {
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--checkout-blue);
+}
+.booking-page .pay-method-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.booking-page .pay-method-body strong {
+  display: block;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 750;
+}
+.booking-page .pay-method-body small {
+  display: block;
+  margin-top: 2px;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.booking-page .pay-cash-block {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid rgba(0, 122, 255, 0.18);
+  border-radius: 14px;
+  background: #f5faff;
+}
+.booking-page .pay-cash-block .panel-hint {
+  margin: 0;
+  color: #374151;
+}
+@media (max-width: 520px) {
+  .booking-page .pay-method { grid-template-columns: 1fr; }
 }
 
 .booking-page .step-nav {

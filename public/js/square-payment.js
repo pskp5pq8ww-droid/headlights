@@ -46,10 +46,16 @@
         } catch (err) {
           this.lastError = err && err.message ? err.message : "Square payment form could not be loaded.";
           if (window.console && window.console.warn) window.console.warn("[SquarePayment]", err);
-          this._loading = null;
           return false;
         }
       })();
+      // Cache only a successful init. If it failed (config, SDK or attach),
+      // clear the cache so re-entering the payment step can retry instead of
+      // being stuck on the cached failure forever.
+      this._loading = this._loading.then((ok) => {
+        if (!ok) this._loading = null;
+        return ok;
+      });
       return this._loading;
     },
 

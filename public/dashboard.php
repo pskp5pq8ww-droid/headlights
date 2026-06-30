@@ -713,6 +713,7 @@ function service_lines(array $items): string {
             <div class="detail-card">
               <h3>Payment</h3>
               <p>Status: <span class="<?= payment_badge_class($b) ?>"><?= h(payment_label($b)) ?></span></p>
+              <p>Method: <?= !empty($b['paymentMethod']) ? h($b['paymentMethod'] === 'cash' ? 'Cash on service' : ucfirst($b['paymentMethod'])) : '—' ?></p>
               <p>Amount: <?= ($b['paymentStatus'] ?? '') === 'paid' ? h(($b['currency'] ?: 'AUD') . ' $' . number_format((float)$b['amount'], 2)) : '—' ?></p>
               <p>Square Payment ID: <?= !empty($b['squarePaymentId']) ? '<span class="mono">' . h($b['squarePaymentId']) . '</span>' : '—' ?></p>
               <?php if (!empty($b['squareOrderId'])): ?><p>Square Order ID: <span class="mono"><?= h($b['squareOrderId']) ?></span></p><?php endif; ?>

@@ -148,6 +148,7 @@ function normalize_booking(array $booking): array {
         // ── Payment fields (Square) ──────────────────────────────────────────
         'amount' => (float)($booking['amount'] ?? 0),
         'currency' => (string)($booking['currency'] ?? 'AUD'),
+        'paymentMethod' => (string)($booking['paymentMethod'] ?? $booking['payment_method'] ?? ''),
         'paymentStatus' => normalize_payment_status((string)($booking['paymentStatus'] ?? $booking['payment_status'] ?? 'unpaid')),
         'squarePaymentId' => (string)($booking['squarePaymentId'] ?? $booking['square_payment_id'] ?? ''),
         'squareOrderId' => (string)($booking['squareOrderId'] ?? $booking['square_order_id'] ?? ''),
@@ -312,7 +313,7 @@ function updateBookingPayment(string $id, array $payment): ?array {
     $booking['paymentStatus'] = $status;
     if (isset($payment['amount'])) $booking['amount'] = (float)$payment['amount'];
     if (!empty($payment['currency'])) $booking['currency'] = (string)$payment['currency'];
-    foreach (['squarePaymentId', 'squareOrderId', 'squareReceiptUrl', 'cardBrand', 'cardLast4'] as $key) {
+    foreach (['squarePaymentId', 'squareOrderId', 'squareReceiptUrl', 'cardBrand', 'cardLast4', 'paymentMethod'] as $key) {
         if (isset($payment[$key])) $booking[$key] = (string)$payment[$key];
     }
     if ($status === 'paid') {
@@ -442,10 +443,16 @@ function send_booking_email(array $booking): void {
     if ($paid) {
         $body .= "\n-- Payment --\n";
         $body .= "Status: PAID\n";
+        $body .= "Method: Card (Square)\n";
         $body .= "Amount: " . ($booking['currency'] ?? 'AUD') . ' $' . number_format((float)($booking['amount'] ?? 0), 2) . "\n";
         $body .= "Square Payment ID: " . ($booking['squarePaymentId'] ?? '') . "\n";
         if (!empty($booking['squareReceiptUrl'])) $body .= "Receipt: " . $booking['squareReceiptUrl'] . "\n";
         if (!empty($booking['cardBrand'])) $body .= "Card: " . $booking['cardBrand'] . ' ****' . ($booking['cardLast4'] ?? '') . "\n";
+    } elseif (($booking['paymentMethod'] ?? '') === 'cash') {
+        $body .= "\n-- Payment --\n";
+        $body .= "Status: UNPAID — pay cash on service\n";
+        $body .= "Method: Cash (customer pays the technician on arrival)\n";
+        if (!empty($booking['estimatedTotal'])) $body .= "Amount due on service: $" . number_format((float)$booking['estimatedTotal'], 2) . "\n";
     }
 
     $headers  = "From: " . ($GLOBALS['SITE']['email'] ?? 'hello@shiningaus.com') . "\r\n";
