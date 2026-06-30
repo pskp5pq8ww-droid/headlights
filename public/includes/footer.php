@@ -40,9 +40,57 @@ $page_scripts = $page_scripts ?? [];
 
     <a class="mobile-sticky-cta" href="/book" aria-label="Claim the EOFY mobile headlight restoration offer">Claim EOFY Offer</a>
 
+    <div class="support-widget" data-support-widget>
+      <button class="support-fab" type="button" aria-expanded="false" aria-controls="supportPanel" data-support-toggle>
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/></svg>
+        <span>Help</span>
+      </button>
+      <section class="support-panel" id="supportPanel" aria-label="Send us a message" hidden>
+        <div class="support-panel-head">
+          <div>
+            <strong>Send a message</strong>
+            <small>Questions, complaints or claims</small>
+          </div>
+          <button class="support-close" type="button" aria-label="Close message form" data-support-close>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <form class="support-form" data-support-form>
+          <input type="hidden" name="page" value="" data-support-page />
+          <label>Type
+            <select name="category">
+              <option value="question">Question</option>
+              <option value="complaint">Complaint</option>
+              <option value="claim">Claim</option>
+              <option value="booking_help">Booking help</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label>Name
+            <input name="name" autocomplete="name" />
+          </label>
+          <label>Email
+            <input name="email" type="email" autocomplete="email" placeholder="Email" />
+          </label>
+          <label>Phone
+            <input name="phone" autocomplete="tel" placeholder="Phone" />
+          </label>
+          <label>Subject
+            <input name="subject" maxlength="160" />
+          </label>
+          <label>Message
+            <textarea name="message" rows="4" required></textarea>
+          </label>
+          <button class="support-submit" type="submit">Send ticket</button>
+          <p class="support-status" data-support-status role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </div>
+
     <script src="<?= asset('vendor/gsap/gsap.min.js') ?>"></script>
     <script src="<?= asset('js/gsapAnimations.js') ?>"></script>
     <script src="<?= asset('js/site.js') ?>"></script>
+    <script src="<?= asset('js/support-widget.js') ?>"></script>
 <?php if (in_array('countdown', $page_scripts, true)): ?>
     <script src="<?= asset('js/countdown.js') ?>"></script>
 <?php endif; ?>

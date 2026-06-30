@@ -93,4 +93,15 @@
       body.hidden = !open;
     });
   });
+
+  document.querySelectorAll("[data-ticket-toggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const card = btn.closest("[data-ticket-card]");
+      const body = card && card.querySelector(".ticket-body");
+      if (!body) return;
+      const open = card.classList.toggle("is-expanded");
+      btn.setAttribute("aria-expanded", String(open));
+      body.hidden = !open;
+    });
+  });
 })();

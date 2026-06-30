@@ -26,6 +26,14 @@ include __DIR__ . '/includes/header.php';
             </article>
 <?php endforeach; ?>
           </div>
+          <div class="faq-ticket-box reveal">
+            <div>
+              <p class="eyebrow">Questions &amp; Answers</p>
+              <h2>Need a direct answer?</h2>
+              <p>Send a question, complaint or claim and the admin team will receive it as a ticket.</p>
+            </div>
+            <button class="button button-primary" type="button" data-support-open><span>Create Ticket</span></button>
+          </div>
           <div class="section-cta reveal"><a class="button button-primary" href="/book"><span>Claim EOFY Offer</span></a></div>
         </div>
       </section>

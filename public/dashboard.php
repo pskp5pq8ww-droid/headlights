@@ -2,6 +2,7 @@
 require_once __DIR__ . '/includes/auth.php';
 require_admin();
 require_once __DIR__ . '/includes/bookings.php';
+require_once __DIR__ . '/includes/tickets.php';
 require_once __DIR__ . '/includes/services.php';
 
 $error = '';
@@ -70,6 +71,26 @@ try {
                              : ($name !== '' ? $name . ' is now hidden from booking.' : 'Service hidden from booking.');
             header('Location: /dashboard?notice=' . urlencode($msg) . '#services');
             exit;
+        } elseif ($action === 'update_ticket') {
+            if ($id === '') throw new InvalidArgumentException('Missing ticket id.');
+            updateTicket($id, [
+                'status' => $_POST['status'] ?? '',
+                'category' => $_POST['category'] ?? '',
+                'adminNotes' => $_POST['adminNotes'] ?? '',
+                'lastResponse' => $_POST['lastResponse'] ?? '',
+            ]);
+            header('Location: /dashboard?notice=' . urlencode('Ticket updated.') . '#tickets');
+            exit;
+        } elseif ($action === 'quick_ticket_status') {
+            if ($id === '') throw new InvalidArgumentException('Missing ticket id.');
+            updateTicket($id, ['status' => $_POST['status'] ?? '']);
+            header('Location: /dashboard?notice=' . urlencode('Ticket status updated.') . '#tickets');
+            exit;
+        } elseif ($action === 'delete_ticket') {
+            if ($id === '') throw new InvalidArgumentException('Missing ticket id.');
+            if (($_POST['confirm_delete'] ?? '') === 'yes') deleteTicket($id);
+            header('Location: /dashboard?notice=' . urlencode('Ticket hidden.') . '#tickets');
+            exit;
         } elseif ($id !== '') {
             if ($action === 'update_booking') {
                 updateBooking($id, [
@@ -92,7 +113,7 @@ try {
         if (!empty($_POST['selectedDate'])) $redirect .= '?date=' . urlencode((string)$_POST['selectedDate']);
         if (!empty($_POST['detail'])) $redirect .= (str_contains($redirect, '?') ? '&' : '?') . 'id=' . urlencode((string)$_POST['detail']);
         $view = clean_text($_POST['view'] ?? '', 40);
-        if ($view !== '' && in_array($view, ['overview', 'calendar', 'bookings', 'services', 'config', 'reports', 'detail'], true)) {
+        if ($view !== '' && in_array($view, ['overview', 'calendar', 'bookings', 'tickets', 'services', 'config', 'reports', 'detail'], true)) {
             $redirect .= '#' . $view;
         }
         header('Location: ' . $redirect);
@@ -100,11 +121,13 @@ try {
     }
 
     $bookings = readBookings();
+    $tickets = readTickets();
     $services = read_services(false);
     $settings = site_settings_read();
 } catch (Throwable $e) {
     booking_log_error('Dashboard failed: ' . $e->getMessage());
     $bookings = [];
+    $tickets = [];
     $services = [];
     $settings = site_settings_read();
     $error = $e instanceof InvalidArgumentException ? $e->getMessage() : 'Unable to load bookings. Please check server storage or permissions.';
@@ -112,6 +135,7 @@ try {
 $notice = clean_text($_GET['notice'] ?? '', 180);
 
 $stats = getBookingStats($bookings);
+$ticketStats = getTicketStats($tickets);
 $tz = new DateTimeZone('Australia/Brisbane');
 $now = new DateTimeImmutable('now', $tz);
 $selectedDate = clean_text($_GET['date'] ?? $now->format('Y-m-d'), 40);
@@ -127,6 +151,9 @@ $dateRange = clean_text($_GET['date_range'] ?? '', 40);
 $dateFrom = clean_text($_GET['date_from'] ?? '', 40);
 $dateTo = clean_text($_GET['date_to'] ?? '', 40);
 $sort = clean_text($_GET['sort'] ?? 'newest', 40);
+$ticketSearch = strtolower(clean_text($_GET['ticket_search'] ?? '', 120));
+$ticketStatusFilter = clean_text($_GET['ticket_status'] ?? '', 40);
+$ticketCategoryFilter = clean_text($_GET['ticket_category'] ?? '', 40);
 
 $filtered = array_values(array_filter($bookings, function ($b) use ($search, $statusFilter, $packageFilter, $dateFilter, $dateRange, $dateFrom, $dateTo, $now) {
     if ($statusFilter !== '' && ($b['status'] ?? '') !== $statusFilter) return false;
@@ -159,6 +186,19 @@ usort($filtered, function ($a, $b) use ($sort) {
     if ($sort === 'preferred_date') return strcmp(($a['preferredDate'] ?? '') . ($a['preferredTimeWindow'] ?? ''), ($b['preferredDate'] ?? '') . ($b['preferredTimeWindow'] ?? ''));
     return strcmp((string)($b['createdAt'] ?? ''), (string)($a['createdAt'] ?? ''));
 });
+
+$filteredTickets = array_values(array_filter($tickets, function ($ticket) use ($ticketSearch, $ticketStatusFilter, $ticketCategoryFilter) {
+    if ($ticketStatusFilter !== '' && ($ticket['status'] ?? '') !== $ticketStatusFilter) return false;
+    if ($ticketCategoryFilter !== '' && ($ticket['category'] ?? '') !== $ticketCategoryFilter) return false;
+    if ($ticketSearch !== '') {
+        $haystack = strtolower(implode(' ', [
+            $ticket['name'] ?? '', $ticket['email'] ?? '', $ticket['phone'] ?? '',
+            $ticket['subject'] ?? '', $ticket['message'] ?? '', $ticket['page'] ?? '',
+        ]));
+        if (!str_contains($haystack, $ticketSearch)) return false;
+    }
+    return true;
+}));
 
 $dailyBookings = getBookingsByDate($selectedDate);
 // Group the day's bookings into Morning / Midday / Afternoon slots; each booking is a 1-hour block.
@@ -213,6 +253,23 @@ function payment_label(array $b): string {
 function payment_badge_class(array $b): string {
     $status = strtolower((string)($b['paymentStatus'] ?? 'unpaid'));
     return 'pay-badge pay-' . preg_replace('/[^a-z]/', '', $status);
+}
+function ticket_badge_class_admin(string $status): string { return 'ticket-badge-' . str_replace('_', '-', strtolower($status)); }
+function ticket_status_options(string $current = '', bool $includeAll = false): string {
+    $html = $includeAll ? '<option value="">All ticket statuses</option>' : '';
+    foreach (TICKET_STATUSES as $status) {
+        $selected = $status === $current ? ' selected' : '';
+        $html .= '<option value="' . h($status) . '"' . $selected . '>' . h(ticket_status_label($status)) . '</option>';
+    }
+    return $html;
+}
+function ticket_category_options(string $current = '', bool $includeAll = false): string {
+    $html = $includeAll ? '<option value="">All categories</option>' : '';
+    foreach (TICKET_CATEGORIES as $category) {
+        $selected = $category === $current ? ' selected' : '';
+        $html .= '<option value="' . h($category) . '"' . $selected . '>' . h(ticket_category_label($category)) . '</option>';
+    }
+    return $html;
 }
 function status_options(string $current): string {
     $html = '';
@@ -292,16 +349,26 @@ function service_lines(array $items): string {
         <span>Shining Admin</span>
       </a>
       <nav class="admin-nav">
-        <a class="is-active" href="#overview" data-admin-view-link="overview"><span>Dashboard</span></a>
-        <a href="#calendar" data-admin-view-link="calendar"><span>Calendar</span></a>
-        <a href="#bookings" data-admin-view-link="bookings"><span>Bookings</span></a>
-        <a href="#services" data-admin-view-link="services"><span>Services</span></a>
-        <a href="#config" data-admin-view-link="config"><span>Config</span></a>
-        <a href="#reports" data-admin-view-link="reports"><span>Reports</span></a>
-        <a href="/analytics"><span>Analytics</span></a>
-        <a href="/bookings-map"><span>Map</span></a>
-        <a href="/users"><span>Users</span></a>
-        <a href="/backups"><span>Backups</span></a>
+        <div class="admin-nav-group">
+          <span class="admin-nav-label">Work</span>
+          <a class="is-active" href="#overview" data-admin-view-link="overview"><span>Dashboard</span></a>
+          <a href="#calendar" data-admin-view-link="calendar"><span>Calendar</span></a>
+          <a href="#bookings" data-admin-view-link="bookings"><span>Bookings</span></a>
+          <a href="#tickets" data-admin-view-link="tickets"><span>Tickets</span><?php if ($ticketStats['open'] > 0): ?><strong><?= h($ticketStats['open']) ?></strong><?php endif; ?></a>
+        </div>
+        <div class="admin-nav-group">
+          <span class="admin-nav-label">Business</span>
+          <a href="#services" data-admin-view-link="services"><span>Services</span></a>
+          <a href="#config" data-admin-view-link="config"><span>Config</span></a>
+          <a href="#reports" data-admin-view-link="reports"><span>Reports</span></a>
+          <a href="/analytics"><span>Analytics</span></a>
+        </div>
+        <div class="admin-nav-group">
+          <span class="admin-nav-label">Tools</span>
+          <a href="/bookings-map"><span>Map</span></a>
+          <a href="/users"><span>Users</span></a>
+          <a href="/backups"><span>Backups</span></a>
+        </div>
       </nav>
       <a class="admin-logout" href="/logout">Logout</a>
     </aside>
@@ -310,7 +377,7 @@ function service_lines(array $items): string {
       <header class="admin-topbar">
         <div>
           <h1>Admin Dashboard</h1>
-          <p>Bookings, calendar, metrics and follow-ups.</p>
+          <p>Bookings, tickets, calendar, metrics and follow-ups.</p>
         </div>
         <div class="bne-clock" data-brisbane>
           <span class="bne-time" data-bne-time><?= $now->format('g:i:s A') ?></span>
@@ -335,6 +402,7 @@ function service_lines(array $items): string {
           <div class="stat-card"><span class="stat-num"><?= $stats['paid'] ?></span><span class="stat-label">Paid Bookings</span></div>
           <div class="stat-card"><span class="stat-num">$<?= $stats['estimatedRevenue'] ?></span><span class="stat-label">Estimated Revenue</span></div>
           <div class="stat-card"><span class="stat-num"><?= $stats['pendingFollowUps'] ?></span><span class="stat-label">Pending Follow-ups</span></div>
+          <div class="stat-card highlight"><span class="stat-num"><?= $ticketStats['open'] ?></span><span class="stat-label">Open Tickets <small><?= $ticketStats['new'] ?> new</small></span></div>
           <div class="stat-card wide"><span class="stat-num small"><?= h($stats['mostSelectedPackage']) ?></span><span class="stat-label">Most Selected Package</span></div>
         </div>
       </section>
@@ -508,6 +576,92 @@ function service_lines(array $items): string {
                     <select name="status" onchange="this.form.submit()"><?= status_options($b['status']) ?></select>
                   </form>
                 </div>
+                </div>
+              </article>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+      </section>
+
+      <section class="admin-view panel" id="tickets" data-admin-view="tickets" aria-label="Tickets">
+        <div class="panel-head">
+          <div>
+            <h2>Requests &amp; Tickets</h2>
+            <p class="panel-subtitle">Questions, complaints and claims submitted from the website.</p>
+          </div>
+          <span><?= count($filteredTickets) ?> shown · <?= h((string)$ticketStats['open']) ?> open</span>
+        </div>
+        <form class="admin-filters ticket-filters" method="get" action="/dashboard#tickets">
+          <input type="search" name="ticket_search" value="<?= h($_GET['ticket_search'] ?? '') ?>" placeholder="Search name, email, phone, subject or message" />
+          <select name="ticket_status"><?= ticket_status_options($ticketStatusFilter, true) ?></select>
+          <select name="ticket_category"><?= ticket_category_options($ticketCategoryFilter, true) ?></select>
+          <button type="submit">Filter</button>
+        </form>
+
+        <div class="ticket-stat-row" aria-label="Ticket metrics">
+          <span><strong><?= h((string)$ticketStats['new']) ?></strong> New</span>
+          <span><strong><?= h((string)$ticketStats['in_review']) ?></strong> In review</span>
+          <span><strong><?= h((string)$ticketStats['resolved']) ?></strong> Resolved</span>
+          <span><strong><?= h((string)$ticketStats['closed']) ?></strong> Closed</span>
+        </div>
+
+        <?php if (!$filteredTickets): ?>
+          <p class="empty">No tickets found.</p>
+        <?php else: ?>
+          <div class="ticket-list">
+            <?php foreach ($filteredTickets as $ticket): ?>
+              <article class="ticket-card" id="ticket-<?= h($ticket['id']) ?>" data-ticket-card>
+                <button type="button" class="ticket-summary" data-ticket-toggle aria-expanded="false">
+                  <span class="ticket-topic">
+                    <strong><?= h($ticket['subject'] ?: ticket_category_label($ticket['category'])) ?></strong>
+                    <small><?= h($ticket['name'] ?: 'Website visitor') ?> · <?= h($ticket['createdAt']) ?></small>
+                  </span>
+                  <span class="ticket-category"><?= h(ticket_category_label($ticket['category'])) ?></span>
+                  <span class="ticket-badge <?= ticket_badge_class_admin($ticket['status']) ?>"><?= h(ticket_status_label($ticket['status'])) ?></span>
+                  <svg class="bc-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="ticket-body" hidden>
+                  <div class="ticket-content-grid">
+                    <div class="ticket-message">
+                      <span class="field-label">Message</span>
+                      <p><?= nl2br(h($ticket['message'])) ?></p>
+                      <div class="ticket-meta-grid">
+                        <div><span class="field-label">Email</span><a class="field-value" href="mailto:<?= h($ticket['email']) ?>"><?= h($ticket['email'] ?: 'No email') ?></a></div>
+                        <div><span class="field-label">Phone</span><a class="field-value" href="tel:<?= h($ticket['phone']) ?>"><?= h($ticket['phone'] ?: 'No phone') ?></a></div>
+                        <div><span class="field-label">Page</span><span class="field-value"><?= h($ticket['page'] ?: 'Unknown') ?></span></div>
+                        <div><span class="field-label">Updated</span><span class="field-value"><?= h($ticket['updatedAt']) ?></span></div>
+                      </div>
+                    </div>
+                    <form method="post" class="ticket-admin-form">
+                      <input type="hidden" name="action" value="update_ticket" />
+                      <input type="hidden" name="id" value="<?= h($ticket['id']) ?>" />
+                      <label>Status<select name="status"><?= ticket_status_options($ticket['status']) ?></select></label>
+                      <label>Category<select name="category"><?= ticket_category_options($ticket['category']) ?></select></label>
+                      <label>Internal notes<textarea name="adminNotes" rows="4"><?= h($ticket['adminNotes']) ?></textarea></label>
+                      <label>Last response<textarea name="lastResponse" rows="3"><?= h($ticket['lastResponse']) ?></textarea></label>
+                      <div class="ticket-action-row">
+                        <button class="auth-submit ticket-save-btn" type="submit">Save ticket</button>
+                        <?php if (!empty($ticket['email'])): ?><a class="mini-action" href="mailto:<?= h($ticket['email']) ?>?subject=<?= rawurlencode('Re: ' . ($ticket['subject'] ?: 'Your Shining Headlights ticket')) ?>">Reply Email</a><?php endif; ?>
+                        <?php if (!empty($ticket['phone'])): ?><a class="mini-action call-action" href="tel:<?= h($ticket['phone']) ?>">Call</a><?php endif; ?>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="ticket-quick-row">
+                    <?php foreach (['new', 'in_review', 'resolved', 'closed'] as $status): ?>
+                      <form method="post">
+                        <input type="hidden" name="action" value="quick_ticket_status" />
+                        <input type="hidden" name="id" value="<?= h($ticket['id']) ?>" />
+                        <input type="hidden" name="status" value="<?= h($status) ?>" />
+                        <button class="mini-action" type="submit">Mark <?= h(ticket_status_label($status)) ?></button>
+                      </form>
+                    <?php endforeach; ?>
+                    <form method="post" onsubmit="return confirm('Hide this ticket from the dashboard?');">
+                      <input type="hidden" name="action" value="delete_ticket" />
+                      <input type="hidden" name="id" value="<?= h($ticket['id']) ?>" />
+                      <input type="hidden" name="confirm_delete" value="yes" />
+                      <button class="mini-action is-danger" type="submit">Hide</button>
+                    </form>
+                  </div>
                 </div>
               </article>
             <?php endforeach; ?>
