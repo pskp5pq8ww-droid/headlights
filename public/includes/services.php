@@ -9,6 +9,7 @@ const VEHICLE_SIZE_LABELS = [
     'large' => 'Large 4WD / van / truck',
     'commercial' => 'Commercial / oversized vehicle',
 ];
+const MAX_SERVICE_QUANTITY = 2;
 
 function services_file_path(): string {
     return booking_storage_base() . '/services.json';
@@ -156,9 +157,23 @@ function service_from_price(array $service): float {
     return $prices ? min($prices) : 0;
 }
 
-function build_selected_services_snapshot(mixed $rawIds, string $vehicleSize, string $headlights = '2'): array {
-    $ids = is_array($rawIds) ? $rawIds : preg_split('/,/', (string)$rawIds);
-    $ids = array_values(array_unique(array_filter(array_map(fn($id) => clean_text($id, 80), $ids))));
+function service_quantity_from_payload(string $serviceId, mixed $rawQuantities, int $fallback = 1): int {
+    $quantity = $fallback;
+    if (is_array($rawQuantities) && array_key_exists($serviceId, $rawQuantities)) {
+        $quantity = (int)$rawQuantities[$serviceId];
+    }
+    return max(1, min(MAX_SERVICE_QUANTITY, $quantity));
+}
+
+function build_selected_services_snapshot(mixed $rawIds, string $vehicleSize, string $headlights = '2', mixed $rawQuantities = []): array {
+    $rawList = is_array($rawIds) ? array_values($rawIds) : preg_split('/,/', (string)$rawIds);
+    $counts = [];
+    foreach ($rawList ?: [] as $id) {
+        $cleanId = clean_text($id, 80);
+        if ($cleanId === '') continue;
+        $counts[$cleanId] = ($counts[$cleanId] ?? 0) + 1;
+    }
+    $ids = array_keys($counts);
     $services = read_services(true);
     $byId = [];
     foreach ($services as $service) $byId[$service['id']] = $service;
@@ -172,7 +187,7 @@ function build_selected_services_snapshot(mixed $rawIds, string $vehicleSize, st
             'serviceName' => $service['name'],
             'selectedVehicleSize' => $vehicleSize,
             'priceAtBooking' => $price,
-            'quantity' => 1,
+            'quantity' => service_quantity_from_payload($service['id'], $rawQuantities, $counts[$id] ?? 1),
         ];
     }
     return $snapshot;

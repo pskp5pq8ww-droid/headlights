@@ -11,7 +11,9 @@ $body_class   = 'booking-page';
 include __DIR__ . '/includes/header.php';
 $services = read_services(true);
 $mainServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') === 'headlight-restoration'));
-$bookingServices = $mainServices ?: array_slice($services, 0, 1);
+$otherServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') !== 'headlight-restoration'));
+$bookingServices = array_merge($mainServices, $otherServices);
+if (!$bookingServices) $bookingServices = array_slice($services, 0, 1);
 ?>
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
         <div class="container booking-grid">
@@ -114,9 +116,9 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
                 <div class="booking-services-block">
                   <div class="booking-services-heading">
                     <p class="eyebrow">Selected service</p>
-                    <p>Headlight restoration is selected for this booking. Extra detailing services can be arranged after confirmation.</p>
+                    <p>Headlight restoration starts selected automatically. Add, remove or duplicate active services before payment.</p>
                   </div>
-                  <div class="booking-primary-service">
+                  <div class="booking-service-grid">
 <?php render_service_cards($bookingServices, ['selectable' => true, 'compact' => true]); ?>
                   </div>
                   <aside class="booking-cart" data-booking-cart hidden aria-live="polite">
@@ -322,6 +324,8 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
                   <p class="panel-hint">This option is quote-only. Submit your request and we'll contact you with pricing — no payment needed now.</p>
                 </div>
 
+                <div class="summary-services payment-summary-services" data-payment-services></div>
+
                 <div class="checkout-total">
                   <span>Total</span>
                   <strong data-summary="total">—</strong>
@@ -344,6 +348,7 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
               window.bookingPricing = <?= json_encode(BOOKING_PACKAGE_PRICES, JSON_UNESCAPED_UNICODE) ?>;
               window.bookingServices = <?= json_encode($bookingServices, JSON_UNESCAPED_UNICODE) ?>;
               window.bookingVehicleSizes = <?= json_encode(VEHICLE_SIZE_LABELS, JSON_UNESCAPED_UNICODE) ?>;
+              window.bookingMaxServiceQuantity = <?= MAX_SERVICE_QUANTITY ?>;
               window.squareConfigEndpoint = '/api/square-config';
               window.squarePaymentEndpoint = '/api/payments/square';
               window.bookingCurrency = '<?= htmlspecialchars(strtoupper(getenv('SQUARE_CURRENCY') ?: 'AUD')) ?>';

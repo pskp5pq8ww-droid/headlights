@@ -857,7 +857,8 @@ function service_lines(array $items): string {
 <?php if (!empty($b['selectedServices']) && is_array($b['selectedServices'])): ?>
               <ul class="metric-list booking-service-snapshot">
 <?php foreach ($b['selectedServices'] as $item): ?>
-                <li><span><?= h($item['serviceName'] ?? 'Service') ?></span><strong><?= (float)($item['priceAtBooking'] ?? 0) > 0 ? h(admin_money((float)$item['priceAtBooking'])) : 'Quote' ?></strong></li>
+                <?php $qty = max(1, (int)($item['quantity'] ?? 1)); $linePrice = (float)($item['priceAtBooking'] ?? 0) * $qty; ?>
+                <li><span><?= h($item['serviceName'] ?? 'Service') ?><?= $qty > 1 ? ' x' . h((string)$qty) : '' ?></span><strong><?= $linePrice > 0 ? h(admin_money($linePrice)) : 'Quote' ?></strong></li>
 <?php endforeach; ?>
               </ul>
 <?php endif; ?>

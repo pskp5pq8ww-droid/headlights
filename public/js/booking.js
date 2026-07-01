@@ -5,6 +5,7 @@
   const services = window.bookingServices || [];
   const vehicleSizes = window.bookingVehicleSizes || {};
   const currency = window.bookingCurrency || "AUD";
+  const maxServiceQuantity = Math.max(1, Number(window.bookingMaxServiceQuantity || 2));
   const qs = (selector, parent = document) => parent.querySelector(selector);
   const qsa = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
 
@@ -69,19 +70,68 @@
       return Number(service[key] || 0);
     }
 
+    function clampServiceQuantity(value) {
+      return Math.max(0, Math.min(maxServiceQuantity, Number.parseInt(value, 10) || 0));
+    }
+
+    function quantityInputForService(serviceId) {
+      const card = qsa("[data-service-card]", form).find((item) => item.dataset.serviceId === serviceId);
+      return card ? qs("[data-service-quantity]", card) : null;
+    }
+
+    function selectInputForService(serviceId) {
+      return qsa("[data-service-select]", form).find((input) => input.value === serviceId) || null;
+    }
+
+    function serviceQuantity(input) {
+      if (!input?.checked) return 0;
+      const qtyInput = quantityInputForService(input.value);
+      const qty = clampServiceQuantity(qtyInput?.value || 1);
+      return qty > 0 ? qty : 1;
+    }
+
+    function setServiceQuantity(input, quantity) {
+      if (!input) return;
+      const qty = clampServiceQuantity(quantity);
+      const qtyInput = quantityInputForService(input.value);
+      input.checked = qty > 0;
+      if (qtyInput) qtyInput.value = String(qty);
+    }
+
+    function selectedServiceCount(items = selectedServiceItems()) {
+      return items.reduce((sum, item) => sum + item.quantity, 0);
+    }
+
+    function syncPackageField(items = selectedServiceItems()) {
+      const field = findFieldByName("package");
+      if (!field) return;
+      if (!items.length) {
+        field.value = "Not sure / Quote";
+        return;
+      }
+      const first = items[0].service.name;
+      const count = selectedServiceCount(items);
+      field.value = count > 1 ? `${first} + ${count - 1} extra` : first;
+    }
+
     function selectedServiceItems() {
       return qsa("[data-service-select]", form)
         .filter((input) => input.checked)
-        .map((input) => servicesById.get(input.value))
+        .map((input) => {
+          const service = servicesById.get(input.value);
+          const quantity = serviceQuantity(input);
+          return service && quantity > 0 ? { service, quantity } : null;
+        })
         .filter(Boolean)
-        .map((service) => ({
-          service,
-          price: servicePrice(service)
+        .map((item) => ({
+          ...item,
+          price: servicePrice(item.service),
+          total: servicePrice(item.service) * item.quantity
         }));
     }
 
     function selectedServicesTotal() {
-      return selectedServiceItems().reduce((sum, item) => sum + item.price, 0);
+      return selectedServiceItems().reduce((sum, item) => sum + item.total, 0);
     }
 
     function isQuoteSelection() {
@@ -92,7 +142,8 @@
       const cart = qs("[data-booking-cart]", form);
       if (!cart) return;
       const items = selectedServiceItems();
-      const showCart = items.length > 2;
+      syncPackageField(items);
+      const showCart = items.length > 0;
       cart.hidden = !showCart;
       if (!showCart) return;
 
@@ -101,15 +152,16 @@
       const cartItems = qs("[data-cart-items]", cart);
       const cartTotal = qs("[data-cart-total]", cart);
 
-      if (cartCount) cartCount.textContent = `${items.length} services`;
+      const count = selectedServiceCount(items);
+      if (cartCount) cartCount.textContent = `${count} ${count === 1 ? "service" : "services"}`;
       if (cartItems) {
         cartItems.replaceChildren();
         items.forEach((item) => {
           const row = document.createElement("div");
           const name = document.createElement("span");
           const amount = document.createElement("strong");
-          name.textContent = item.service.name;
-          amount.textContent = quote || item.price <= 0 ? "Quote" : money(item.price);
+          name.textContent = item.quantity > 1 ? `${item.service.name} x${item.quantity}` : item.service.name;
+          amount.textContent = quote || item.price <= 0 ? "Quote" : money(item.total);
           row.append(name, amount);
           cartItems.append(row);
         });
@@ -122,24 +174,32 @@
         const input = qs("[data-service-select]", card);
         const button = qs("[data-service-button]", card);
         const service = input ? servicesById.get(input.value) : null;
+        const qtyInput = qs("[data-service-quantity]", card);
+        const qtyControl = qs("[data-service-quantity-control]", card);
+        const qtyLabel = qs("[data-quantity-label]", card);
+        const increment = qs('[data-quantity-action="increment"]', card);
+        if (input && qtyInput && input.checked && clampServiceQuantity(qtyInput.value) < 1) {
+          qtyInput.value = "1";
+        }
+        const quantity = input ? serviceQuantity(input) : 0;
         const priceEl = qs(".service-price-row span", card);
         const price = servicePrice(service);
         const quote = selectedVehicleSize() === "commercial" || price <= 0;
         card.classList.toggle("is-selected", !!input?.checked);
         card.classList.toggle("is-quote", quote);
         if (priceEl) priceEl.textContent = quote ? "Quote required" : money(price);
+        if (qtyInput) qtyInput.value = String(quantity);
+        if (qtyControl) qtyControl.hidden = !input?.checked;
+        if (qtyLabel) qtyLabel.textContent = String(quantity);
+        if (increment) increment.disabled = quantity >= maxServiceQuantity;
         if (button) {
-          const isMain = service?.slug === "headlight-restoration";
           const checked = !!input?.checked;
-          button.disabled = isMain;
-          button.setAttribute("aria-disabled", String(isMain));
           const label = qs("span", button);
           if (label) {
-            if (isMain) {
-              input.checked = true;
-              label.textContent = "Main service selected";
+            if (checked) {
+              label.textContent = service?.slug === "headlight-restoration" ? "Remove main service" : "Remove";
             } else {
-              label.textContent = checked ? "Added" : (quote ? "Request quote" : "Add to booking");
+              label.textContent = quote ? "Request quote" : "Add to booking";
             }
           }
         }
@@ -220,8 +280,9 @@
     }
 
     function buildSummary() {
-      const pkg = selectedPackage();
       const items = selectedServiceItems();
+      syncPackageField(items);
+      const pkg = selectedPackage();
       const price = selectedServicesTotal();
       const quote = isQuoteSelection();
       const setSummary = (key, value) => {
@@ -238,19 +299,44 @@
       setSummary("name", fieldValue("name"));
       setSummary("price", !quote && price > 0 ? money(price) : "Quote");
       setSummary("total", !quote && price > 0 ? money(price) : "Quote on request");
-      const servicesSummary = qs("[data-summary-services]", wizard);
-      if (servicesSummary) {
+      qsa("[data-summary-services], [data-payment-services]", wizard).forEach((servicesSummary) => {
+        const interactive = servicesSummary.matches("[data-summary-services], [data-payment-services]");
         servicesSummary.replaceChildren();
+        servicesSummary.hidden = !items.length;
         items.forEach((item) => {
           const row = document.createElement("div");
           const name = document.createElement("span");
+          const actions = document.createElement("span");
           const amount = document.createElement("strong");
-          name.textContent = item.service.name;
-          amount.textContent = quote || item.price <= 0 ? "Quote" : money(item.price);
-          row.append(name, amount);
+          name.textContent = item.quantity > 1 ? `${item.service.name} x${item.quantity}` : item.service.name;
+          amount.textContent = quote || item.price <= 0 ? "Quote" : money(item.total);
+          actions.className = "summary-service-actions";
+          if (interactive) {
+            const controls = document.createElement("span");
+            const decrement = document.createElement("button");
+            const label = document.createElement("span");
+            const increment = document.createElement("button");
+            controls.className = "summary-quantity-control";
+            decrement.type = "button";
+            decrement.textContent = "-";
+            decrement.dataset.quantityAction = "decrement";
+            decrement.dataset.serviceId = item.service.id;
+            decrement.setAttribute("aria-label", `Decrease ${item.service.name}`);
+            label.textContent = String(item.quantity);
+            increment.type = "button";
+            increment.textContent = "+";
+            increment.dataset.quantityAction = "increment";
+            increment.dataset.serviceId = item.service.id;
+            increment.disabled = item.quantity >= maxServiceQuantity;
+            increment.setAttribute("aria-label", `Increase ${item.service.name}`);
+            controls.append(decrement, label, increment);
+            actions.append(controls);
+          }
+          actions.append(amount);
+          row.append(name, actions);
           servicesSummary.append(row);
         });
-      }
+      });
       return quote ? 0 : price;
     }
 
@@ -357,17 +443,31 @@
         const card = button.closest("[data-service-card]");
         const input = card && qs("[data-service-select]", card);
         if (!input) return;
-        const service = servicesById.get(input.value);
-        if (service?.slug === "headlight-restoration") {
-          input.checked = true;
-          refreshServiceCards();
-          buildSummary();
-          return;
-        }
-        input.checked = !input.checked;
+        setServiceQuantity(input, input.checked ? 0 : 1);
         refreshServiceCards();
         buildSummary();
       });
+    });
+
+    wizard.addEventListener("click", (event) => {
+      const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+      const button = target?.closest("[data-quantity-action]");
+      if (!button || !wizard.contains(button)) return;
+      const serviceId = button.dataset.serviceId
+        || button.closest("[data-service-card]")?.dataset.serviceId
+        || "";
+      const input = serviceId ? selectInputForService(serviceId) : null;
+      if (!input) return;
+      const current = serviceQuantity(input);
+      const next = button.dataset.quantityAction === "increment" ? current + 1 : current - 1;
+      setServiceQuantity(input, next);
+      refreshServiceCards();
+      const activePanel = qsa("[data-panel]", wizard).find((panel) => !panel.hidden);
+      if (Number(activePanel?.dataset.panel || 0) === 5) {
+        enterPaymentStep();
+      } else {
+        buildSummary();
+      }
     });
 
     ["vehicle_size", "number_of_headlights"].forEach((name) => {
@@ -436,6 +536,12 @@
       const fd = new FormData(form);
       const booking = {};
       fd.forEach((value, key) => {
+        const quantityMatch = key.match(/^service_quantities\[([^\]]+)\]$/);
+        if (quantityMatch) {
+          booking.service_quantities = booking.service_quantities || {};
+          booking.service_quantities[quantityMatch[1]] = value;
+          return;
+        }
         const cleanKey = key.endsWith("[]") ? key.slice(0, -2) : key;
         if (key.endsWith("[]")) {
           booking[cleanKey] = booking[cleanKey] || [];

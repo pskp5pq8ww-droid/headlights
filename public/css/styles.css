@@ -4986,6 +4986,56 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   width: 100%;
   margin-top: auto;
 }
+.service-quantity-control {
+  display: grid;
+  grid-template-columns: 38px minmax(34px, 1fr) 38px;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px;
+  border: 1px solid rgba(143, 163, 178, 0.2);
+  border-radius: var(--radius);
+  background: rgba(244, 252, 255, 0.68);
+}
+.service-card-main .service-quantity-control {
+  border-color: rgba(168, 243, 255, 0.2);
+  background: rgba(244, 252, 255, 0.08);
+}
+.service-quantity-control[hidden] {
+  display: none;
+}
+.service-quantity-control button,
+.summary-quantity-control button {
+  display: inline-grid;
+  place-items: center;
+  width: 100%;
+  min-width: 34px;
+  height: 32px;
+  border: 1px solid rgba(0, 217, 255, 0.34);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(0, 217, 255, 0.1);
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+.service-card-main .service-quantity-control button {
+  color: #fff;
+  background: rgba(0, 217, 255, 0.14);
+}
+.service-quantity-control button:disabled,
+.summary-quantity-control button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.service-quantity-control span,
+.summary-quantity-control > span {
+  min-width: 24px;
+  color: inherit;
+  font-weight: 900;
+  text-align: center;
+}
 .booking-services-block {
   display: grid;
   gap: 14px;
@@ -5141,6 +5191,27 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   gap: 16px;
   align-items: center;
 }
+.summary-services[hidden] {
+  display: none;
+}
+.summary-service-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.summary-quantity-control {
+  display: inline-grid;
+  grid-template-columns: 30px 24px 30px;
+  align-items: center;
+  gap: 4px;
+}
+.summary-quantity-control button {
+  min-width: 30px;
+  height: 30px;
+  padding: 0;
+  font-size: 16px;
+}
 .summary-services span,
 .summary-services strong,
 .summary-note { font-size: 12px; }
@@ -5174,6 +5245,10 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   .booking-page .summary-meta-row,
   .summary-services div {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .summary-service-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
   .booking-page .summary-location-icon {
     display: none;

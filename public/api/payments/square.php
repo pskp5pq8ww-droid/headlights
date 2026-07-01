@@ -72,7 +72,8 @@ if ($errors) {
 $selectedServices = build_selected_services_snapshot(
     $b['selected_services'] ?? $b['selectedServices'] ?? [],
     $vehicleSize,
-    $b['number_of_headlights'] ?? $b['numberOfHeadlights'] ?? '2'
+    $b['number_of_headlights'] ?? $b['numberOfHeadlights'] ?? '2',
+    $b['service_quantities'] ?? $b['serviceQuantities'] ?? []
 );
 $estimatedTotal = selected_services_total($selectedServices);
 $amountCents = (int)round($estimatedTotal * 100);

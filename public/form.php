@@ -63,7 +63,8 @@ try {
     $selectedServices = build_selected_services_snapshot(
         $_POST['selected_services'] ?? [],
         $vehicleSize,
-        $_POST['number_of_headlights'] ?? '2'
+        $_POST['number_of_headlights'] ?? '2',
+        $_POST['service_quantities'] ?? []
     );
     $estimatedTotal = selected_services_total($selectedServices);
     $booking = createBooking([

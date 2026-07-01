@@ -91,7 +91,13 @@ function render_service_cards(array $services, array $options = []): void {
               </details>
 <?php if ($selectable): ?>
               <input type="checkbox" name="selected_services[]" value="<?= service_h($service['id']) ?>" data-service-select hidden<?= $isMain ? ' checked' : '' ?> />
-              <button class="button <?= $quoteOnly ? 'button-secondary' : 'button-primary' ?> service-select-btn" type="button" data-service-button<?= $isMain ? ' disabled aria-disabled="true"' : '' ?>>
+              <input type="hidden" name="service_quantities[<?= service_h($service['id']) ?>]" value="<?= $isMain ? '1' : '0' ?>" min="0" max="<?= MAX_SERVICE_QUANTITY ?>" data-service-quantity />
+              <div class="service-quantity-control" data-service-quantity-control aria-label="Service quantity"<?= $isMain ? '' : ' hidden' ?>>
+                <button type="button" data-quantity-action="decrement" aria-label="Decrease <?= service_h($service['name']) ?>">-</button>
+                <span data-quantity-label><?= $isMain ? '1' : '0' ?></span>
+                <button type="button" data-quantity-action="increment" aria-label="Increase <?= service_h($service['name']) ?>">+</button>
+              </div>
+              <button class="button <?= $quoteOnly ? 'button-secondary' : 'button-primary' ?> service-select-btn" type="button" data-service-button>
                 <span><?= $isMain ? 'Main service selected' : ($quoteOnly ? 'Request quote' : 'Add to booking') ?></span>
               </button>
 <?php else: ?>
