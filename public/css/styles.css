@@ -5189,6 +5189,10 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
     display: grid;
     gap: 8px;
   }
+  .booking-page .form-panel[hidden],
+  .booking-page .checkout-panel[hidden] {
+    display: none !important;
+  }
   .booking-page .checkout-panel .panel-title {
     margin: 0;
   }
