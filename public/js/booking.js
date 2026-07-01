@@ -408,6 +408,13 @@
         useRequestFallback(squareUnavailableMessage());
         return;
       }
+      // Card already mounted: a quantity/remove change only needs the new total +
+      // pay label (updated above). Don't re-show "Loading…" or re-init Square —
+      // that flash is what made the checkout feel like it was bugging out.
+      if (squareReady) {
+        status.textContent = "";
+        return;
+      }
       status.textContent = "Loading secure payment…";
       squareReady = await window.SquarePayment.init();
       if (squareReady) {
@@ -490,6 +497,9 @@
       const input = qsa("[data-service-select]", form).find((item) => item.value === requestedService);
       if (input) {
         input.checked = true;
+        // If the requested add-on lives inside the collapsed extras panel, open it.
+        const menu = input.closest("details");
+        if (menu) menu.open = true;
       }
     }
     refreshServiceCards();

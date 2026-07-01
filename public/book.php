@@ -11,9 +11,12 @@ $body_class   = 'booking-page';
 include __DIR__ . '/includes/header.php';
 $services = read_services(true);
 $mainServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') === 'headlight-restoration'));
-$otherServices = array_values(array_filter($services, fn($service) => ($service['slug'] ?? '') !== 'headlight-restoration'));
-$bookingServices = array_merge($mainServices, $otherServices);
-if (!$bookingServices) $bookingServices = array_slice($services, 0, 1);
+$mainService = $mainServices[0] ?? ($services[0] ?? null);
+$extraServices = $mainService
+    ? array_values(array_filter($services, fn($service) => ($service['id'] ?? '') !== ($mainService['id'] ?? '')))
+    : array_values($services);
+// JS needs every rendered selectable service (main first, then the add-ons).
+$bookingServices = $mainService ? array_merge([$mainService], $extraServices) : $extraServices;
 ?>
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
         <div class="container booking-grid">
@@ -115,12 +118,23 @@ if (!$bookingServices) $bookingServices = array_slice($services, 0, 1);
                 </label>
                 <div class="booking-services-block">
                   <div class="booking-services-heading">
-                    <p class="eyebrow">Selected service</p>
-                    <p>Headlight restoration starts selected automatically. Add, remove or duplicate active services before payment.</p>
+                    <p class="eyebrow">Your service</p>
+                    <p>Headlight restoration is added automatically. Open “Add extra shine” only if you want optional add-ons.</p>
                   </div>
-                  <div class="booking-service-grid">
-<?php render_service_cards($bookingServices, ['selectable' => true, 'compact' => true]); ?>
+                  <div class="booking-primary-service">
+<?php if ($mainService) render_service_cards([$mainService], ['selectable' => true, 'compact' => true]); ?>
                   </div>
+<?php if ($extraServices): ?>
+                  <details class="booking-extras-menu" data-extras-menu>
+                    <summary>
+                      <span>Add extra shine</span>
+                      <small>Optional add-ons — tap to browse, then add the ones you want</small>
+                    </summary>
+                    <div class="booking-service-grid">
+<?php render_service_cards($extraServices, ['selectable' => true, 'compact' => true]); ?>
+                    </div>
+                  </details>
+<?php endif; ?>
                   <aside class="booking-cart" data-booking-cart hidden aria-live="polite">
                     <div class="booking-cart-head">
                       <span>Cart</span>

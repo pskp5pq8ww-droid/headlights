@@ -54,6 +54,33 @@ try {
             write_services($services);
             header('Location: /dashboard?notice=' . urlencode($action === 'create_service' ? 'Service created.' : 'Service updated.') . '#services');
             exit;
+        } elseif ($action === 'create_addon') {
+            // Simple add-on: name + one price. The same price is applied to every
+            // vehicle size so a flat item (e.g. a $1 add-on) never resolves to $0
+            // for medium/large vehicles, which would flip the cart into quote mode.
+            $services = read_services(false);
+            $price = round(max(0, (float)($_POST['price'] ?? 0)), 2);
+            $payload = service_payload_from_post([
+                'name' => $_POST['name'] ?? '',
+                'slug' => $_POST['slug'] ?? ($_POST['name'] ?? ''),
+                'category' => 'Add-on',
+                'shortDescription' => $_POST['shortDescription'] ?? '',
+                'longDescription' => $_POST['shortDescription'] ?? '',
+                'priceSmall' => $price,
+                'priceMedium' => $price,
+                'priceLarge' => $price,
+                'isAddOn' => '1',
+                'isActive' => '1',
+                'sortOrder' => 200,
+            ]);
+            $service = validate_service_payload($payload);
+            foreach ($services as $existing) {
+                if ($existing['slug'] === $service['slug']) throw new InvalidArgumentException('An add-on with that name already exists — choose a different name.');
+            }
+            $services[] = $service;
+            write_services($services);
+            header('Location: /dashboard?notice=' . urlencode('Add-on created.') . '#services');
+            exit;
         } elseif ($action === 'toggle_service' || $action === 'deactivate_service') {
             $services = read_services(false);
             $newState = $action === 'deactivate_service' ? false : !empty($_POST['isActive']);
@@ -675,8 +702,19 @@ function service_lines(array $items): string {
           <span><?= count($services) ?> stored</span>
         </div>
 
+        <details class="service-admin-create" open>
+          <summary>Quick add-on <small>(name + price)</small></summary>
+          <form method="post" class="service-admin-form addon-quick-form">
+            <input type="hidden" name="action" value="create_addon" />
+            <label>Add-on name<input name="name" placeholder="e.g. Rain repellent, $1 test add-on" required /></label>
+            <label>Price (AUD) <small>same for every vehicle size</small><input name="price" type="number" min="0" step="0.01" value="1" required /></label>
+            <label>Short description <small>(optional — one line customers see)</small><input name="shortDescription" placeholder="Optional short line" /></label>
+            <button class="auth-submit service-save-btn" type="submit">Create add-on</button>
+          </form>
+        </details>
+
         <details class="service-admin-create">
-          <summary>Create service</summary>
+          <summary>Create full service</summary>
           <form method="post" class="service-admin-form">
             <input type="hidden" name="action" value="create_service" />
             <label>Name<input name="name" required /></label>

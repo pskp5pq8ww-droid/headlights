@@ -5,7 +5,7 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '37';
+const ASSET_VER = '38';
 const DEFAULT_COUNTDOWN_TARGET = '2026-07-12T23:59:59+10:00';
 
 // ── Business info ────────────────────────────────────────────────────────────
