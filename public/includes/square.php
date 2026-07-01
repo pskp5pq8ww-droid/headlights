@@ -58,6 +58,18 @@ function square_setting(string $envName, string $fileKey, string $default = ''):
 }
 
 function square_environment(): string {
+    // Source of truth = the environment encoded in the APPLICATION ID. The Web
+    // Payments SDK validates the loaded square.js against the app id, so deriving
+    // the environment from the id makes the two impossible to desync — the exact
+    // cause of "application ID created in production however you are currently
+    // using sandbox". Sandbox ids look like sandbox-sq0idb-…, production sq0idp-…
+    // This wins over a stale SQUARE_ENVIRONMENT env var / config value.
+    $appId = strtolower(square_application_id());
+    if ($appId !== '') {
+        if (str_contains($appId, 'sq0idb') || str_starts_with($appId, 'sandbox-')) return 'sandbox';
+        if (str_starts_with($appId, 'sq0idp-')) return 'production';
+    }
+    // Fall back to the explicit SQUARE_ENVIRONMENT env var / _private/square.php.
     $environment = strtolower(square_setting('SQUARE_ENVIRONMENT', 'environment', 'sandbox'));
     if ($environment === 'prod' || $environment === 'live') return 'production';
     if ($environment === 'test') return 'sandbox';

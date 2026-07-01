@@ -68,6 +68,11 @@ SQUARE_CURRENCY=AUD
 
 The `SQUARE_ACCESS_TOKEN` is read **only** by the backend and never reaches the browser.
 
+The public Web Payments SDK URL is derived from the `SQUARE_APPLICATION_ID`
+prefix, so a production app id (`sq0idp-...`) always loads Square's production
+SDK and a sandbox app id (`sandbox-sq0idb-...`) always loads the sandbox SDK.
+This protects the booking form from a stale `SQUARE_ENVIRONMENT` value.
+
 ## E. Folders on Hostinger
 
 Storage base defaults to `<project>/Storagehighlights` (or `BOOKING_STORAGE_PATH`).
@@ -139,7 +144,8 @@ or `/_private/admin.php`) → `/dashboard`. Session-based, bcrypt, `noindex`.
 
 1. In `/_private/square.php` (or env): set `environment` → `production` and paste
    your **production** `application_id`, `access_token`, `location_id`.
-2. The API base URL and the Web Payments SDK URL switch automatically.
+2. The API base URL and the Web Payments SDK URL switch automatically from the
+   production `application_id` prefix.
 3. Re-test with a real card for a small amount, then refund it from the Square Dashboard.
 4. Ensure HTTPS is enforced (it is required by Square in production).
 ```

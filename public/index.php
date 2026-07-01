@@ -115,6 +115,33 @@ include __DIR__ . '/includes/header.php';
         </div>
       </section>
 
+      <section class="landing-section landing-product" id="our-product" aria-labelledby="product-title">
+        <div class="container">
+          <div class="landing-section-heading reveal">
+            <p class="eyebrow">Our Product</p>
+            <h2 id="product-title">The Polymer Behind The Shine</h2>
+            <p>Every restoration is finished with our professional Headlight Restoration Polymer Liquid — a clear, UV-stable coating made for polycarbonate lenses. It bonds to the freshly prepped surface, seals out oxidation and cures to a glass-clear finish that restores light output and helps keep your headlights clear for up to 12+ months. <span class="product-note">Results vary.</span></p>
+          </div>
+
+          <ul class="product-spec-row reveal" aria-label="Polymer highlights">
+            <li>Polycarbonate lens clarity</li>
+            <li>UV-protective finish</li>
+            <li>Up to 12+ months protection</li>
+          </ul>
+
+          <div class="product-video-frame reveal">
+            <iframe
+              src="https://player.vimeo.com/video/1206162717?background=1&amp;autoplay=1&amp;loop=1&amp;muted=1&amp;controls=0&amp;title=0&amp;byline=0&amp;portrait=0&amp;autopause=0&amp;dnt=1"
+              allow="autoplay; fullscreen; picture-in-picture"
+              referrerpolicy="strict-origin-when-cross-origin"
+              title="Shining Headlights restoration polymer product video"
+              tabindex="-1"
+              aria-hidden="true"
+              loading="lazy"></iframe>
+          </div>
+        </div>
+      </section>
+
       <section class="landing-section landing-before-after" id="before-after" aria-labelledby="before-after-title">
         <div class="container">
           <div class="landing-section-heading reveal">
