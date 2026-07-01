@@ -1928,6 +1928,12 @@ select[aria-invalid="true"] {
   animation: ctaPulse 2600ms ease-in-out infinite;
 }
 
+/* No infinite repaint loop during checkout — keeps the wizard calm and
+   leaves the main thread free while a customer is filling in the form. */
+#bookingWizard .button-primary {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -3863,9 +3869,8 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   padding: clamp(28px, 4vw, 48px);
   border: 1px solid rgba(229, 231, 235, 0.78);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.92);
+  background: #fff;
   box-shadow: 0 30px 90px rgba(15, 23, 42, 0.09), 0 2px 10px rgba(15, 23, 42, 0.04);
-  backdrop-filter: blur(16px);
 }
 
 .booking-page .form-steps {

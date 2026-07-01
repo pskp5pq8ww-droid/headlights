@@ -5,8 +5,10 @@
   const STAR_PATH = "M50 2 58.2 41.8 98 50 58.2 58.2 50 98 41.8 58.2 2 50 41.8 41.8 50 2Z";
   const SELECTORS = {
     cta: ".button-primary, .button-secondary, .mobile-sticky-cta, .promo-cta, .eofy-main-cta",
-    reveal:
-      ".offer-card, .promo-hero-card, .comparison-card, .booking-form, .final-panel, .final-band, .landing-feature-card, .landing-review-card, .premium-comparison, .final-eofy-panel"
+    // .promo-hero-card and .booking-form already carry the generic .reveal
+    // class, which site.js's own IntersectionObserver animates — listing them
+    // here too just double-animates them on every booking page load.
+    reveal: ".landing-feature-card, .landing-review-card, .premium-comparison, .final-eofy-panel"
   };
 
   const qs = (selector, parent = document) => parent.querySelector(selector);
@@ -204,6 +206,10 @@
     document.addEventListener("click", (event) => {
       const button = event.target.closest(".button-primary, .mobile-sticky-cta, .promo-cta");
       if (!button || button.disabled || button.type === "submit") return;
+      // Step-nav buttons switch panels inside the same page — the full-screen
+      // transition is for real navigation only, and firing it here is what
+      // made every booking step feel like it froze.
+      if (button.matches(".step-next-btn, .step-back-btn")) return;
       playStarTransition();
     });
   }
