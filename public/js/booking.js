@@ -340,7 +340,8 @@
         if (!panelIsValid(currentPanel)) return;
         status.textContent = "";
         goToStep(next);
-        if (next === 4) enterPaymentStep();
+        if (next === 4) buildSummary();
+        if (next === 5) enterPaymentStep();
       });
     });
 

@@ -31,14 +31,18 @@
   }
 
   countdowns.forEach((countdown) => {
-    const isDaily = countdown.dataset.mode === "daily-brisbane";
-    const target = isDaily ? null : new Date(countdown.dataset.target || "");
+    let isDaily = countdown.dataset.mode === "daily-brisbane";
+    let target = readTarget();
     const daysEl = countdown.querySelector("[data-days]");
     const hoursEl = countdown.querySelector("[data-hours]");
     const minutesEl = countdown.querySelector("[data-minutes]");
     const secondsEl = countdown.querySelector("[data-seconds]");
 
     if (!isDaily && Number.isNaN(target.getTime())) return;
+
+    function readTarget() {
+      return countdown.dataset.mode === "daily-brisbane" ? null : new Date(countdown.dataset.target || "");
+    }
 
     function tick() {
       const totalSeconds = isDaily
@@ -57,5 +61,17 @@
 
     tick();
     window.setInterval(tick, 1000);
+
+    const refresh = () => {
+      isDaily = countdown.dataset.mode === "daily-brisbane";
+      target = readTarget();
+      if (!isDaily && Number.isNaN(target.getTime())) return;
+      tick();
+    };
+    new MutationObserver(refresh).observe(countdown, {
+      attributes: true,
+      attributeFilter: ["data-target", "data-mode"]
+    });
+    document.addEventListener("countdown:refresh", refresh);
   });
 })();

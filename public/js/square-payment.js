@@ -1,4 +1,4 @@
-/* square-payment.js — Square Web Payments SDK wrapper (Production). */
+/* square-payment.js — Square Web Payments SDK wrapper. */
 (function () {
   const SquarePayment = {
     config: null,

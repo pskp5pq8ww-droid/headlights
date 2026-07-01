@@ -4,7 +4,7 @@
  *
  * Real payments are now processed by Square via:
  *   POST /api/payments/square   (see public/api/payments/square.php)
- * driven by the booking wizard step 4 on /book.
+ * driven by the booking wizard payment step on /book.
  *
  * This stub remains only so any old bookmark/link returns a clear message
  * instead of charging nothing. Safe to delete once no longer referenced.

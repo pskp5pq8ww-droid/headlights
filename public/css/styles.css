@@ -3645,7 +3645,7 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 .pay-ref{margin:6px 0 18px;font-size:13px;font-weight:700;color:var(--muted)}
 .pay-ref[hidden]{display:none}
 
-/* ── Square payment step (booking wizard step 4) ─────────────────────────── */
+/* ── Square payment step (booking wizard payment step) ───────────────────── */
 .pay-summary {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -4093,28 +4093,107 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
 
 .booking-page .pay-card-block {
   margin-top: 20px;
-  padding: 24px;
+  padding: 18px;
   border: 1px solid rgba(229, 231, 235, 0.82);
-  border-radius: 18px;
+  border-radius: 12px;
   background: #fff;
   box-shadow: 0 18px 42px rgba(15, 23, 42, 0.04);
 }
 
-.booking-page .square-card-label {
-  display: block;
-  margin: 0 0 10px;
-  color: #374151;
-  font-size: 13px;
+.booking-page .square-payment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.booking-page .square-brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+}
+
+.booking-page .square-logo-mark {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 8px;
+  background: #050505;
+}
+
+.booking-page .square-logo-mark::before {
+  content: "";
+  width: 25px;
+  height: 25px;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.booking-page .square-logo-mark span {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  background: #050505;
+}
+
+.booking-page .square-brand-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.booking-page .square-brand-copy strong {
+  color: #111827;
+  font-size: 24px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.booking-page .square-brand-copy small {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.booking-page .square-security-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 11px;
+  flex: none;
+  border: 1px solid rgba(22, 163, 74, 0.22);
+  border-radius: 999px;
+  color: #166534;
+  background: #f0fdf4;
+  font-size: 12px;
   font-weight: 750;
+}
+
+.booking-page .square-security-pill svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .booking-page .square-card-shell {
   position: relative;
-  min-height: 98px;
-  padding: 12px 14px;
+  min-height: 116px;
+  padding: 14px;
   border: 1px solid var(--checkout-line);
-  border-radius: 12px;
-  background: #fff;
+  border-radius: 10px;
+  background: #fbfdff;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
@@ -4124,33 +4203,68 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1), 0 10px 24px rgba(15, 23, 42, 0.05);
 }
 
+.booking-page .square-card-shell-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.booking-page .square-card-label {
+  display: block;
+  margin: 0;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.booking-page .square-card-shell-top > span:not(.square-card-label) {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 650;
+  text-align: right;
+}
+
 .booking-page .square-card-field {
   min-height: 72px;
   margin: 0;
   padding: 0;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
-.booking-page .pay-secure-note {
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 18px;
-  color: #6b7280;
-  font-size: 13px;
-  line-height: 1.55;
+.booking-page .square-trust-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.booking-page .pay-secure-note svg {
-  width: 17px;
-  height: 17px;
-  margin-top: 2px;
+.booking-page .square-trust-row span {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 7px;
+  padding: 9px 10px;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  color: #4b5563;
+  background: #f8fafc;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.booking-page .square-trust-row svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
   color: #111827;
   fill: none;
   stroke: currentColor;
-}
-
-.booking-page .pay-secure-note strong {
-  color: #374151;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* Payment method picker: card vs cash on service */
@@ -5112,22 +5226,68 @@ body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rota
   }
   .booking-page .pay-card-block {
     margin-top: 0;
+    padding: 12px;
     box-shadow: none;
   }
-  .booking-page .square-card-label {
-    margin-bottom: 5px;
-    font-size: 12px;
+  .booking-page .square-payment-header {
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .booking-page .square-logo-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+  }
+  .booking-page .square-logo-mark::before {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+  }
+  .booking-page .square-logo-mark span {
+    width: 9px;
+    height: 9px;
+  }
+  .booking-page .square-brand {
+    gap: 9px;
+  }
+  .booking-page .square-brand-copy strong {
+    font-size: 20px;
+  }
+  .booking-page .square-brand-copy small {
+    font-size: 11px;
+  }
+  .booking-page .square-security-pill {
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
   }
   .booking-page .square-card-shell {
-    min-height: 74px;
-    padding: 8px 10px;
+    min-height: 86px;
+    padding: 10px;
     border-radius: 9px;
   }
-  .booking-page .square-card-field {
-    min-height: 58px;
+  .booking-page .square-card-shell-top {
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 7px;
   }
-  .booking-page .pay-secure-note {
-    margin-top: 7px;
+  .booking-page .square-card-label,
+  .booking-page .square-card-shell-top > span:not(.square-card-label) {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+  .booking-page .square-card-field {
+    min-height: 62px;
+  }
+  .booking-page .square-trust-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .booking-page .square-trust-row span {
+    min-height: 32px;
+    padding: 7px 8px;
     font-size: 11px;
     line-height: 1.35;
   }

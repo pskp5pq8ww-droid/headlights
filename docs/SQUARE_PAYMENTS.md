@@ -8,7 +8,7 @@ This project is a **PHP site on Hostinger** (Apache + clean URLs). Payments use 
 
 ## A. Summary of changes
 
-- Added a 4th step (**Review & Pay**) to the booking wizard on `/book`.
+- Added a dedicated **Review** step followed by a **Payment** step to the booking wizard on `/book`.
 - Card is collected with Square Web Payments SDK; the browser only ever sends a
   one-time `sourceId` token + booking data to the backend.
 - New backend endpoint charges the card with Square and **only saves the booking
@@ -26,10 +26,10 @@ This project is a **PHP site on Hostinger** (Apache + clean URLs). Payments use 
 
 - `public/includes/bookings.php` — payment fields, `normalize_payment_status()`,
   `booking_amount_cents()`, `updateBookingPayment()`, paid revenue in stats, shared `send_booking_email()`.
-- `public/includes/config.php` — `ASSET_VER` bumped to 16.
+- `public/includes/config.php` — asset version and shared campaign countdown target.
 - `public/includes/footer.php` — loads `square-payment.js` on booking pages.
 - `public/form.php` — removed duplicate `send_booking_email()` (now shared).
-- `public/book.php` — step 4 UI + pricing/config passed to JS.
+- `public/book.php` — review/payment UI + pricing/config passed to JS.
 - `public/js/booking.js` — payment step, summary, Square submit + fallback.
 - `public/thank-you.php` — payment-aware success screen.
 - `public/dashboard.php` — payment stats, badges, payment detail card.

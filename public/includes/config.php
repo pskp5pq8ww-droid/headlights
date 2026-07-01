@@ -5,7 +5,8 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '34';
+const ASSET_VER = '35';
+const DEFAULT_COUNTDOWN_TARGET = '2026-07-12T23:59:59+10:00';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [
@@ -19,7 +20,7 @@ $SITE = [
 ];
 
 // ── EOFY offer ───────────────────────────────────────────────────────────────
-// Countdown target — End of Financial Year (30 June), Brisbane time (UTC+10, no DST).
+// Countdown target — centralized campaign end time, Brisbane time (UTC+10, no DST).
 $EOFY = [
     'badge'    => 'EOFY · Limited Time Only',
     'title'    => 'EOFY Mobile Headlight Restoration Sale',
@@ -29,7 +30,7 @@ $EOFY = [
     'was'      => 220,
     'save'     => 121,
     'note'     => 'EOFY launch price. Limited time only.',
-    'target'   => '2026-06-30T23:59:59+10:00',
+    'target'   => DEFAULT_COUNTDOWN_TARGET,
 ];
 
 $SITE_SETTINGS = site_settings_read();
@@ -164,7 +165,7 @@ function site_settings_path(): string {
 
 function site_settings_defaults(): array {
     return [
-        'countdownTarget' => '2026-06-30T23:59:59+10:00',
+        'countdownTarget' => DEFAULT_COUNTDOWN_TARGET,
         'updatedAt' => '',
     ];
 }
@@ -193,13 +194,28 @@ function site_settings_normalize_target(string $value): string {
     }
 }
 
+function site_settings_effective_countdown_target(string $value): string {
+    $target = site_settings_normalize_target($value);
+    if ($target === '') return DEFAULT_COUNTDOWN_TARGET;
+    try {
+        $tz = new DateTimeZone('Australia/Brisbane');
+        $targetDate = new DateTimeImmutable($target);
+        $defaultDate = new DateTimeImmutable(DEFAULT_COUNTDOWN_TARGET, $tz);
+        $now = new DateTimeImmutable('now', $tz);
+        if ($targetDate <= $now && $defaultDate > $now) return DEFAULT_COUNTDOWN_TARGET;
+    } catch (Throwable) {
+        return DEFAULT_COUNTDOWN_TARGET;
+    }
+    return $target;
+}
+
 function site_settings_read(): array {
     $defaults = site_settings_defaults();
     $path = site_settings_path();
     if (!is_file($path)) return $defaults;
     $data = json_decode((string)@file_get_contents($path), true);
     if (!is_array($data)) return $defaults;
-    $target = site_settings_normalize_target((string)($data['countdownTarget'] ?? ''));
+    $target = site_settings_effective_countdown_target((string)($data['countdownTarget'] ?? ''));
     return [
         'countdownTarget' => $target !== '' ? $target : $defaults['countdownTarget'],
         'updatedAt' => trim((string)($data['updatedAt'] ?? '')),

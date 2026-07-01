@@ -44,7 +44,9 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
               <span class="step-line" aria-hidden="true"></span>
               <div class="form-step" data-step-indicator="3"><span class="step-num">3</span><span class="step-label">Details</span></div>
               <span class="step-line" aria-hidden="true"></span>
-              <div class="form-step" data-step-indicator="4"><span class="step-num">4</span><span class="step-label">Payment</span></div>
+              <div class="form-step" data-step-indicator="4"><span class="step-num">4</span><span class="step-label">Review</span></div>
+              <span class="step-line" aria-hidden="true"></span>
+              <div class="form-step" data-step-indicator="5"><span class="step-num">5</span><span class="step-label">Payment</span></div>
             </div>
 
             <form id="bookingForm" action="/form" method="post" enctype="multipart/form-data" novalidate>
@@ -179,7 +181,7 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg><span>Back</span>
                   </button>
                   <button class="button button-primary step-next-btn" type="button" data-next="4">
-                    <span>Review &amp; pay</span>
+                    <span>Review booking</span>
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
                   </button>
                 </div>
@@ -187,6 +189,7 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
 
               <div class="form-panel checkout-panel" data-panel="4" hidden>
                 <h3 class="panel-title">Review &amp; confirm</h3>
+                <p class="panel-hint">Check the booking details before choosing payment. You can edit any section before confirming.</p>
                 <div class="pay-summary" id="paySummary" aria-live="polite">
                   <div class="summary-topline">
                     <div>
@@ -234,6 +237,28 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
                   <p class="summary-note">Final price may change after inspection if vehicle condition is excessive.</p>
                 </div>
 
+                <label class="terms-consent" for="termsAccepted">
+                  <input id="termsAccepted" name="terms_accepted" type="checkbox" value="1" required />
+                  <span>I have read and accept the <a href="/terms" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</span>
+                </label>
+                <input type="hidden" name="terms_version" value="2026-06-27-eofy" />
+
+                <div class="step-nav">
+                  <button class="button button-secondary step-back-btn" type="button" data-prev="3">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg><span>Back</span>
+                  </button>
+                  <button class="button button-primary step-next-btn" type="button" data-next="5">
+                    <span>Continue to payment</span>
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+                  </button>
+                </div>
+                <p class="terms-short">T&amp;Cs apply. $99 EOFY offer applies to standard front headlight restoration within selected Brisbane service areas. Results vary depending on lens condition. Service does not repair internal moisture, cracks, broken seals, electrical faults, bulbs, or internal damage. Customer must provide a safe, legal, and accessible workspace. Children, pets, and customers must remain clear of the work area during service. Mobile service included in selected suburbs only.</p>
+              </div>
+
+              <div class="form-panel checkout-panel payment-panel" data-panel="5" hidden>
+                <h3 class="panel-title">Payment</h3>
+                <p class="panel-hint">Choose how you want to pay for the booking.</p>
+
                 <div class="pay-method" id="payMethod" role="radiogroup" aria-label="How would you like to pay?">
                   <label class="pay-method-option">
                     <input type="radio" name="payment_method" value="card" checked data-pay-method />
@@ -265,15 +290,32 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
                   <p class="panel-hint">No payment needed now. You'll pay <strong data-cash-amount>—</strong> in cash to our technician at the time of service. We'll contact you to confirm your booking.</p>
                 </div>
 
-                <div class="pay-card-block" id="payCardBlock">
-                  <label class="square-card-label" for="squareCard">Card details</label>
+                <div class="pay-card-block" id="payCardBlock" aria-label="Secure card payment by Square">
+                  <div class="square-payment-header">
+                    <div class="square-brand" aria-label="Square">
+                      <span class="square-logo-mark" aria-hidden="true"><span></span></span>
+                      <span class="square-brand-copy">
+                        <strong>Square</strong>
+                        <small>Secure card payment</small>
+                      </span>
+                    </div>
+                    <span class="square-security-pill">
+                      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M6 11h12v10H6z"/></svg>
+                      Encrypted
+                    </span>
+                  </div>
                   <div class="square-card-shell">
+                    <div class="square-card-shell-top">
+                      <span class="square-card-label">Card details</span>
+                      <span>Processed securely by Square</span>
+                    </div>
                     <div id="squareCard" class="square-card-field"></div>
                   </div>
-                  <p class="pay-secure-note">
-                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M6 11h12v10H6z"/></svg>
-                    <span><strong>Secure payment.</strong> Your card details are encrypted and processed securely by Square. We never store your card information.</span>
-                  </p>
+                  <div class="square-trust-row" aria-label="Payment security details">
+                    <span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Encrypted payment</span>
+                    <span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>No card details stored</span>
+                    <span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M6 11h12v10H6z"/></svg>Powered by Square</span>
+                  </div>
                 </div>
 
                 <div class="pay-quote-block" id="payQuoteBlock" hidden>
@@ -285,14 +327,8 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
                   <strong data-summary="total">—</strong>
                 </div>
 
-                <label class="terms-consent" for="termsAccepted">
-                  <input id="termsAccepted" name="terms_accepted" type="checkbox" value="1" required />
-                  <span>I have read and accept the <a href="/terms" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</span>
-                </label>
-                <input type="hidden" name="terms_version" value="2026-06-27-eofy" />
-
                 <div class="step-nav">
-                  <button class="button button-secondary step-back-btn" type="button" data-prev="3">
+                  <button class="button button-secondary step-back-btn" type="button" data-prev="4">
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6" /></svg><span>Back</span>
                   </button>
                   <button class="button button-primary form-submit" id="payButton" type="submit">
@@ -300,7 +336,6 @@ $bookingServices = $mainServices ?: array_slice($services, 0, 1);
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M6 11h12v10H6z"/></svg>
                   </button>
                 </div>
-                <p class="terms-short">T&amp;Cs apply. $99 EOFY offer applies to standard front headlight restoration within selected Brisbane service areas. Results vary depending on lens condition. Service does not repair internal moisture, cracks, broken seals, electrical faults, bulbs, or internal damage. Customer must provide a safe, legal, and accessible workspace. Children, pets, and customers must remain clear of the work area during service. Mobile service included in selected suburbs only.</p>
               </div>
               <p class="form-status" role="status" aria-live="polite" data-form-status></p>
             </form>

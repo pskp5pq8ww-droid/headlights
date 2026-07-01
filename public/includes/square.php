@@ -14,9 +14,9 @@ declare(strict_types=1);
  * The SQUARE_ACCESS_TOKEN is ONLY ever used here in the backend. The browser
  * only ever receives square_public_config() (application id + location id).
  *
- * This deployment is production-only: charges go to connect.squareup.com and
- * the browser loads https://web.squarecdn.com/v1/square.js. Live credentials
- * are required on the server.
+ * The Square environment must match the credentials:
+ *   sandbox    -> connect.squareupsandbox.com + sandbox Web Payments SDK
+ *   production -> connect.squareup.com + production Web Payments SDK
  */
 
 require_once __DIR__ . '/bookings.php';
@@ -58,7 +58,10 @@ function square_setting(string $envName, string $fileKey, string $default = ''):
 }
 
 function square_environment(): string {
-    return 'production';
+    $environment = strtolower(square_setting('SQUARE_ENVIRONMENT', 'environment', 'sandbox'));
+    if ($environment === 'prod' || $environment === 'live') return 'production';
+    if ($environment === 'test') return 'sandbox';
+    return in_array($environment, ['sandbox', 'production'], true) ? $environment : 'sandbox';
 }
 
 function square_application_id(): string { return square_setting('SQUARE_APPLICATION_ID', 'application_id'); }
@@ -71,12 +74,16 @@ function square_location_id(): string {
 function square_currency(): string       { return strtoupper(square_setting('SQUARE_CURRENCY', 'currency', 'AUD')); }
 
 function square_api_base(): string {
-    return 'https://connect.squareup.com';
+    return square_environment() === 'sandbox'
+        ? 'https://connect.squareupsandbox.com'
+        : 'https://connect.squareup.com';
 }
 
 /** URL of the Web Payments SDK that matches the current environment. */
 function square_web_sdk_url(): string {
-    return 'https://web.squarecdn.com/v1/square.js';
+    return square_environment() === 'sandbox'
+        ? 'https://sandbox.web.squarecdn.com/v1/square.js'
+        : 'https://web.squarecdn.com/v1/square.js';
 }
 
 function square_is_configured(): bool {
