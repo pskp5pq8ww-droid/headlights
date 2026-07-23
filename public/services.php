@@ -20,7 +20,7 @@ $services = read_services(true);
           <p class="eyebrow">Services</p>
           <h1 class="reveal">Mobile headlight restoration</h1>
           <p class="hero-lede reveal">Restore, don't replace. We bring your headlights back to life at your location — for clarity, shine and safer night driving.</p>
-          <div class="hero-actions reveal center"><a class="button button-primary" href="/book"><span>Claim EOFY Offer</span></a></div>
+          <div class="hero-actions reveal center"><a class="button button-primary" href="/book"><span>Claim Special Offer</span></a></div>
         </div>
       </section>
 

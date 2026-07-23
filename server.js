@@ -23,6 +23,11 @@ http
   .createServer((req, res) => {
     let urlPath = decodeURIComponent(req.url.split("?")[0]);
     if (urlPath === "/") urlPath = "/index.php";
+    if (/^\/[eE][oO][fF][yY]-offer\/?$/.test(urlPath)) {
+      res.writeHead(301, { Location: "/special-offer" });
+      res.end();
+      return;
+    }
 
     let filePath = path.join(ROOT, urlPath);
     if (!filePath.startsWith(ROOT)) {

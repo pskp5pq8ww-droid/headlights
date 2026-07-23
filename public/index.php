@@ -1,13 +1,13 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
 $current      = 'home';
-$page_title   = '$99 EOFY Headlight Restoration | ' . $SITE['name'];
-$page_desc    = 'EOFY Sale: mobile headlight restoration for $99, was $220. Limited time offer with countdown. Brisbane mobile service.';
+$page_title   = '$99 Limited-Time Headlight Restoration | ' . $SITE['name'];
+$page_desc    = 'Special limited-time offer: mobile headlight restoration for $99, was $220. Brisbane mobile service with countdown.';
 $page_scripts = ['countdown'];
 $body_class   = 'landing-home';
 include __DIR__ . '/includes/header.php';
 ?>
-      <section class="eofy-landing-hero" id="home" aria-labelledby="hero-title">
+      <section class="offer-landing-hero" id="home" aria-labelledby="hero-title">
         <div class="hero-video-bg" aria-hidden="true">
           <video class="hero-video" autoplay muted loop playsinline preload="auto" disablepictureinpicture>
             <source src="<?= asset('assets/video/headlights-hero-loop.mp4') ?>" type="video/mp4" />
@@ -32,15 +32,15 @@ include __DIR__ . '/includes/header.php';
         <div class="hero-video-overlay" aria-hidden="true"></div>
         <div class="hero-ambient" aria-hidden="true"></div>
 
-        <div class="container eofy-landing-inner">
-          <div class="eofy-hero-copy">
-            <span class="sale-pill reveal">EOFY Sale</span>
-            <h1 id="hero-title" class="reveal">$<?= $EOFY['now'] ?> Headlight<br />Restoration</h1>
-            <p class="hero-direct reveal">Save $<?= $EOFY['save'] ?> <span>Offer Ends Soon</span></p>
+        <div class="container offer-landing-inner">
+          <div class="offer-hero-copy">
+            <span class="sale-pill reveal">Special Offer</span>
+            <h1 id="hero-title" class="reveal">$<?= $OFFER['now'] ?> Headlight<br />Restoration</h1>
+            <p class="hero-direct reveal">Save $<?= $OFFER['save'] ?> <span>Offer Ends Soon</span></p>
 
-            <div class="eofy-countdown-card reveal" aria-label="EOFY offer countdown">
+            <div class="offer-countdown-card reveal" aria-label="Special offer countdown">
               <p>Offer ends in</p>
-              <div class="countdown landing-countdown" data-countdown data-target="<?= htmlspecialchars($EOFY['target']) ?>">
+              <div class="countdown landing-countdown" data-countdown data-target="<?= htmlspecialchars($OFFER['target']) ?>">
                 <span><strong data-days>00</strong><small>Days</small></span>
                 <span><strong data-hours>00</strong><small>Hours</small></span>
                 <span><strong data-minutes>00</strong><small>Minutes</small></span>
@@ -48,14 +48,14 @@ include __DIR__ . '/includes/header.php';
               </div>
             </div>
 
-            <div class="eofy-price reveal">
-              <span class="was-price">$<?= $EOFY['was'] ?></span>
-              <strong>$<?= $EOFY['now'] ?></strong>
-              <span class="save-pill">Save $<?= $EOFY['save'] ?></span>
+            <div class="offer-price reveal">
+              <span class="was-price">$<?= $OFFER['was'] ?></span>
+              <strong>$<?= $OFFER['now'] ?></strong>
+              <span class="save-pill">Save $<?= $OFFER['save'] ?></span>
             </div>
 
-            <a class="button button-primary eofy-main-cta reveal" href="/book">
-              <span>Claim EOFY Offer</span>
+            <a class="button button-primary offer-main-cta reveal" href="/book">
+              <span>Claim Special Offer</span>
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
             </a>
           </div>
@@ -185,12 +185,12 @@ include __DIR__ . '/includes/header.php';
       </section>
 
       <section class="landing-final-cta" aria-labelledby="final-title">
-        <div class="container final-eofy-panel reveal">
+        <div class="container final-offer-panel reveal">
           <p class="eyebrow">Limited time</p>
           <h2 id="final-title">Still Driving With Cloudy Headlights?</h2>
-          <p>Restore Them Today For Just $<?= $EOFY['now'] ?></p>
-          <a class="button button-primary eofy-main-cta" href="/book">
-            <span>Claim EOFY Offer</span>
+          <p>Restore Them Today For Just $<?= $OFFER['now'] ?></p>
+          <a class="button button-primary offer-main-cta" href="/book">
+            <span>Claim Special Offer</span>
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
           </a>
         </div>

@@ -810,7 +810,7 @@ function service_lines(array $items): string {
           <div class="config-card-copy">
             <p class="config-eyebrow">Countdown</p>
             <h3>Offer end time</h3>
-            <p>Controls the countdown shown on the home page, booking page and EOFY offer page.</p>
+            <p>Controls the countdown shown on the home page, booking page and special offer page.</p>
             <p class="config-current">Current: <strong><?= h($countdownSettings['display']) ?></strong></p>
           </div>
           <form method="post" class="config-form">
@@ -890,7 +890,7 @@ function service_lines(array $items): string {
               <label>Preferred date<input type="date" name="preferredDate" value="<?= h($b['preferredDate']) ?>" /></label>
               <label>Preferred time<input name="preferredTimeWindow" value="<?= h($b['preferredTimeWindow']) ?>" /></label>
               <p>Service selected: <?= h($b['packageSelected']) ?></p>
-              <p>Promo selected: <?= str_contains($b['packageSelected'], 'EOFY') ? 'EOFY Sale' : 'None' ?></p>
+              <p>Promo selected: <?= str_contains($b['packageSelected'], 'Special') ? 'Special Offer' : 'None' ?></p>
               <p>Price: <?= $price > 0 ? h(admin_money((float)$price)) : 'Quote' ?></p>
 <?php if (!empty($b['selectedServices']) && is_array($b['selectedServices'])): ?>
               <ul class="metric-list booking-service-snapshot">

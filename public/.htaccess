@@ -12,6 +12,7 @@ Options -Indexes
   RewriteRule ^admin-login/?$ admin.php [L,QSA]
   RewriteRule ^admin/dashboard/?$ dashboard.php [L,QSA]
   RewriteRule ^public/dashboard\.php$ dashboard.php [L,QSA]
+  RewriteRule ^[eE][oO][fF][yY]-offer/?$ /special-offer [L,R=301]
 
   # /index or /index.php → /
   RewriteRule ^index(\.php)?$ / [L,R=301]

@@ -5,8 +5,8 @@
  */
 
 // Cache-busting version for CSS/JS. Bump when you change assets.
-const ASSET_VER = '39';
-const DEFAULT_COUNTDOWN_TARGET = '2026-07-12T23:59:59+10:00';
+const ASSET_VER = '40';
+const DEFAULT_COUNTDOWN_TARGET = '2026-08-31T23:59:59+10:00';
 
 // ── Business info ────────────────────────────────────────────────────────────
 $SITE = [
@@ -19,23 +19,23 @@ $SITE = [
     'canonical'    => 'https://shiningaus.com',
 ];
 
-// ── EOFY offer ───────────────────────────────────────────────────────────────
+// ── Special limited-time offer ───────────────────────────────────────────────
 // Countdown target — centralized campaign end time, Brisbane time (UTC+10, no DST).
-$EOFY = [
-    'badge'    => 'EOFY · Limited Time Only',
-    'title'    => 'EOFY Mobile Headlight Restoration Sale',
+$OFFER = [
+    'badge'    => 'Special Offer · Limited Time Only',
+    'title'    => 'Special Limited-Time Headlight Restoration Offer',
     'sub'      => 'We come to you anywhere in Brisbane.',
     'support'  => 'Crystal-clear headlights. Safer driving. Better looks. Professional restoration at your home, workplace or driveway.',
     'now'      => 99,
     'was'      => 220,
     'save'     => 121,
-    'note'     => 'EOFY launch price. Limited time only.',
+    'note'     => 'Special limited-time price. Availability is limited.',
     'target'   => DEFAULT_COUNTDOWN_TARGET,
 ];
 
 $SITE_SETTINGS = site_settings_read();
 if (!empty($SITE_SETTINGS['countdownTarget'])) {
-    $EOFY['target'] = $SITE_SETTINGS['countdownTarget'];
+    $OFFER['target'] = $SITE_SETTINGS['countdownTarget'];
 }
 
 // ── Packages ─────────────────────────────────────────────────────────────────
@@ -139,7 +139,7 @@ $FAQS = [
 // ── Navigation ───────────────────────────────────────────────────────────────
 $NAV = [
     'home'         => ['/',             'Home'],
-    'eofy'         => ['/eofy-offer',   'EOFY Offer'],
+    'offer'        => ['/special-offer', 'Special Offer'],
     'services'     => ['/services',     'Services'],
     'before-after' => ['/before-after', 'Before &amp; After'],
     'pricing'      => ['/pricing',      'Pricing'],

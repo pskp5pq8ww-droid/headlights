@@ -29,7 +29,7 @@ function default_services(): array {
             'priceSmall' => 99, 'priceMedium' => 129, 'priceLarge' => 159, 'priceSingle' => 90, 'priceExtraPair' => 99,
             'estimatedTime' => '45-90 minutes', 'isAddOn' => false, 'isFeatured' => true, 'isActive' => true, 'sortOrder' => 10,
             'imageKey' => 'headlights', 'icon' => 'sparkles',
-            'termsNote' => 'EOFY Promo — $99 for two front headlights on small cars. Outside surface only. Does not repair internal condensation, cracked lenses, broken seals, electrical faults or internal headlight damage.',
+            'termsNote' => 'Special Offer — $99 for two front headlights on small cars. Outside surface only. Does not repair internal condensation, cracked lenses, broken seals, electrical faults or internal headlight damage.',
         ],
         ['slug' => 'quick-exterior-wash', 'name' => 'Quick Exterior Wash', 'category' => 'Add-on', 'shortDescription' => 'A quick exterior refresh after the headlights are restored.', 'longDescription' => 'A quick exterior refresh to make the vehicle look cleaner after the headlights are restored.', 'inclusions' => ['Exterior hand wash', 'Wheel face clean', 'Tyre shine', 'Exterior glass clean', 'Door jamb wipe', 'Quick spray protection'], 'exclusions' => [], 'priceSmall' => 119, 'priceMedium' => 149, 'priceLarge' => 179, 'priceSingle' => 0, 'priceExtraPair' => 0, 'estimatedTime' => '45-75 minutes', 'isAddOn' => true, 'isFeatured' => false, 'isActive' => true, 'sortOrder' => 20, 'imageKey' => 'wash', 'icon' => 'droplets', 'termsNote' => 'Final price depends on vehicle condition and access.'],
         ['slug' => 'interior-refresh-detail', 'name' => 'Interior Refresh Detail', 'category' => 'Detailing', 'shortDescription' => 'Make the inside feel clean again without a full deep detail.', 'longDescription' => 'For customers who want the inside to feel clean again without doing a full deep detail.', 'inclusions' => ['Vacuum seats, carpets and boot', 'Dashboard and console wipe-down', 'Cup holders and door trims cleaned', 'Interior glass clean', 'Mats cleaned', 'Light deodorising'], 'exclusions' => [], 'priceSmall' => 169, 'priceMedium' => 199, 'priceLarge' => 249, 'priceSingle' => 0, 'priceExtraPair' => 0, 'estimatedTime' => '1.5-2.5 hours', 'isAddOn' => true, 'isFeatured' => false, 'isActive' => true, 'sortOrder' => 30, 'imageKey' => 'interior', 'icon' => 'seat', 'termsNote' => 'Heavy staining, pet hair, sand or odours may require extra work.'],
@@ -77,6 +77,14 @@ function normalize_service(array $service): array {
         fn($item) => clean_text($item, 220),
         is_array($value) ? $value : preg_split('/\r\n|\r|\n/', (string)$value)
     ), fn($item) => $item !== ''));
+    $termsNote = clean_text($service['termsNote'] ?? '', 800);
+    $legacyCampaign = 'EO' . 'FY';
+    $termsNote = str_ireplace(
+        [$legacyCampaign . ' Promo', $legacyCampaign . ' promotional', $legacyCampaign . ' offer', $legacyCampaign],
+        ['Special Offer', 'special promotional', 'special offer', 'special offer'],
+        $termsNote
+    );
+
     return [
         'id' => $id,
         'slug' => normalize_slug(clean_text($service['slug'] ?? '', 120), $name),
@@ -98,7 +106,7 @@ function normalize_service(array $service): array {
         'sortOrder' => (int)($service['sortOrder'] ?? 100),
         'imageKey' => clean_text($service['imageKey'] ?? '', 80),
         'icon' => clean_text($service['icon'] ?? '', 80),
-        'termsNote' => clean_text($service['termsNote'] ?? '', 800),
+        'termsNote' => $termsNote,
         'createdAt' => clean_text($service['createdAt'] ?? $now, 80),
         'updatedAt' => clean_text($service['updatedAt'] ?? $now, 80),
     ];

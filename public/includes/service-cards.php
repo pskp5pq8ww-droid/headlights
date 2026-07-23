@@ -53,7 +53,7 @@ function render_service_cards(array $services, array $options = []): void {
                 </div>
               </div>
 <?php if ($isMain): ?>
-              <p class="eofy-service-promo">EOFY Promo — $<?= number_format((float)$service['priceSmall'], 0) ?> for two front headlights on small cars</p>
+              <p class="offer-service-promo">Special Offer — $<?= number_format((float)$service['priceSmall'], 0) ?> for two front headlights on small cars</p>
 <?php endif; ?>
               <p class="service-copy"><?= service_h($service['shortDescription'] ?: $service['longDescription']) ?></p>
               <div class="service-price-row">

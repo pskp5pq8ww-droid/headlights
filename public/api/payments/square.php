@@ -145,7 +145,7 @@ try {
         'pricingNote'          => 'Final price may change after inspection if vehicle condition is excessive.',
         'source'              => 'square_' . square_environment(),
         'termsAccepted'        => $termsAccepted,
-        'termsVersion'         => $b['terms_version'] ?? $b['termsVersion'] ?? '2026-06-27-eofy',
+        'termsVersion'         => $b['terms_version'] ?? $b['termsVersion'] ?? '2026-07-23-special-offer',
     ]);
 
     $booking = updateBookingPayment($booking['id'], [

@@ -9,9 +9,9 @@ window.siteConfig = {
     facebook: "#"
   },
   promotionalOffer: {
-    title: "Today's Mobile Booking Offer",
-    text: "Book today and get our launch mobile headlight restoration offer from $99.",
-    resetNote: "Daily launch offer resets every 24 hours. Availability depends on location and schedule.",
+    title: "Special Limited-Time Offer",
+    text: "Book now and get mobile headlight restoration from $99 for a limited time.",
+    resetNote: "Availability depends on location and schedule.",
     timezone: "Australia/Brisbane"
   },
   packages: [

@@ -1,12 +1,12 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
-$current      = 'eofy';
-$page_title   = 'EOFY Offer | ' . $SITE['name'];
-$page_desc    = 'Full details on our EOFY mobile headlight restoration sale — from $99, was $220. Limited time only.';
+$current      = 'offer';
+$page_title   = 'Special Offer | ' . $SITE['name'];
+$page_desc    = 'Full details on our special limited-time mobile headlight restoration offer — from $99, was $220.';
 $page_scripts = ['countdown'];
 include __DIR__ . '/includes/header.php';
 ?>
-      <section class="section section-dark page-hero" aria-labelledby="eofy-title">
+      <section class="section section-dark page-hero" aria-labelledby="offer-title">
         <div class="hero-bg" aria-hidden="true"></div>
         <div class="container narrow center">
           <div class="hero-brand-lockup center-brand-lockup reveal">
@@ -16,25 +16,25 @@ include __DIR__ . '/includes/header.php';
               <small><?= htmlspecialchars($SITE['tagline']) ?></small>
             </span>
           </div>
-          <span class="eofy-badge"><?= $EOFY['badge'] ?></span>
-          <h1 id="eofy-title" class="reveal"><?= htmlspecialchars($EOFY['title']) ?></h1>
-          <p class="hero-lede reveal"><?= htmlspecialchars($EOFY['support']) ?></p>
+          <span class="offer-badge"><?= $OFFER['badge'] ?></span>
+          <h1 id="offer-title" class="reveal"><?= htmlspecialchars($OFFER['title']) ?></h1>
+          <p class="hero-lede reveal"><?= htmlspecialchars($OFFER['support']) ?></p>
 
           <div class="promo-hero-card center-card reveal">
-            <span class="promo-badge">EOFY Launch Price</span>
+            <span class="promo-badge">Special Limited-Time Price</span>
             <div class="promo-price-row">
-              <span class="promo-was">Was $<?= $EOFY['was'] ?></span>
-              <span class="promo-now">$<?= $EOFY['now'] ?></span>
-              <span class="promo-save">Save $<?= $EOFY['save'] ?></span>
+              <span class="promo-was">Was $<?= $OFFER['was'] ?></span>
+              <span class="promo-now">$<?= $OFFER['now'] ?></span>
+              <span class="promo-save">Save $<?= $OFFER['save'] ?></span>
             </div>
-            <p class="promo-note"><?= htmlspecialchars($EOFY['note'] ?? '') ?></p>
-            <div class="countdown" data-countdown data-target="<?= htmlspecialchars($EOFY['target']) ?>" aria-label="EOFY offer countdown">
+            <p class="promo-note"><?= htmlspecialchars($OFFER['note'] ?? '') ?></p>
+            <div class="countdown" data-countdown data-target="<?= htmlspecialchars($OFFER['target']) ?>" aria-label="Special offer countdown">
               <span><strong data-days>00</strong><small>Days</small></span>
               <span><strong data-hours>00</strong><small>Hrs</small></span>
               <span><strong data-minutes>00</strong><small>Min</small></span>
               <span><strong data-seconds>00</strong><small>Sec</small></span>
             </div>
-            <a class="button button-primary promo-cta" href="/book"><span>Claim EOFY Offer</span>
+            <a class="button button-primary promo-cta" href="/book"><span>Claim Special Offer</span>
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
             </a>
           </div>
@@ -43,7 +43,7 @@ include __DIR__ . '/includes/header.php';
 
       <section class="section section-white">
         <div class="container narrow">
-          <div class="section-heading reveal"><p class="eyebrow">What's included</p><h2>Your EOFY restoration covers</h2></div>
+          <div class="section-heading reveal"><p class="eyebrow">What's included</p><h2>Your restoration covers</h2></div>
           <div class="card-grid two-col">
             <article class="info-card reveal"><h3>Full multi-stage restoration</h3><p>Oxidation removal, clarity restoration and a glossy clear finish.</p></article>
             <article class="info-card reveal"><h3>UV protection coating</h3><p>Helps your results last longer against the Queensland sun.</p></article>

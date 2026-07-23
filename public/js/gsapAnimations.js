@@ -4,11 +4,11 @@
   const ISOTYPE_SRC = "/assets/shining-headlights-isotype.svg";
   const STAR_PATH = "M50 2 58.2 41.8 98 50 58.2 58.2 50 98 41.8 58.2 2 50 41.8 41.8 50 2Z";
   const SELECTORS = {
-    cta: ".button-primary, .button-secondary, .mobile-sticky-cta, .promo-cta, .eofy-main-cta",
+    cta: ".button-primary, .button-secondary, .mobile-sticky-cta, .promo-cta, .offer-main-cta",
     // .promo-hero-card and .booking-form already carry the generic .reveal
     // class, which site.js's own IntersectionObserver animates — listing them
     // here too just double-animates them on every booking page load.
-    reveal: ".landing-feature-card, .landing-review-card, .premium-comparison, .final-eofy-panel"
+    reveal: ".landing-feature-card, .landing-review-card, .premium-comparison, .final-offer-panel"
   };
 
   const qs = (selector, parent = document) => parent.querySelector(selector);
@@ -302,10 +302,10 @@
 
   function initLandingHero() {
     const gsap = getGsap();
-    const hero = qs(".eofy-landing-hero");
+    const hero = qs(".offer-landing-hero");
     if (!hero || !gsap || reduceMotion()) return;
 
-    const headlineItems = qsa(".sale-pill, .eofy-landing-hero h1, .hero-direct, .eofy-countdown-card, .eofy-price, .eofy-main-cta", hero);
+    const headlineItems = qsa(".sale-pill, .offer-landing-hero h1, .hero-direct, .offer-countdown-card, .offer-price, .offer-main-cta", hero);
     gsap.fromTo(
       headlineItems,
       { autoAlpha: 0, y: 24 },
@@ -331,7 +331,7 @@
     const gsap = getGsap();
     if (!gsap || reduceMotion()) return;
 
-    qsa(".eofy-countdown-card").forEach((card) => {
+    qsa(".offer-countdown-card").forEach((card) => {
       gsap.to(card, {
         scale: 1.012,
         duration: 2.8,
@@ -355,7 +355,7 @@
     const gsap = getGsap();
     if (!gsap || reduceMotion()) return;
 
-    qsa(".eofy-main-cta").forEach((button) => {
+    qsa(".offer-main-cta").forEach((button) => {
       if (button.dataset.magneticReady) return;
       button.dataset.magneticReady = "true";
       const xTo = gsap.quickTo(button, "x", { duration: 0.32, ease: "power3.out" });

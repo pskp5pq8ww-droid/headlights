@@ -10,7 +10,7 @@ const BOOKING_PACKAGE_PRICES = [
     'Basic Restore' => 99,
     'Crystal Restore' => 220,
     'Premium Protection Restore' => 199,
-    'EOFY Launch Offer – $99' => 99,
+    'Special Limited-Time Offer – $99' => 99,
     'Not sure / Quote' => 0,
 ];
 
@@ -250,7 +250,7 @@ function createBooking(array $data): array {
         'pricingNote' => clean_text($data['pricingNote'] ?? '', 800),
         'termsAccepted' => !empty($data['termsAccepted']) || !empty($data['terms_accepted']),
         'termsAcceptedAt' => (!empty($data['termsAccepted']) || !empty($data['terms_accepted'])) ? $now : '',
-        'termsVersion' => clean_text($data['termsVersion'] ?? $data['terms_version'] ?? '2026-06-27-eofy', 80),
+        'termsVersion' => clean_text($data['termsVersion'] ?? $data['terms_version'] ?? '2026-07-23-special-offer', 80),
         'adminNotes' => '',
         'history' => [[
             'at' => $now,

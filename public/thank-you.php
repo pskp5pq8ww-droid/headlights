@@ -80,7 +80,7 @@ include __DIR__ . '/includes/header.php';
             </div>
 
             <?php if ($isPaid): ?>
-              <span class="eofy-badge">Payment successful</span>
+              <span class="offer-badge">Payment successful</span>
               <h1 id="thank-you-title">Booking confirmed</h1>
               <p class="thank-you-lede">Your payment was successful and your appointment has been saved.</p>
 
@@ -100,7 +100,7 @@ include __DIR__ . '/includes/header.php';
                 <?php endif; ?>
               </div>
             <?php else: ?>
-              <span class="eofy-badge">Booking request received</span>
+              <span class="offer-badge">Booking request received</span>
               <h1 id="thank-you-title">Thank you! Your booking request has been received.</h1>
               <p class="thank-you-lede">We'll contact you shortly to confirm your appointment and service details.</p>
               <?php if ($booking): ?>

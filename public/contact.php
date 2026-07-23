@@ -24,7 +24,7 @@ include __DIR__ . '/includes/header.php';
               <a href="mailto:<?= htmlspecialchars($SITE['email']) ?>"><?= htmlspecialchars($SITE['email']) ?></a>
             </div>
             <p class="section-note"><?= htmlspecialchars($SITE['region']) ?> — mobile service only. We come to your home, workplace or driveway.</p>
-            <div class="hero-actions"><a class="button button-primary" href="/book"><span>Claim EOFY Offer</span></a></div>
+            <div class="hero-actions"><a class="button button-primary" href="/book"><span>Claim Special Offer</span></a></div>
           </div>
           <div class="area-panel reveal">
             <div class="area-map" aria-hidden="true">

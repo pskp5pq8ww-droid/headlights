@@ -1,8 +1,9 @@
-# Square Payments — Booking + Admin (Sandbox → Production)
+# Square Payments — Booking + Admin (Production)
 
 This project is a **PHP site on Hostinger** (Apache + clean URLs). Payments use the
 **Square Payments REST API via cURL** (no Composer/SDK needed) and the
-**Square Web Payments SDK** in the browser. Sandbox is the default.
+**Square Web Payments SDK** in the browser. Production credentials live outside
+`public_html`.
 
 ---
 
@@ -44,34 +45,29 @@ This project is a **PHP site on Hostinger** (Apache + clean URLs). Payments use 
 - `public/api/payments/square.php` — create-payment endpoint.
 - `public/js/square-payment.js` — Web Payments SDK wrapper.
 - `_private/square.example.php` — credentials template.
-- `_private/square.php` — real sandbox creds (gitignored; **add your Location ID**).
+- `_private/square.php` — real production creds (gitignored; never commit).
 - `.env.example` — environment reference.
 - `docs/SQUARE_PAYMENTS.md` — this file.
 
-## D. Environment variables (Hostinger)
+## D. Production Credentials (Hostinger)
 
-Primary method on this project = the private PHP file `/_private/square.php`
-(already created). Alternatively set these as real env vars in hPanel:
+Primary method on this project = the private PHP file `/_private/square.php`.
+On Hostinger it should live at `/home/u613502604/_private/square.php`, outside
+`public_html`. Alternatively set these as real env vars in hPanel:
 
 ```
-SQUARE_ENVIRONMENT=sandbox
-SQUARE_APPLICATION_ID=<your sandbox Application ID>
-SQUARE_ACCESS_TOKEN=<your sandbox Access token — keep secret, never commit>
-SQUARE_LOCATION_ID=<your sandbox Location ID>
+SQUARE_ENVIRONMENT=production
+SQUARE_APPLICATION_ID=<your production Application ID>
+SQUARE_ACCESS_TOKEN=<your production Access token — keep secret, never commit>
+SQUARE_LOCATION_ID=<your production Location ID>
 SQUARE_CURRENCY=AUD
 ```
-
-> ⚠️ **You still need the Sandbox Location ID.** Square Dashboard → Developer →
-> your app → **Sandbox → Locations** → copy the Location ID into
-> `/home/u613502604/_private/square.php` (`'location_id' => '...'`). Until then,
-> online payment stays disabled and the form uses the request flow.
 
 The `SQUARE_ACCESS_TOKEN` is read **only** by the backend and never reaches the browser.
 
 The public Web Payments SDK URL is derived from the `SQUARE_APPLICATION_ID`
 prefix, so a production app id (`sq0idp-...`) always loads Square's production
-SDK and a sandbox app id (`sandbox-sq0idb-...`) always loads the sandbox SDK.
-This protects the booking form from a stale `SQUARE_ENVIRONMENT` value.
+SDK. This protects the booking form from a stale `SQUARE_ENVIRONMENT` value.
 
 ## E. Folders on Hostinger
 
@@ -108,44 +104,36 @@ cURL (standard on Hostinger) and Square's CDN-hosted Web Payments SDK.
 Static PHP — nothing to build. Just upload the changed files. If you changed
 `ASSET_VER`, browsers pick up new CSS/JS automatically. No process to restart.
 
-## I. How to test in Sandbox
+## I. How to test in Production
 
-1. Add your Sandbox **Location ID** (section D).
+1. Confirm `/api/square-config` returns `environment: production`, your production
+   `applicationId`, and the production `locationId`.
 2. Open `https://TU_DOMINIO/book`.
-3. Fill steps 1–3, pick a priced service (e.g. *Crystal Restore – $149*).
-4. Step 4 shows the summary + Square card field. Enter a test card (section J).
+3. Fill steps 1–3 and pick a priced service.
+4. Step 4 shows the summary + Square card field. Enter a real card for a small
+   live test amount.
 5. Click **Pay & Confirm Booking** → redirected to `/thank-you` success screen.
-6. Confirm the booking appears in the Square Sandbox Dashboard → Transactions.
+6. Confirm the booking appears in the Square Dashboard → Transactions.
+7. Refund the test payment from the Square Dashboard if needed.
 
-## J. Square Sandbox test cards
-
-| Result            | Card number          | Exp / CVV / ZIP            |
-|-------------------|----------------------|----------------------------|
-| ✅ Success        | `4111 1111 1111 1111`| any future date / `111` / `94103` |
-| ❌ Declined       | `4000 0000 0000 0002`| any future date / any CVV  |
-| ❌ CVV failure    | use CVV `911`        |                            |
-| ❌ Insufficient   | `4000 0000 0000 9995`|                            |
-
-(See https://developer.squareup.com/docs/devtools/sandbox/payments for the full list.)
-
-## K. Check a saved booking
+## J. Check a saved booking
 
 - Admin dashboard `/dashboard` → booking shows a green **Paid** badge + amount.
 - File: `storage/bookings/booking_<id>.json` → `"paymentStatus": "paid"`, `squarePaymentId`.
 - Payment audit: `storage/payments/payment_*.json` (paid + failed attempts).
 - Log: `storage/logs/square-payments.log`.
 
-## L. Admin access
+## K. Admin access
 
 `https://TU_DOMINIO/admin` → log in (credentials from `ADMIN_USERNAME`/`ADMIN_PASSWORD`
 or `/_private/admin.php`) → `/dashboard`. Session-based, bcrypt, `noindex`.
 
-## M. Going to production
+## L. Production checklist
 
-1. In `/_private/square.php` (or env): set `environment` → `production` and paste
-   your **production** `application_id`, `access_token`, `location_id`.
-2. The API base URL and the Web Payments SDK URL switch automatically from the
-   production `application_id` prefix.
-3. Re-test with a real card for a small amount, then refund it from the Square Dashboard.
-4. Ensure HTTPS is enforced (it is required by Square in production).
+1. `/_private/square.php` uses production `application_id`, `access_token`, and
+   `location_id`.
+2. Hostinger environment variables are either empty or set to the same production
+   values. hPanel env vars override the private PHP file.
+3. `/api/square-config` shows `environment: production`.
+4. HTTPS is enforced.
 ```

@@ -66,7 +66,7 @@ $minimal_header = str_contains(' ' . $body_class . ' ', ' booking-page ');
           <a href="<?= $item[0] ?>"<?= $current === $key ? ' class="is-active"' : '' ?>><?= $item[1] ?></a>
 <?php endforeach; ?>
         </nav>
-        <a class="button button-primary drawer-cta" href="/book">Claim EOFY Offer</a>
+        <a class="button button-primary drawer-cta" href="/book">Claim Special Offer</a>
       </aside>
 <?php endif; ?>
     </header>

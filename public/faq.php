@@ -34,7 +34,7 @@ include __DIR__ . '/includes/header.php';
             </div>
             <button class="button button-primary" type="button" data-support-open><span>Create Ticket</span></button>
           </div>
-          <div class="section-cta reveal"><a class="button button-primary" href="/book"><span>Claim EOFY Offer</span></a></div>
+          <div class="section-cta reveal"><a class="button button-primary" href="/book"><span>Claim Special Offer</span></a></div>
         </div>
       </section>
 

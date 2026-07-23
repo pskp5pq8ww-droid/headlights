@@ -3,7 +3,7 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/service-cards.php';
 $current    = 'pricing';
 $page_title = 'Pricing | ' . $SITE['name'];
-$page_desc  = 'Mobile headlight restoration pricing in Brisbane — EOFY offer from $99, standard packages and travel info.';
+$page_desc  = 'Mobile headlight restoration pricing in Brisbane — special limited-time offer from $99, standard packages and travel info.';
 include __DIR__ . '/includes/header.php';
 $services = read_services(true);
 ?>
@@ -12,7 +12,7 @@ $services = read_services(true);
         <div class="container narrow center">
           <p class="eyebrow">Pricing</p>
           <h1 class="reveal">Simple mobile restoration pricing</h1>
-          <p class="hero-lede reveal">EOFY launch price from $<?= $EOFY['now'] ?> (was $<?= $EOFY['was'] ?>). Choose a package or send photos for a quick quote.</p>
+          <p class="hero-lede reveal">Special limited-time price from $<?= $OFFER['now'] ?> (was $<?= $OFFER['was'] ?>). Choose a package or send photos for a quick quote.</p>
         </div>
       </section>
 

@@ -14,8 +14,7 @@ declare(strict_types=1);
  * The SQUARE_ACCESS_TOKEN is ONLY ever used here in the backend. The browser
  * only ever receives square_public_config() (application id + location id).
  *
- * The Square environment must match the credentials:
- *   sandbox    -> connect.squareupsandbox.com + sandbox Web Payments SDK
+ * This live site is production-only:
  *   production -> connect.squareup.com + production Web Payments SDK
  */
 
@@ -58,22 +57,7 @@ function square_setting(string $envName, string $fileKey, string $default = ''):
 }
 
 function square_environment(): string {
-    // Source of truth = the environment encoded in the APPLICATION ID. The Web
-    // Payments SDK validates the loaded square.js against the app id, so deriving
-    // the environment from the id makes the two impossible to desync — the exact
-    // cause of "application ID created in production however you are currently
-    // using sandbox". Sandbox ids look like sandbox-sq0idb-…, production sq0idp-…
-    // This wins over a stale SQUARE_ENVIRONMENT env var / config value.
-    $appId = strtolower(square_application_id());
-    if ($appId !== '') {
-        if (str_contains($appId, 'sq0idb') || str_starts_with($appId, 'sandbox-')) return 'sandbox';
-        if (str_starts_with($appId, 'sq0idp-')) return 'production';
-    }
-    // Fall back to the explicit SQUARE_ENVIRONMENT env var / _private/square.php.
-    $environment = strtolower(square_setting('SQUARE_ENVIRONMENT', 'environment', 'sandbox'));
-    if ($environment === 'prod' || $environment === 'live') return 'production';
-    if ($environment === 'test') return 'sandbox';
-    return in_array($environment, ['sandbox', 'production'], true) ? $environment : 'sandbox';
+    return 'production';
 }
 
 function square_application_id(): string { return square_setting('SQUARE_APPLICATION_ID', 'application_id'); }
@@ -86,25 +70,26 @@ function square_location_id(): string {
 function square_currency(): string       { return strtoupper(square_setting('SQUARE_CURRENCY', 'currency', 'AUD')); }
 
 function square_api_base(): string {
-    return square_environment() === 'sandbox'
-        ? 'https://connect.squareupsandbox.com'
-        : 'https://connect.squareup.com';
+    return 'https://connect.squareup.com';
 }
 
 /** URL of the Web Payments SDK that matches the current environment. */
 function square_web_sdk_url(): string {
-    return square_environment() === 'sandbox'
-        ? 'https://sandbox.web.squarecdn.com/v1/square.js'
-        : 'https://web.squarecdn.com/v1/square.js';
+    return 'https://web.squarecdn.com/v1/square.js';
 }
 
 function square_is_configured(): bool {
-    return square_application_id() !== '' && square_access_token() !== '' && square_location_id() !== '';
+    return square_application_id_is_production() && square_access_token() !== '' && square_location_id() !== '';
+}
+
+function square_application_id_is_production(): bool {
+    return str_starts_with(strtolower(square_application_id()), 'sq0idp-');
 }
 
 function square_config_status(): array {
     $missing = [];
     if (square_application_id() === '') $missing[] = 'application_id';
+    elseif (!square_application_id_is_production()) $missing[] = 'production_application_id';
     if (square_access_token() === '') $missing[] = 'access_token';
     if (square_location_id() === '') $missing[] = 'location_id';
     if (!function_exists('curl_init')) $missing[] = 'php_curl';

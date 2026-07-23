@@ -1,22 +1,22 @@
-# Shining Headlights Australia - EOFY Meta Ads Campaign
+# Shining Headlights Australia - Special Offer Meta Ads Campaign
 
 ## Campaign Goal
 
-Generate bookings for the EOFY mobile headlight restoration offer in Brisbane.
+Generate bookings for the special limited-time mobile headlight restoration offer in Brisbane.
 
 Primary offer:
-- EOFY Mobile Headlight Restoration Sale
+- Special Limited-Time Headlight Restoration Offer
 - From $99
 - Was $220
-- Save $50
+- Save $121
 - Limited time only
 - We come to your home, workplace or driveway across Brisbane
 
 Primary CTA:
-- Claim EOFY Offer
+- Claim Special Offer
 
 Landing page:
-- `/eofy-offer`
+- `/special-offer`
 
 ## Core Audiences
 
@@ -33,7 +33,7 @@ Warm retargeting:
 
 ## Campaign Structure
 
-### Campaign 1: EOFY Offer - Conversions
+### Campaign 1: Special Offer - Conversions
 Objective: leads/bookings.
 
 Ad sets:
@@ -68,10 +68,10 @@ Creatives:
 
 ## Creative Set
 
-1. `01-eofy-promo-feed`
+1. `01-special-offer-promo-feed`
    Format: 1080x1080 feed.
-   Angle: price-led EOFY offer.
-   Copy: "EOFY SALE / From $99 / Was $220 - Save $121 / We come to you anywhere in Brisbane."
+   Angle: price-led special offer.
+   Copy: "SPECIAL OFFER / From $99 / Was $220 - Save $121 / We come to you anywhere in Brisbane."
 
 2. `02-before-after-feed`
    Format: 1080x1080 feed.
@@ -91,7 +91,7 @@ Creatives:
 5. `05-last-days-story`
    Format: 1080x1920 story/reel.
    Angle: urgency.
-   Copy: "EOFY offer ends 30 June."
+   Copy: "Special offer ends soon."
 
 6. `06-restore-dont-replace-feed`
    Format: 1080x1080 feed.
@@ -101,28 +101,28 @@ Creatives:
 ## Caption Copy Options
 
 ### Direct Promo
-Cloudy or yellow headlights? EOFY bookings are open from $99, was $220.
+Cloudy or yellow headlights? Special offer bookings are open from $99, was $220.
 
 We come to your home, workplace or driveway across Brisbane.
 
-Claim the EOFY offer before it ends.
+Claim the special offer before it ends.
 
 ### Before/After
 Same headlights. Clear difference.
 
 Our mobile restoration service removes oxidation and brings back a clean, glossy finish without a workshop visit.
 
-Book your EOFY restoration from $99.
+Book your special offer restoration from $99.
 
 ### Review-Led
 "Came to my driveway and had both headlights crystal clear in under an hour. Looks like a new car."
 
-Trusted by Brisbane drivers. EOFY mobile bookings from $99.
+Trusted by Brisbane drivers. Special offer mobile bookings from $99.
 
 ### Retargeting
 Still thinking about fixing those cloudy headlights?
 
-EOFY mobile headlight restoration is from $99 for a limited time. We come to you anywhere in Brisbane.
+Mobile headlight restoration is from $99 for a limited time. We come to you anywhere in Brisbane.
 
 ## Compliance Notes
 

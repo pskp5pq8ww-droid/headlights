@@ -96,7 +96,7 @@ try {
         'source' => $_POST['source'] ?? 'public_booking_form',
         'paymentMethod' => in_array(($_POST['payment_method'] ?? ''), ['cash', 'card'], true) ? $_POST['payment_method'] : '',
         'termsAccepted' => terms_was_accepted($_POST['terms_accepted'] ?? $_POST['termsAccepted'] ?? ''),
-        'termsVersion' => $_POST['terms_version'] ?? '2026-06-27-eofy',
+        'termsVersion' => $_POST['terms_version'] ?? '2026-07-23-special-offer',
     ]);
 
     $photos = handle_booking_uploads($booking['id']);

@@ -21,18 +21,18 @@ $bookingServices = $mainService ? array_merge([$mainService], $extraServices) : 
       <section class="section section-light booking" id="booking" aria-labelledby="booking-title">
         <div class="container booking-grid">
           <div class="section-copy reveal">
-            <span class="eofy-badge">EOFY LIMITED TIME ONLY</span>
+            <span class="offer-badge">SPECIAL LIMITED TIME ONLY</span>
             <h1 id="booking-title">Book your mobile headlight restoration</h1>
             <p>Tell us where your vehicle is located and we'll contact you to confirm your booking.</p>
 
             <div class="promo-hero-card compact reveal">
-              <p class="promo-kicker">Limited EOFY Offer</p>
+              <p class="promo-kicker">Special Limited-Time Offer</p>
               <div class="promo-price-row">
-                <span class="promo-now">$<?= $EOFY['now'] ?></span>
-                <span class="promo-was">Was $<?= $EOFY['was'] ?></span>
-                <span class="promo-save">Save $<?= $EOFY['save'] ?></span>
+                <span class="promo-now">$<?= $OFFER['now'] ?></span>
+                <span class="promo-was">Was $<?= $OFFER['was'] ?></span>
+                <span class="promo-save">Save $<?= $OFFER['save'] ?></span>
               </div>
-              <div class="countdown" data-countdown data-target="<?= htmlspecialchars($EOFY['target']) ?>" aria-label="Offer countdown">
+              <div class="countdown" data-countdown data-target="<?= htmlspecialchars($OFFER['target']) ?>" aria-label="Offer countdown">
                 <span><strong data-days>00</strong><small>Days</small></span>
                 <span><strong data-hours>00</strong><small>Hours</small></span>
                 <span><strong data-minutes>00</strong><small>Minutes</small></span>
@@ -92,7 +92,7 @@ $bookingServices = $mainService ? array_merge([$mainService], $extraServices) : 
 
               <div class="form-panel" data-panel="2" hidden>
                 <h3 class="panel-title">Choose your service</h3>
-                <input type="hidden" name="package" id="hiddenPackage" value="EOFY Launch Offer – $99" required />
+                <input type="hidden" name="package" id="hiddenPackage" value="Special Limited-Time Offer – $99" required />
                 <label>Vehicle size
                   <select name="vehicle_size" id="vehicleSizeSelect" required>
                     <option value="">Select vehicle size</option>
@@ -257,7 +257,7 @@ $bookingServices = $mainService ? array_merge([$mainService], $extraServices) : 
                   <input id="termsAccepted" name="terms_accepted" type="checkbox" value="1" required />
                   <span>I have read and accept the <a href="/terms" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</span>
                 </label>
-                <input type="hidden" name="terms_version" value="2026-06-27-eofy" />
+                <input type="hidden" name="terms_version" value="2026-07-23-special-offer" />
 
                 <div class="step-nav">
                   <button class="button button-secondary step-back-btn" type="button" data-prev="3">
@@ -268,7 +268,7 @@ $bookingServices = $mainService ? array_merge([$mainService], $extraServices) : 
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
                   </button>
                 </div>
-                <p class="terms-short">T&amp;Cs apply. $99 EOFY offer applies to standard front headlight restoration within selected Brisbane service areas. Results vary depending on lens condition. Service does not repair internal moisture, cracks, broken seals, electrical faults, bulbs, or internal damage. Customer must provide a safe, legal, and accessible workspace. Children, pets, and customers must remain clear of the work area during service. Mobile service included in selected suburbs only.</p>
+                <p class="terms-short">T&amp;Cs apply. The $99 special limited-time offer applies to standard front headlight restoration within selected Brisbane service areas. Results vary depending on lens condition. Service does not repair internal moisture, cracks, broken seals, electrical faults, bulbs, or internal damage. Customer must provide a safe, legal, and accessible workspace. Children, pets, and customers must remain clear of the work area during service. Mobile service included in selected suburbs only.</p>
               </div>
 
               <div class="form-panel checkout-panel payment-panel" data-panel="5" hidden>

@@ -23,7 +23,7 @@ $page_scripts = $page_scripts ?? [];
         </div>
         <div>
           <h2>Explore</h2>
-          <a href="/eofy-offer">EOFY Offer</a>
+          <a href="/special-offer">Special Offer</a>
           <a href="/services">Services</a>
           <a href="/pricing">Pricing</a>
           <a href="/faq">FAQ</a>
@@ -38,7 +38,7 @@ $page_scripts = $page_scripts ?? [];
       </div>
     </footer>
 
-    <a class="mobile-sticky-cta" href="/book" aria-label="Claim the EOFY mobile headlight restoration offer">Claim EOFY Offer</a>
+    <a class="mobile-sticky-cta" href="/book" aria-label="Claim the special limited-time mobile headlight restoration offer">Claim Special Offer</a>
 
     <div class="support-widget" data-support-widget>
       <button class="support-fab" type="button" aria-expanded="false" aria-controls="supportPanel" data-support-toggle>

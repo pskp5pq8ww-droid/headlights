@@ -23,9 +23,9 @@ include __DIR__ . '/includes/header.php';
           <p>The service is designed to improve the appearance and clarity of plastic/polycarbonate headlight lenses. Results may vary depending on the age, condition, material, previous treatments, depth of damage, and overall condition of the headlights.</p>
           <p>This service does not replace damaged headlight assemblies, electrical components, bulbs, seals, internal reflectors, or wiring.</p>
 
-          <h2>2. EOFY Promotional Offer</h2>
-          <p>The EOFY promotional price of $99 applies to a standard mobile restoration service for a standard pair of front headlights, within selected Brisbane service areas.</p>
-          <p>The regular price is $220, and the EOFY promotional price is available for a limited time only.</p>
+          <h2>2. Special Limited-Time Offer</h2>
+          <p>The special promotional price of $99 applies to a standard mobile restoration service for a standard pair of front headlights, within selected Brisbane service areas.</p>
+          <p>The regular price is $220, and the special promotional price is available for a limited time only.</p>
           <p>The $99 offer may not apply where headlights require additional work due to severe oxidation, deep scratches, peeling factory coating, cracked lenses, internal moisture, previous failed restoration attempts, oversized headlights, commercial vehicles, or non-standard vehicle conditions.</p>
           <p><?= htmlspecialchars($SITE['name']) ?> reserves the right to inspect the headlights before starting and confirm whether the promotional price applies.</p>
 
